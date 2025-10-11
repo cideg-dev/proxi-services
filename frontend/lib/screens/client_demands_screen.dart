@@ -1,0 +1,205 @@
+import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:frontend/providers/notification_ui_provider.dart';
+import 'package:frontend/services/socket_service.dart';
+import 'package:provider/provider.dart';
+import '../services/demand_service.dart';
+import '../widgets/glass_card.dart';
+import 'demand_detail_screen.dart';
+
+class ClientDemandsScreen extends StatefulWidget {
+  const ClientDemandsScreen({Key? key}) : super(key: key);
+
+  @override
+  _ClientDemandsScreenState createState() => _ClientDemandsScreenState();
+}
+
+class _ClientDemandsScreenState extends State<ClientDemandsScreen> {
+  final DemandService _demandService = DemandService();
+  List<dynamic> _demands = [];
+  String? _error;
+  bool _isLoading = true;
+  StreamSubscription? _demandUpdateSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDemands();
+    // We need a post-frame callback to access the provider safely.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _setupSocketListener();
+    });
+  }
+
+  @override
+  void dispose() {
+    _demandUpdateSubscription?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _loadDemands() async {
+    if (!mounted) return;
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+    try {
+      final demands = await _demandService.getClientDemands();
+      if (!mounted) return;
+      setState(() {
+        _demands = demands;
+        _isLoading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = 'Erreur de chargement: $e';
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _setupSocketListener() {
+    final socketService = context.read<SocketService>();
+    _demandUpdateSubscription = socketService.demandUpdates.listen((updatedDemand) {
+      if (!mounted) return;
+
+      final int index = _demands.indexWhere((d) => d['id'] == updatedDemand['id']);
+      if (index != -1) {
+        setState(() {
+          _demands[index]['status'] = updatedDemand['status'];
+        });
+
+        final notificationProvider = context.read<NotificationUIProvider>();
+        notificationProvider.showNotification(
+          NotificationData(
+            title: 'Statut de la demande mis à jour',
+            message: 'Votre demande pour ${updatedDemand['professional_name'] ?? 'un professionnel'} est maintenant "${updatedDemand['status']}".',
+            icon: Icons.info_outline,
+            color: Colors.blueAccent,
+          ),
+        );
+      }
+    });
+  }
+
+  Future<void> _cancelDemand(int demandId) async {
+    try {
+      await _demandService.cancelDemand(demandId);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Demande annulée avec succès.'), backgroundColor: Colors.green),
+      );
+      _loadDemands(); // Refresh the list
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erreur: $e'), backgroundColor: Colors.red),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Mes Demandes'),
+      ),
+      body: _buildBody(),
+    );
+  }
+
+  Widget _buildBody() {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (_error != null) {
+      return Center(child: Text(_error!));
+    }
+    if (_demands.isEmpty) {
+      return RefreshIndicator(
+        onRefresh: _loadDemands,
+        child: ListView(
+          children: const [
+            Center(child: Text('Vous n\'avez fait aucune demande.'))
+          ],
+        ),
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: _loadDemands,
+      child: ListView.builder(
+        padding: const EdgeInsets.all(8.0),
+        itemCount: _demands.length,
+        itemBuilder: (context, index) {
+          final demand = _demands[index];
+          final isPending = demand['status'] == 'pending';
+
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: GlassCard(
+              child: ListTile(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => DemandDetailScreen(demandId: demand['id']),
+                    ),
+                  ).then((_) => _loadDemands()); // Refresh when coming back
+                },
+                title: Text(demand['professional_name'] ?? 'Professionnel inconnu'),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Demande #${demand['id']}'),
+                    const SizedBox(height: 4),
+                    Text(demand['service_description'] ?? 'Pas de description.'),
+                    const SizedBox(height: 8),
+                    Chip(
+                      label: Text(demand['status'] ?? 'inconnu'),
+                      backgroundColor: Colors.black.withOpacity(0.3),
+                      side: BorderSide.none,
+                    ),
+                  ],
+                ),
+                trailing: isPending
+                    ? TextButton.icon(
+                        icon: const Icon(Icons.cancel, color: Colors.redAccent),
+                        label: const Text('Annuler', style: TextStyle(color: Colors.redAccent)),
+                        onPressed: () => _showCancelConfirmation(demand['id']),
+                      )
+                    : null,
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  void _showCancelConfirmation(int demandId) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirmer l\'annulation'),
+          content: const Text('Êtes-vous sûr de vouloir annuler cette demande ?'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Non'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Oui, annuler'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _cancelDemand(demandId);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+}

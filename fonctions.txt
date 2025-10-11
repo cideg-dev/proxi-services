@@ -1,0 +1,232 @@
+Un cahier des charges complet, priorisé et exploitable immédiatement : liste des fonctionnalités à ajouter, endpoints, schémas de données, validations, écrans à créer/modifier, tests et critères d'acceptation. À la fin je propose une roadmap d'implémentation et estimations « taille » (Small/Medium/Large).
+
+Ce que je vais livrer ensuite
+Un backlog priorisé (critique → optionnel)
+Pour chaque fonctionnalité : contrat (inputs/outputs), endpoints, modifications DB, UI nécessaire, validations, tests & critères d'acceptation
+Estimations de charge et dépendances
+Contexte synthétique (rapide)
+Basé sur l'analyse du code :
+
+Backend Node/Express + PostgreSQL (voir server.js, db.config.js, controllers/*, authMiddleware.js).
+Frontend Flutter (web & mobile) utilise flutter_dotenv, ApiConstants.baseUrl et socket.io client (socket_service.dart).
+Images uploadées via Multer + Sharp ; URLs servies depuis /uploads.
+Rôles : client, artisan, commercant; profils dans tables séparées.
+Problèmes rencontrés : reliance sur asset app.env, URLs codées en dur (5000 ancien port), pas de build servi ou mismatch ports.
+Priorité : Critiques (à ajouter / corriger immédiatement)
+Configuration & démarrage robustes (déjà partiellement modifié)
+
+Objectif : garantir que frontend et backend démarrent et communiquent sans erreur (ENV, build, ports, fallback).
+Actions:
+frontend : loader dotenv résilient (fait).
+frontend : centraliser API_URL via ApiConstants (fait).
+backend : servir frontend/build/web si présent (fait).
+Ajouter scripts d'init (PowerShell / npm) pour dev local.
+Critères d'acceptation : flutter run ou flutter build web + npm start → front et back fonctionnels ; pas d’erreur 500 pour app.env.
+Signup / Login : améliorer UX & erreurs
+
+Pourquoi : l’app tente POST /api/auth/register → ERR_CONNECTION_REFUSED si backend non démarré ; les messages d’erreurs doivent être affichés.
+Endpoints existants : POST /api/auth/register, POST /api/auth/login (authRoutes.js).
+Fonctionnalités à ajouter :
+Afficher erreurs serveur (400/500) de façon conviviale.
+Validation côté client avant demande (format email, longueur mot de passe).
+Retry & backoff léger pour failure réseau.
+Tests : scénario happy path, mauvais mot-de-passe, email déjà utilisé.
+Gestion complète des URLs d’images et téléchargement
+
+Problème : front concaténé avec host fixe. Résolution : utiliser ApiConstants.baseUrl partout (fait).
+Ajouter : thumbnails côté serveur (sharp) et header Cache-Control lors du service static.
+Critères : images uploadées → converties en .webp, accessibles via ${API_URL}${image_url}, affichées sans 404.
+Protections / Autorisations
+
+S’assurer que toutes les routes sensibles utilisent authenticateToken et authorizeRole (pattern déjà utilisé).
+Ajouter tests d’autorisation (ex: client ne peut pas modifier profil artisan).
+Fonctionnalités fonctionnelles à ajouter (priorisées)
+Pour chaque fonctionnalité ci‑dessous je fournis contrat, endpoints, DB, UI, validation, tests, critère d’acceptation et estimation.
+
+A. Workflow complet des "demandes" (service requests) — PRIORITÉ HIGH
+But : permettre création, mise à jour (par artisan), notifications temps réel, historique et annulation.
+
+Contrat (mini)
+
+Input (création) : { artisanId:int, serviceIds?:[int], serviceDescription?:string }
+Output : { id, client_id, artisan_id, service_ids, status, created_at }
+Erreurs : artisan absent(404), validation (400), DB error(500)
+Endpoints (backend)
+
+POST /api/demandes (auth required, role client) — déjà partiellement implémenté ; ajouter logs et tests
+GET /api/client/demandes (role client) — existant
+GET /api/artisan/demandes (role artisan) — existant
+PUT /api/demandes/:id/status (role artisan) — existant (emit socket), améliorer audit
+DELETE /api/demandes/:id (client peut annuler si pending) — à ajouter
+GET /api/demandes/:id — détails (ajouter)
+DB
+
+Table demandes déjà utilisée. Vérifier colonnes : status enum (pending, accepted, declined, completed, cancelled), timestamps, service_ids as int[].
+Front-end (écrans)
+
+Page de création demande (CreateDemandScreen) — confirmer UX (sélection service, text area)
+Page historique client + détail demande
+Page liste artisan (inbox demandes) + actions (accept/decline/complete)
+Notifications in-app et socket demand-status-updated (déjà émis) — afficher toast + écran.
+Validation & règles métier
+
+client ne peut pas créer demande pour artisan non-existant
+annulation : only if status == pending
+artisan Update -> trigger socket to client; log changement (audit)
+Tests
+
+Unit tests route création, update status, delete, permissions
+Integration smoke : create -> artisan accept -> client reçoit socket event
+Critère d'accept.
+
+Test manuel : Client crée demande; artisan reçoit; artisan accepte; client voit mise à jour.
+Estimation : Medium (backend 2-3 jours incl. tests; frontend 2-3 jours)
+
+B. Vérification / documents (KYC) pour artisans & commercants — PRIORITÉ HIGH
+But : permettre upload de documents, révision manuelle, état verified dans profil.
+
+Contrat
+
+Input: upload file (image/pdf), userId (auth)
+Output: updated profile with document_verification_url and verification_status (pending/verified/rejected)
+Endpoints:
+POST /api/users/:id/upload-document (exists) — ajouter email notification & audit
+GET /api/admin/verifications (role admin — à ajouter) — lister docs pending
+PUT /api/admin/verifications/:id (role admin) — accept/reject (set verified true/false)
+DB:
+Add column document_verification_url (exists) and verification_status varchar in artisan_profiles/commercant_profiles
+Table verifications optional for audit (id, user_id, file_url, status, admin_id, comment, created_at, updated_at)
+Frontend:
+Artisan profile UI: statut verification, bouton upload (already present)
+Admin panel: liste verifications, preview, accept/reject with comment
+Validation:
+Only images up to certain size, convert to webp, store filename safe
+Tests:
+Upload success, admin accept → profile updated + email notification
+Critère acceptance
+
+Uploading doc changes status to pending; admin can mark verified and user profile shows verified.
+Estimation : Medium (backend + admin UI: 3-5 jours)
+
+C. Favoris & Recommandations (amélioration UX) — PRIORITÉ MEDIUM
+But : permettre users de bookmark artisans et montrer favorites.
+
+Contrat & Endpoints
+
+POST /api/artisans/:userId/favorites/:favoriteArtisanId (exists)
+DELETE /api/... (exists)
+GET /api/artisans/:userId/favorites (exists)
+Enhancement : get favorites with distance/sorting/filter
+Front-end
+
+Bouton favorite sur artisan list/detail; page favorites
+Tests UI & API
+Critère : ajouter/remove; list consistent.
+
+Estimation : Small (1-2 jours)
+
+D. Gestion des messages & conversations (amélioration)
+But : améliorer fiabilité socket et historique
+
+Actions
+
+Mettre en place ack mechanism pour socket messages (emit with callback)
+Add delivered/read status in messages table
+Paginate GET /api/messages/:user1/:user2
+Front-end
+
+Show delivery/read ticks
+Load previous messages page-by-page
+Estimation : Medium (2-4 jours)
+
+E. Admin features — PRIORITÉ MEDIUM
+Admin dashboard (gestion users, verification, signalements, purge contenu)
+Endpoints sécurisés avec role admin
+Audit logs (table logs: actor_id, action, target, metadata, created_at)
+Estimation : Large
+
+F. Paiement / abonnements (optionnel)
+Endpoint subscribe premium (already referenced /api/premium/subscribe in frontend)
+Integrate stripe/checkout (server-side)
+Frontend screens subscribe/unsubscribe + invoice management
+Estimation : Large (3+ semaines si intégration complète & compliance)
+
+G. Tests et CI (obligatoire)
+Backend: unit tests pour controllers/services (jest/mocha or use node testing stack) — ajouter script npm test (currently echo)
+Frontend: widget tests + integration smoke that builds web and asserts assets exist
+CI GitHub Actions:
+job: install deps, lint, backend tests, flutter build web (cache), ensure app.env exists if expected
+Deploy job (if needed)
+Patterns techniques & règles à respecter (projet-specific)
+Ne pas renommer colonnes sans mettre à jour schema.sql et toutes les requêtes SQL (voir copilot-instructions.md).
+Authorize via authenticateToken / authorizeRole (voir authMiddleware.js).
+Uploads: multer.memoryStorage() + sharp convert to .webp. Profile size 200x200. Documents max width 800.
+Serve static /uploads from Express; when serving frontend build ensure express.static(frontend/build/web) is mounted (done).
+Provide JWT_SECRET in .env (server exits if absent).
+Exemples de schémas de données (JSON) — à réutiliser
+Demande (demandes) { "id": 123, "client_id": 45, "artisan_id": 67, "service_ids": [1,2], "service_description": "Réparer fuite", "status": "pending", "created_at": "2025-10-09T12:00:00Z" }
+
+Verification audit (verifications) { "id": 22, "user_id": 67, "file_url": "/uploads/document-67-1660000000.webp", "status": "pending", "admin_id": null, "comment": null, "created_at": "...", "updated_at": "..." }
+
+Edge cases / risques à couvrir
+Upload de fichiers corrompus/volumineux → server should reject (size limit) and return 413/400.
+Race condition sur demandes accept/decline : two artisans or requests — utiliser transaction and verify current status before update.
+Token expiry (client side): refresh flow absent — ensure UX to re-login when token expired (401).
+Socket disconnect/reconnect: preserve user mapping and re-emit user connected on reconnection.
+DB schema mismatch in production vs dev → add migrations or version check on startup.
+Tests recommandés (concrets)
+Backend unit tests:
+auth routes: register/login happy + already exists + invalid email
+demandes: create/ invalid artisan/verify owner/ status transitions
+image upload: simulate buffer → sharp conversion success
+Integration tests:
+End-to-end create demande + socket notification (local env with pg)
+Frontend:
+Widget test for CreateDemandScreen validation
+Integration test to ensure ApiConstants.baseUrl used and requests go to configured host
+CI job to run flutter build web and verify the presence of app.env or that --dart-define was used.
+Livrables & découpage en tickets (exemples de tickets)
+(Critique) Fix env & build flow — Done partly; finalize scripts (0.5d)
+(Critique) Replace hardcoded URLs in frontend — Done; code review (0.5d)
+(High) Complete demandes workflow: add DELETE, GET detail, audit, tests (3d backend, 3d frontend)
+(High) KYC verification flow + admin endpoints + UI (backend 3d, frontend 4d)
+(Medium) Messaging delivery/read status & pagination (3d)
+(Medium) Admin dashboard basic (4-6d)
+(Optional) Payment/subscribe (2-3w)
+Sécurité & opérations
+Stocker JWT_SECRET hors repo; ne jamais commit .env (use .env.example — ajouté).
+Rate-limit endpoints sensibles (auth/register).
+Sanitize filenames uploaded & check MIME types.
+Backups DB & migrations plan.
+Priorité de mise en œuvre (recommandée)
+Phase 0 (immédiat)
+
+Stabiliser env & build (finish scripts), fix hardcoded URLs (terminé).
+Smoke tests pour ability to run app locally.
+Phase 1 (2+ semaines)
+
+Demandes workflow complet (backend + frontend)
+Verification KYC + admin review
+Phase 2
+
+Messaging improvements, favorites polish, admin dashboard
+Phase 3
+
+Paiement, analytics et monitoring
+Contrat minimal pour la priorité 1 (Demande)
+Inputs : valid token (role client), body { artisanId, serviceIds?, serviceDescription? }
+Outputs : 201 + demande object or 4xx/5xx
+Error modes : 400 invalid input, 403 unauthorized, 404 artisan not found, 500 internal
+Success criteria : created row in demandes with status='pending', client receives confirmation and artisan receives socket event.
+Proposition d’accompagnement
+Je peux :
+
+Générer les tickets détaillés (GitHub issues) avec checklist et estimations.
+Implémenter le ticket 1 à 3 (par ex : DELETE demande, verification admin) et fournir PRs.
+Créer scripts d’automatisation (PowerShell / Docker Compose) pour dev local.
+Quelle est ta priorité immédiate ? Je peux commencer tout de suite par :
+
+Option A : Implémenter DELETE /api/demandes/:id (annulation) + tests backend (2–4h)
+Option B : Implémenter panel admin pour verifications (upload flow + endpoint accept/reject) (3–5 jours)
+Option C : Générer tickets détaillés et script start-all (1 jour)
+Dis laquelle tu veux que je fasse maintenant et j’ouvre la première tâche (et je l’implémente).

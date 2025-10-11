@@ -1,0 +1,9 @@
+{
+  "name": "proxi-services",
+  "version": "1.0.0",
+  "description": "Main package for Proxi-Services project",
+  "scripts": {
+    "start:backend": "npm --prefix backend start",
+    "start:frontend": "cd frontend && flutter run"
+  }
+}

@@ -1,0 +1,49 @@
+# Fichiers de dépendances et de build
+node_modules/
+.pub/
+.dart_tool/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+.flutter-plugins-lock
+
+# Fichiers d'environnement
+.env
+.env.*
+*.env
+
+# Fichiers de base de données locaux
+*.sqlite
+*.db
+database.sqlite
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Fichiers générés par l'IDE
+.idea/
+.vscode/
+*.iml
+*.DS_Store
+Thumbs.db
+
+# Fichiers spécifiques à Flutter/Dart
+.packages
+.flutter-plugins
+.flutter-plugins-dependencies
+.flutter-plugins-lock
+.metadata
+*.g.dart # Fichiers générés par build_runner, etc.
+
+# Fichiers spécifiques à iOS/Android (artefacts de build)
+ios/Pods/
+ios/.symlinks/
+android/.gradle/
+android/build/
+android/app/build/
+android/app/.cxx/
+android/app/src/main/assets/flutter_assets/

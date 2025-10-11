@@ -1,0 +1,78 @@
+2025-10-09T03:06:36.556Z - GET /
+2025-10-09T03:06:36.674Z - GET / 200 Le serveur backend Proxi-Services fonctionne !
+2025-10-09T03:52:36.315Z - POST /api/auth/register
+2025-10-09T03:53:12.941Z - POST /api/auth/register 200 {"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoxLCJyb2xlIjoiY2xpZW50In0sImlhdCI6MTc1OTk4MTk5MiwiZXhwIjoxNzU5OTk5OTkyfQ.Z6zWgjBRqJZ42FNiyV2A8AMDBtgRAZXFLtZud6nCPbM","user":{"id":1,"email":"proxi@gmail.com","role":"client"}}
+2025-10-09T03:53:19.521Z - GET /api/artisans
+2025-10-09T03:53:25.902Z - GET /api/artisans 200 []
+2025-10-09T04:04:09.706Z - POST /api/auth/register
+2025-10-09T04:04:33.772Z - POST /api/auth/register 200 {"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoyLCJyb2xlIjoiY29tbWVyY2FudCJ9LCJpYXQiOjE3NTk5ODI2NzMsImV4cCI6MTc2MDAwMDY3M30.QdD1u2NLC_4VX17yQCUDAaq3M2NI5Nejl9PQF_IGViI","user":{"id":2,"email":"cideg@gmail.com","role":"commercant"}}
+2025-10-09T04:04:37.143Z - GET /api/artisans
+2025-10-09T04:04:41.175Z - GET /api/artisans 200 []
+2025-10-09T05:57:10.651Z - POST /api/auth/login
+2025-10-09T05:57:20.691Z - POST /api/auth/login 400 {"message":"Identifiants invalides."}
+2025-10-09T05:57:25.307Z - POST /api/auth/login
+2025-10-09T05:57:25.875Z - POST /api/auth/login 400 {"message":"Identifiants invalides."}
+2025-10-10T00:11:28.959Z - POST /api/auth/login
+2025-10-10T00:11:30.795Z - POST /api/auth/login 400 {"message":"Identifiants invalides."}
+2025-10-10T00:22:45.931Z - POST /api/auth/register
+2025-10-10T00:22:46.255Z - POST /api/auth/register
+2025-10-10T00:22:46.693Z - POST /api/auth/register 200 {"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjozLCJyb2xlIjoiY2xpZW50In0sImlhdCI6MTc2MDA1NTc2NiwiZXhwIjoxNzYwMDczNzY2fQ.w2llfeWneCcnmWx74W6G4Nxac0KQA9N8Axy11va44Po","user":{"id":3,"email":"test.client.auth@example.com","role":"client"}}
+2025-10-10T00:22:46.693Z - POST /api/auth/register 200 {"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjo0LCJyb2xlIjoiY2xpZW50In0sImlhdCI6MTc2MDA1NTc2NiwiZXhwIjoxNzYwMDczNzY2fQ.UGotKXHignFGdkxFlJzgTHrWK1dskvZx_F34MYxVrGI","user":{"id":4,"email":"auth.test.client@example.com","role":"client"}}
+2025-10-10T00:22:46.719Z - POST /api/auth/register
+2025-10-10T00:22:46.720Z - POST /api/auth/register
+2025-10-10T00:22:46.999Z - POST /api/auth/register 200 {"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjo1LCJyb2xlIjoiYXJ0aXNhbiJ9LCJpYXQiOjE3NjAwNTU3NjYsImV4cCI6MTc2MDA3Mzc2Nn0._6HJeuP0iSnHDLOzLOpseRJT_wR55N2rA-PUcjiOI_Y","user":{"id":5,"email":"auth.test.artisan@example.com","role":"artisan"}}
+2025-10-10T00:22:47.000Z - POST /api/auth/register 200 {"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjo2LCJyb2xlIjoiYXJ0aXNhbiJ9LCJpYXQiOjE3NjAwNTU3NjYsImV4cCI6MTc2MDA3Mzc2Nn0.yOJLigC83jaWcO5DDwnfLVQ6eFnpy1sQwplbfPhhqeo","user":{"id":6,"email":"test.artisan.auth@example.com","role":"artisan"}}
+2025-10-10T00:22:47.011Z - POST /api/auth/register
+2025-10-10T00:22:47.159Z - POST /api/auth/register 200 {"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjo3LCJyb2xlIjoiYXJ0aXNhbiJ9LCJpYXQiOjE3NjAwNTU3NjcsImV4cCI6MTc2MDA3Mzc2N30.KELxp_Stdudx2h8R0ARmhYiw_wWHiR8gBpIMzlb-IyE","user":{"id":7,"email":"auth.test.otherartisan@example.com","role":"artisan"}}
+2025-10-10T00:22:47.422Z - POST /api/artisans/6/services
+2025-10-10T00:22:47.430Z - POST /api/artisans/5/services
+2025-10-10T00:22:47.430Z - POST /api/artisans/6/services 403 {"message":"Action non autorisée pour votre rôle."}
+2025-10-10T00:22:47.439Z - POST /api/artisans/5/services 403 {"message":"Action non autorisée pour votre rôle."}
+2025-10-10T00:22:47.492Z - POST /api/artisans/5/services
+2025-10-10T00:22:47.497Z - POST /api/artisans/5/services 403 {"message":"Action non autorisée pour votre rôle."}
+2025-10-10T00:22:47.514Z - GET /api/artisan/demandes
+2025-10-10T00:22:47.516Z - GET /api/artisan/demandes 403 {"message":"Action non autorisée pour votre rôle."}
+2025-10-10T00:22:47.531Z - POST /api/artisans/5/services
+2025-10-10T00:22:47.535Z - POST /api/artisans/5/services 403 {"message":"Action non autorisée pour votre rôle."}
+2025-10-10T00:23:37.089Z - POST /api/auth/register
+2025-10-10T00:23:37.291Z - POST /api/auth/register 200 {"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjo4LCJyb2xlIjoiY2xpZW50In0sImlhdCI6MTc2MDA1NTgxNywiZXhwIjoxNzYwMDczODE3fQ.EarCZ8r1EMs74AZnJiv61zPYJtH3XVt2KFx34Gfd8ZM","user":{"id":8,"email":"auth.test.client@example.com","role":"client"}}
+2025-10-10T00:23:37.311Z - POST /api/auth/register
+2025-10-10T00:23:37.458Z - POST /api/auth/register 200 {"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjo5LCJyb2xlIjoiYXJ0aXNhbiJ9LCJpYXQiOjE3NjAwNTU4MTcsImV4cCI6MTc2MDA3MzgxN30.9zxYsHL5JM0cflISJTU9GCq4kKyxsmOFXr911eMjr98","user":{"id":9,"email":"auth.test.artisan@example.com","role":"artisan"}}
+2025-10-10T00:23:37.468Z - POST /api/auth/register
+2025-10-10T00:23:37.616Z - POST /api/auth/register 200 {"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoxMCwicm9sZSI6ImFydGlzYW4ifSwiaWF0IjoxNzYwMDU1ODE3LCJleHAiOjE3NjAwNzM4MTd9.iF1Yoczg1V3IU5TKWlYwWWzq-H46v_-Rv5eVGe0P4m0","user":{"id":10,"email":"auth.test.otherartisan@example.com","role":"artisan"}}
+2025-10-10T00:23:37.637Z - POST /api/artisans/9/services
+2025-10-10T00:23:37.646Z - POST /api/artisans/9/services 403 {"message":"Action non autorisée pour votre rôle."}
+2025-10-10T00:23:37.700Z - POST /api/artisans/9/services
+2025-10-10T00:23:37.703Z - POST /api/artisans/9/services 403 {"message":"Action non autorisée pour votre rôle."}
+2025-10-10T00:23:37.715Z - GET /api/artisan/demandes
+2025-10-10T00:23:37.718Z - GET /api/artisan/demandes 403 {"message":"Action non autorisée pour votre rôle."}
+2025-10-10T00:23:37.728Z - POST /api/artisans/9/services
+2025-10-10T00:23:37.732Z - POST /api/artisans/9/services 403 {"message":"Action non autorisée pour votre rôle."}
+2025-10-10T00:23:39.405Z - POST /api/auth/register
+2025-10-10T00:23:39.778Z - POST /api/auth/register 200 {"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoxMSwicm9sZSI6ImNsaWVudCJ9LCJpYXQiOjE3NjAwNTU4MTksImV4cCI6MTc2MDA3MzgxOX0.bjBDkoQuxDvs5BNh4gM3exRCg2lUh4k693s5eyHzLn4","user":{"id":11,"email":"test.client.auth@example.com","role":"client"}}
+2025-10-10T00:23:39.792Z - POST /api/auth/register
+2025-10-10T00:23:39.941Z - POST /api/auth/register 200 {"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoxMiwicm9sZSI6ImFydGlzYW4ifSwiaWF0IjoxNzYwMDU1ODE5LCJleHAiOjE3NjAwNzM4MTl9.v8HhnFRq4bybWkeUq29lAoKdiKe7jyyQLJKQsxER5ic","user":{"id":12,"email":"test.artisan.auth@example.com","role":"artisan"}}
+2025-10-10T00:23:39.958Z - POST /api/artisans/12/services
+2025-10-10T00:23:39.968Z - POST /api/artisans/12/services 403 {"message":"Action non autorisée pour votre rôle."}
+2025-10-11T01:05:29.740Z - POST /api/auth/register
+2025-10-11T01:05:32.773Z - POST /api/auth/register
+2025-10-11T01:05:42.477Z - POST /api/auth/register 200 {"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoxNCwicm9sZSI6ImNsaWVudCJ9LCJpYXQiOjE3NjAxNDQ3NDIsImV4cCI6MTc2MDE2Mjc0Mn0.16gXDYzEayEN5SmIXSoQbm7ewcsIMy6GaeA68eXAIqM","user":{"id":14,"email":"proxiservices@gmail.com","role":"client"}}
+2025-10-11T01:05:42.524Z - POST /api/auth/register 500 Erreur du serveur
+2025-10-11T01:05:43.160Z - GET /api/artisans
+2025-10-11T01:05:43.552Z - GET /api/artisans/14/favorites
+2025-10-11T01:05:43.572Z - GET /api/artisans/14/favorites? 403 {"message":"Action non autorisée. Vous ne pouvez voir que vos propres favoris."}
+2025-10-11T01:05:44.308Z - GET /api/artisans 200 []
+2025-10-11T01:12:17.719Z - POST /api/auth/register
+2025-10-11T01:12:28.430Z - POST /api/auth/register 200 {"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoxNSwicm9sZSI6ImNvbW1lcmNhbnQifSwiaWF0IjoxNzYwMTQ1MTQ4LCJleHAiOjE3NjAxNjMxNDh9.QX-JQwX9M1JqqDzWZrA2WUfRwmO6WkWyUbYAzoBNSZc","user":{"id":15,"email":"davi.ekue@gmail.com","role":"commercant"}}
+2025-10-11T01:12:29.726Z - POST /api/auth/register
+2025-10-11T01:12:29.731Z - POST /api/auth/register 400 {"message":"Cet utilisateur existe déjà."}
+2025-10-11T01:36:18.257Z - POST /api/auth/login
+2025-10-11T01:36:18.829Z - POST /api/auth/login 200 {"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoxNSwicm9sZSI6ImNvbW1lcmNhbnQifSwiaWF0IjoxNzYwMTQ2NTc4LCJleHAiOjE3NjAxNjQ1Nzh9.Q9uPh1G9REpb9BuvpsXbn9zaVWv06iUshixrPa0Y3yY","user":{"id":15,"role":"commercant"}}
+2025-10-11T01:36:19.507Z - GET /api/artisans
+2025-10-11T01:36:19.832Z - GET /api/artisans 200 []
+2025-10-11T01:36:19.879Z - GET /api/artisans/15/favorites
+2025-10-11T01:36:19.896Z - GET /api/artisans/15/favorites? 403 {"message":"Action non autorisée. Vous ne pouvez voir que vos propres favoris."}
+2025-10-11T01:39:01.159Z - GET /api/artisans
+2025-10-11T01:39:01.568Z - GET /api/artisans/15/favorites
+2025-10-11T01:39:01.576Z - GET /api/artisans/15/favorites? 403 {"message":"Action non autorisée. Vous ne pouvez voir que vos propres favoris."}
+2025-10-11T01:39:01.607Z - GET /api/artisans 304 
