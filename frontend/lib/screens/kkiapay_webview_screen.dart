@@ -43,8 +43,6 @@ class _KkiapayWebviewScreenState extends State<KkiapayWebviewScreen> {
             setState(() {
               _isLoading = false;
             });
-            // Inject JavaScript to handle Kkiapay payment
-            _injectKkiapayJavaScript();
           },
           onWebResourceError: (WebResourceError error) {
             debugPrint('''
@@ -92,40 +90,7 @@ Page resource error:
       ..loadRequest(Uri.parse(widget.paymentUrl)); // Load the initial payment URL
   }
 
-  void _injectKkiapayJavaScript() {
-    // This JavaScript will be executed inside the WebView
-    // It loads the Kkiapay JS SDK and initiates the payment
-    final String jsCode = '''
-      (function() {
-        // Load Kkiapay JS SDK from CDN
-        const script = document.createElement('script');
-        script.src = 'https://unpkg.com/kkiapay/dist/kkiapay.bundle.js';
-        script.onload = function() {
-          const k = kkiapay("${ApiConstants.kkiapayPublicKey}", {
-            sandbox: ${ApiConstants.kkiapaySandbox}, // Assuming a boolean env var
-            theme: "#0095ff", // Optional: customize theme
-            // Add other Kkiapay options as needed
-          });
 
-          // Example: Initiate debit payment
-          // This part needs to be dynamic based on the payment initiation
-          // For now, we'll assume the paymentUrl already contains enough info
-          // or we'll pass it from Flutter.
-          // The paymentUrl from backend is already a Kkiapay URL, so we might not need to call k.debit() here.
-          // Instead, we might just need to ensure the WebView loads the Kkiapay payment page.
-
-          // If the paymentUrl is a direct Kkiapay payment page,
-          // the user will interact with it directly.
-          // We primarily need to listen for the callback URL.
-
-          // Example of sending message back to Flutter (if needed)
-          // KkiapayFlutterChannel.postMessage(JSON.stringify({ status: 'success', transactionId: '...' }));
-        };
-        document.head.appendChild(script);
-      })();
-    ''';
-    _controller.runJavaScript(jsCode);
-  }
 
   void _handlePaymentResult(Map<String, dynamic> result) {
     if (mounted) {

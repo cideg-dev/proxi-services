@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto'); // Added for Kkiapay webhook signature verification
 
 
 
@@ -782,25 +783,21 @@ app.post('/api/payments/kkiapay/initiate', authenticateToken, async (req, res) =
     );
 
     // Call Kkiapay API to initiate payment
-    // This part is a placeholder as I don't have the exact Kkiapay API details.
     // You would typically make an HTTP POST request to Kkiapay's initiation endpoint.
-    // Example:
-    // const kkiapayResponse = await axios.post('https://api.kkiapay.me/v1/initiate', {
-    //   amount: amount,
-    //   reason: reason,
-    //   callBackUrl: `${process.env.FRONTEND_URL}/payment-callback`, // URL Kkiapay redirects to
-    //   // Add other Kkiapay specific parameters like phone, email, etc.
-    // }, {
-    //   headers: {
-    //     'X-API-KEY': process.env.KKIAPAY_PUBLIC_KEY, // Or Secret Key depending on Kkiapay API
-    //     'X-SECRET-KEY': process.env.KKIAPAY_SECRET_KEY,
-    //     'Content-Type': 'application/json'
-    //   }
-    // });
-    // const kkiapayPaymentUrl = kkiapayResponse.data.paymentUrl;
-
-    // For now, returning a dummy URL or indicating success
-    const kkiapayPaymentUrl = `https://api.kkiapay.me/v1/payment?amount=${amount}&transaction_id=${ourTransactionId}&callback_url=${process.env.FRONTEND_URL}/payment-callback`; // Dummy URL
+    const kkiapayResponse = await axios.post('https://api.kkiapay.me/v1/initiate', {
+      amount: amount,
+      reason: reason,
+      transactionId: ourTransactionId, // Ensure this is passed if Kkiapay requires it
+      callBackUrl: `${process.env.FRONTEND_URL}/payment-callback`, // URL Kkiapay redirects to
+      // Add other Kkiapay specific parameters like phone, email, etc.
+    }, {
+      headers: {
+        'X-API-KEY': process.env.KKIAPAY_PUBLIC_KEY, // Or Secret Key depending on Kkiapay API
+        'X-SECRET-KEY': process.env.KKIAPAY_SECRET_KEY,
+        'Content-Type': 'application/json'
+      }
+    });
+    const kkiapayPaymentUrl = kkiapayResponse.data.paymentUrl;
 
     res.status(200).json({ message: 'Paiement initié.', paymentUrl: kkiapayPaymentUrl, ourTransactionId: ourTransactionId });
 
@@ -811,30 +808,28 @@ app.post('/api/payments/kkiapay/initiate', authenticateToken, async (req, res) =
 });
 
 // POST /api/payments/kkiapay/webhook - Kkiapay webhook endpoint
-app.post('/api/payments/kkiapay/webhook', async (req, res) => {
+app.post('/api/payments/kkiapay/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
   const kkiapaySecret = process.env.KKIAPAY_SECRET_KEY;
   const signature = req.headers['x-kkiapay-signature']; // Kkiapay's signature header
-  const event = req.body; // Kkiapay's event payload
+  const rawBody = req.body.toString(); // Raw body for signature verification
+  const expectedSignature = crypto.createHmac('sha256', kkiapaySecret)
+                                  .update(rawBody)
+                                  .digest('hex');
 
-  // Basic validation (more robust signature verification might be needed based on Kkiapay docs)
-  if (!signature || !kkiapaySecret) {
-    console.error('Kkiapay webhook: Missing signature or secret key.');
-    return res.status(400).json({ message: 'Webhook signature or secret key missing.' });
+  if (signature !== expectedSignature) {
+    console.error('Kkiapay webhook: Invalid signature.');
+    return res.status(403).json({ message: 'Invalid webhook signature.' });
   }
 
-  // TODO: Implement robust signature verification as per Kkiapay documentation
-  // For now, we'll just trust the source if the secret key is present.
-  // A real implementation would hash the payload with the secret key and compare.
+  const event = JSON.parse(rawBody); // Kkiapay's event payload
+  const kkiapayTransactionId = event.transactionId;
+  const kkiapayStatus = event.status; // 'SUCCESS', 'FAILED', 'PENDING', 'CANCELED'
+  const ourTransactionId = event.metadata?.ourTransactionId; // Assuming we pass this in metadata
 
-  try {
-    const kkiapayTransactionId = event.transactionId;
-    const kkiapayStatus = event.status; // 'SUCCESS', 'FAILED', 'PENDING', 'CANCELED'
-    const ourTransactionId = event.metadata?.ourTransactionId; // Assuming we pass this in metadata
-
-    if (!ourTransactionId || !kkiapayTransactionId || !kkiapayStatus) {
-      console.error('Kkiapay webhook: Missing essential transaction data in payload.', event);
-      return res.status(400).json({ message: 'Missing essential transaction data in payload.' });
-    }
+  if (!ourTransactionId || !kkiapayTransactionId || !kkiapayStatus) {
+    console.error('Kkiapay webhook: Missing essential transaction data in payload.', event);
+    return res.status(400).json({ message: 'Missing essential transaction data in payload.' });
+  }
 
     // Update our payment record
     const result = await pool.query(
@@ -1039,25 +1034,21 @@ app.post('/api/payments/kkiapay/initiate', authenticateToken, async (req, res) =
     );
 
     // Call Kkiapay API to initiate payment
-    // This part is a placeholder as I don't have the exact Kkiapay API details.
     // You would typically make an HTTP POST request to Kkiapay's initiation endpoint.
-    // Example:
-    // const kkiapayResponse = await axios.post('https://api.kkiapay.me/v1/initiate', {
-    //   amount: amount,
-    //   reason: reason,
-    //   callBackUrl: `${process.env.FRONTEND_URL}/payment-callback`, // URL Kkiapay redirects to
-    //   // Add other Kkiapay specific parameters like phone, email, etc.
-    // }, {
-    //   headers: {
-    //     'X-API-KEY': process.env.KKIAPAY_PUBLIC_KEY, // Or Secret Key depending on Kkiapay API
-    //     'X-SECRET-KEY': process.env.KKIAPAY_SECRET_KEY,
-    //     'Content-Type': 'application/json'
-    //   }
-    // });
-    // const kkiapayPaymentUrl = kkiapayResponse.data.paymentUrl;
-
-    // For now, returning a dummy URL or indicating success
-    const kkiapayPaymentUrl = `https://api.kkiapay.me/v1/payment?amount=${amount}&transaction_id=${ourTransactionId}&callback_url=${process.env.FRONTEND_URL}/payment-callback`; // Dummy URL
+    const kkiapayResponse = await axios.post('https://api.kkiapay.me/v1/initiate', {
+      amount: amount,
+      reason: reason,
+      transactionId: ourTransactionId, // Ensure this is passed if Kkiapay requires it
+      callBackUrl: `${process.env.FRONTEND_URL}/payment-callback`, // URL Kkiapay redirects to
+      // Add other Kkiapay specific parameters like phone, email, etc.
+    }, {
+      headers: {
+        'X-API-KEY': process.env.KKIAPAY_PUBLIC_KEY, // Or Secret Key depending on Kkiapay API
+        'X-SECRET-KEY': process.env.KKIAPAY_SECRET_KEY,
+        'Content-Type': 'application/json'
+      }
+    });
+    const kkiapayPaymentUrl = kkiapayResponse.data.paymentUrl;
 
     res.status(200).json({ message: 'Paiement initié.', paymentUrl: kkiapayPaymentUrl, ourTransactionId: ourTransactionId });
 
