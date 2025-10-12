@@ -1,3 +1,5 @@
+
+
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -518,7 +520,7 @@ app.post('/api/reports', authenticateToken,
     try {
       const result = await pool.query(
         `INSERT INTO reports (reporter_id, reported_user_id, reported_message_id, reported_review_id, reported_portfolio_item_id, report_type, reason, status)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, 'pending') RETURNING *`
+         VALUES ($1, $2, $3, $4, $5, $6, $7, 'pending') RETURNING *`,
         [reporterId, reported_user_id, reported_message_id, reported_review_id, reported_portfolio_item_id, report_type, reason]
       );
       const newReport = result.rows[0];
@@ -831,6 +833,7 @@ app.post('/api/payments/kkiapay/webhook', express.raw({ type: 'application/json'
     return res.status(400).json({ message: 'Missing essential transaction data in payload.' });
   }
 
+  try {
     // Update our payment record
     const result = await pool.query(
       'UPDATE payments SET status = $1, kkiapay_transaction_id = $2, webhook_event = $3 WHERE kkiapay_transaction_id = $4 RETURNING *',
@@ -1056,9 +1059,6 @@ app.post('/api/payments/kkiapay/initiate', authenticateToken, async (req, res) =
 
 
 
-
-
-
 // The helper function recalculateAverageRating is no longer needed as logic is in the route
 // const recalculateAverageRating = (artisan) => {
 //   if (!artisan.reviews || artisan.reviews.length === 0) {
@@ -1067,7 +1067,6 @@ app.post('/api/payments/kkiapay/initiate', authenticateToken, async (req, res) =
 //   const totalRating = artisan.reviews.reduce((sum, review) => sum + review.rating, 0);
 //   return totalRating / artisan.reviews.length;
 // };
-
 
 
 
@@ -1470,7 +1469,7 @@ app.post('/api/profile', authenticateToken,
     }
   });
 
-// PUT /api/profile - Update logged-in user's profile
+// PUT /api/profile - Update logged-in user\'s profile
 app.put('/api/profile', authenticateToken,
   [
     // General email validation
@@ -1524,15 +1523,15 @@ app.put('/api/profile', authenticateToken,
       let paramIndex = 1;
 
       if (userRole === 'client') {
-        if (profileData.nom_complet !== undefined) { updates.push(`nom_complet = ${paramIndex++}`); values.push(profileData.nom_complet); }
-        if (profileData.sexe !== undefined) { updates.push(`sexe = ${paramIndex++}`); values.push(profileData.sexe); }
-        if (profileData.location !== undefined) { updates.push(`location = ${paramIndex++}`); values.push(profileData.location); }
-        if (profileData.telephone !== undefined) { updates.push(`telephone = ${paramIndex++}`); values.push(profileData.telephone); }
-        if (profileData.photo_url !== undefined) { updates.push(`photo_url = ${paramIndex++}`); values.push(profileData.photo_url); }
+        if (profileData.nom_complet !== undefined) { updates.push(`nom_complet = $${paramIndex++}`); values.push(profileData.nom_complet); }
+        if (profileData.sexe !== undefined) { updates.push(`sexe = $${paramIndex++}`); values.push(profileData.sexe); }
+        if (profileData.location !== undefined) { updates.push(`location = $${paramIndex++}`); values.push(profileData.location); }
+        if (profileData.telephone !== undefined) { updates.push(`telephone = $${paramIndex++}`); values.push(profileData.telephone); }
+        if (profileData.photo_url !== undefined) { updates.push(`photo_url = $${paramIndex++}`); values.push(profileData.photo_url); }
 
         if (updates.length > 0) {
           values.push(userId);
-          const profileUpdateQuery = `UPDATE client_profiles SET ${updates.join(', ')} WHERE user_id = ${paramIndex} RETURNING *`;
+          const profileUpdateQuery = `UPDATE client_profiles SET ${updates.join(', ')} WHERE user_id = $${paramIndex} RETURNING *`;
           const result = await client.query(profileUpdateQuery, values);
           updatedProfile = result.rows[0];
         }
@@ -1541,21 +1540,21 @@ app.put('/api/profile', authenticateToken,
         profileCompletenessPercentage = calculateProfileCompleteness(currentProfileResult.rows[0], userRole);
 
       } else if (userRole === 'artisan') {
-        if (profileData.nom_complet !== undefined) { updates.push(`nom_complet = ${paramIndex++}`); values.push(profileData.nom_complet); }
-        if (profileData.sexe !== undefined) { updates.push(`sexe = ${paramIndex++}`); values.push(profileData.sexe); }
-        if (profileData.specialite !== undefined) { updates.push(`specialite = ${paramIndex++}`); values.push(profileData.specialite); }
-        if (profileData.description !== undefined) { updates.push(`description = ${paramIndex++}`); values.push(profileData.description); }
-        if (profileData.location !== undefined) { updates.push(`location = ${paramIndex++}`); values.push(profileData.location); }
-        if (profileData.telephone !== undefined) { updates.push(`telephone = ${paramIndex++}`); values.push(profileData.telephone); }
-        if (profileData.annees_experience !== undefined) { updates.push(`annees_experience = ${paramIndex++}`); values.push(profileData.annees_experience); }
-        if (profileData.siret !== undefined) { updates.push(`siret = ${paramIndex++}`); values.push(profileData.siret); }
-        if (profileData.site_web !== undefined) { updates.push(`site_web = ${paramIndex++}`); values.push(profileData.site_web); }
-        if (profileData.photo_url !== undefined) { updates.push(`photo_url = ${paramIndex++}`); values.push(profileData.photo_url); }
-        if (profileData.document_verification_url !== undefined) { updates.push(`document_verification_url = ${paramIndex++}`); values.push(profileData.document_verification_url); }
+        if (profileData.nom_complet !== undefined) { updates.push(`nom_complet = $${paramIndex++}`); values.push(profileData.nom_complet); }
+        if (profileData.sexe !== undefined) { updates.push(`sexe = $${paramIndex++}`); values.push(profileData.sexe); }
+        if (profileData.specialite !== undefined) { updates.push(`specialite = $${paramIndex++}`); values.push(profileData.specialite); }
+        if (profileData.description !== undefined) { updates.push(`description = $${paramIndex++}`); values.push(profileData.description); }
+        if (profileData.location !== undefined) { updates.push(`location = $${paramIndex++}`); values.push(profileData.location); }
+        if (profileData.telephone !== undefined) { updates.push(`telephone = $${paramIndex++}`); values.push(profileData.telephone); }
+        if (profileData.annees_experience !== undefined) { updates.push(`annees_experience = $${paramIndex++}`); values.push(profileData.annees_experience); }
+        if (profileData.siret !== undefined) { updates.push(`siret = $${paramIndex++}`); values.push(profileData.siret); }
+        if (profileData.site_web !== undefined) { updates.push(`site_web = $${paramIndex++}`); values.push(profileData.site_web); }
+        if (profileData.photo_url !== undefined) { updates.push(`photo_url = $${paramIndex++}`); values.push(profileData.photo_url); }
+        if (profileData.document_verification_url !== undefined) { updates.push(`document_verification_url = $${paramIndex++}`); values.push(profileData.document_verification_url); }
 
         if (updates.length > 0) {
           values.push(userId);
-          const profileUpdateQuery = `UPDATE artisan_profiles SET ${updates.join(', ')} WHERE user_id = ${paramIndex} RETURNING *`;
+          const profileUpdateQuery = `UPDATE artisan_profiles SET ${updates.join(', ')} WHERE user_id = $${paramIndex} RETURNING *`;
           const result = await client.query(profileUpdateQuery, values);
           updatedProfile = result.rows[0];
         }
@@ -1564,22 +1563,22 @@ app.put('/api/profile', authenticateToken,
         profileCompletenessPercentage = calculateProfileCompleteness(currentProfileResult.rows[0], userRole);
 
       } else if (userRole === 'commercant') {
-        if (profileData.nom_entreprise !== undefined) { updates.push(`nom_entreprise = ${paramIndex++}`); values.push(profileData.nom_entreprise); }
-        if (profileData.sexe_contact !== undefined) { updates.push(`sexe_contact = ${paramIndex++}`); values.push(profileData.sexe_contact); }
-        if (profileData.type_commerce !== undefined) { updates.push(`type_commerce = ${paramIndex++}`); values.push(profileData.type_commerce); }
-        if (profileData.description !== undefined) { updates.push(`description = ${paramIndex++}`); values.push(profileData.description); }
-        if (profileData.adresse !== undefined) { updates.push(`adresse = ${paramIndex++}`); values.push(profileData.adresse); }
-        if (profileData.location !== undefined) { updates.push(`location = ${paramIndex++}`); values.push(profileData.location); }
-        if (profileData.telephone !== undefined) { updates.push(`telephone = ${paramIndex++}`); values.push(profileData.telephone); }
-        if (profileData.siret !== undefined) { updates.push(`siret = ${paramIndex++}`); values.push(profileData.siret); }
-        if (profileData.site_web !== undefined) { updates.push(`site_web = ${paramIndex++}`); values.push(profileData.site_web); }
-        if (profileData.horaires_ouverture !== undefined) { updates.push(`horaires_ouverture = ${paramIndex++}`); values.push(profileData.horaires_ouverture); }
-        if (profileData.photo_url !== undefined) { updates.push(`photo_url = ${paramIndex++}`); values.push(profileData.photo_url); }
-        if (profileData.document_verification_url !== undefined) { updates.push(`document_verification_url = ${paramIndex++}`); values.push(profileData.document_verification_url); }
+        if (profileData.nom_entreprise !== undefined) { updates.push(`nom_entreprise = $${paramIndex++}`); values.push(profileData.nom_entreprise); }
+        if (profileData.sexe_contact !== undefined) { updates.push(`sexe_contact = $${paramIndex++}`); values.push(profileData.sexe_contact); }
+        if (profileData.type_commerce !== undefined) { updates.push(`type_commerce = $${paramIndex++}`); values.push(profileData.type_commerce); }
+        if (profileData.description !== undefined) { updates.push(`description = $${paramIndex++}`); values.push(profileData.description); }
+        if (profileData.adresse !== undefined) { updates.push(`adresse = $${paramIndex++}`); values.push(profileData.adresse); }
+        if (profileData.location !== undefined) { updates.push(`location = $${paramIndex++}`); values.push(profileData.location); }
+        if (profileData.telephone !== undefined) { updates.push(`telephone = $${paramIndex++}`); values.push(profileData.telephone); }
+        if (profileData.siret !== undefined) { updates.push(`siret = $${paramIndex++}`); values.push(profileData.siret); }
+        if (profileData.site_web !== undefined) { updates.push(`site_web = $${paramIndex++}`); values.push(profileData.site_web); }
+        if (profileData.horaires_ouverture !== undefined) { updates.push(`horaires_ouverture = $${paramIndex++}`); values.push(profileData.horaires_ouverture); }
+        if (profileData.photo_url !== undefined) { updates.push(`photo_url = $${paramIndex++}`); values.push(profileData.photo_url); }
+        if (profileData.document_verification_url !== undefined) { updates.push(`document_verification_url = $${paramIndex++}`); values.push(profileData.document_verification_url); }
 
         if (updates.length > 0) {
           values.push(userId);
-          const profileUpdateQuery = `UPDATE commercant_profiles SET ${updates.join(', ')} WHERE user_id = ${paramIndex} RETURNING *`;
+          const profileUpdateQuery = `UPDATE commercant_profiles SET ${updates.join(', ')} WHERE user_id = $${paramIndex} RETURNING *`;
           const result = await client.query(profileUpdateQuery, values);
           updatedProfile = result.rows[0];
         }
@@ -1708,7 +1707,6 @@ app.get('/api/demandes/:id', authenticateToken, async (req, res) => {
     res.status(500).json({ message: 'Erreur interne du serveur.' });
   }
 });
-
 
 
 
@@ -1926,7 +1924,7 @@ app.put('/api/admin/verifications/:userId', authenticateToken, authorizeRole(['a
 
     // TODO: Send an email notification to the user
 
-    res.status(200).json({ message: `Le statut de l'utilisateur ${userId} a été mis à jour à "${status}".` });
+    res.status(200).json({ message: `Le statut de l\'utilisateur ${userId} a été mis à jour à "${status}".` });
 
   } catch (error) {
     console.error('Error updating verification status:', error);
@@ -1999,16 +1997,16 @@ app.get('/api/admin/users/:id', authenticateToken, authorizeRole(['admin']), asy
     }
     const user = userResult.rows[0];
 
-    let profile = {};
+    let profile = null;
     if (user.role === 'client') {
       const profileResult = await pool.query('SELECT * FROM client_profiles WHERE user_id = $1', [userId]);
-      if (profileResult.rows.length > 0) profile = profileResult.rows[0];
+      profile = profileResult.rows[0];
     } else if (user.role === 'artisan') {
       const profileResult = await pool.query('SELECT * FROM artisan_profiles WHERE user_id = $1', [userId]);
-      if (profileResult.rows.length > 0) profile = profileResult.rows[0];
+      profile = profileResult.rows[0];
     } else if (user.role === 'commercant') {
       const profileResult = await pool.query('SELECT * FROM commercant_profiles WHERE user_id = $1', [userId]);
-      if (profileResult.rows.length > 0) profile = profileResult.rows[0];
+      profile = profileResult.rows[0];
     }
 
     res.json({ ...user, profile });
@@ -2019,89 +2017,93 @@ app.get('/api/admin/users/:id', authenticateToken, authorizeRole(['admin']), asy
   }
 });
 
-// PUT /api/admin/users/:id/block - Block or unblock a user
-app.put('/api/admin/users/:id/block', authenticateToken, authorizeRole(['admin']), async (req, res) => {
+// PUT /api/admin/users/:id - Update user details (for admin panel)
+app.put('/api/admin/users/:id', authenticateToken, authorizeRole(['admin']), async (req, res) => {
   const userId = parseInt(req.params.id);
-  const { isBlocked } = req.body; // Expecting a boolean value
-
-  if (typeof isBlocked !== 'boolean') {
-    return res.status(400).json({ message: 'Le statut de blocage doit être une valeur booléenne.' });
-  }
+  const { email, role } = req.body;
 
   try {
-    const result = await pool.query(
-      'UPDATE users SET is_blocked = $1 WHERE id = $2 RETURNING id, email, is_blocked',
-      [isBlocked, userId]
-    );
-
-    if (result.rows.length === 0) {
-      return res.status(404).json({ message: 'Utilisateur non trouvé.' });
+    // Basic validation
+    if (email) {
+      const emailCheck = await pool.query('SELECT id FROM users WHERE email = $1 AND id != $2', [email, userId]);
+      if (emailCheck.rows.length > 0) {
+        return res.status(400).json({ message: 'Cet email est déjà utilisé.' });
+      }
     }
 
-    res.status(200).json({ message: `Utilisateur ${isBlocked ? 'bloqué' : 'débloqué'} avec succès.`, user: result.rows[0] });
+    const updates = [];
+    const values = [];
+    let paramIndex = 1;
+
+    if (email) { updates.push(`email = $${paramIndex++}`); values.push(email); }
+    if (role) { updates.push(`role = $${paramIndex++}`); values.push(role); }
+
+    if (updates.length === 0) {
+      return res.status(400).json({ message: 'Aucun champ à mettre à jour.' });
+    }
+
+    values.push(userId);
+    const query = `UPDATE users SET ${updates.join(', ')} WHERE id = $${paramIndex} RETURNING id, email, role`;
+
+    const result = await pool.query(query, values);
+
+    res.json({ message: 'Utilisateur mis à jour avec succès.', user: result.rows[0] });
 
   } catch (error) {
-    console.error('Error blocking/unblocking user:', error);
+    console.error('Error updating user from admin panel:', error);
     res.status(500).json({ message: 'Erreur interne du serveur.' });
   }
 });
 
-// DELETE /api/admin/users/:id - Delete a user
+// DELETE /api/admin/users/:id - Delete a user (for admin panel)
 app.delete('/api/admin/users/:id', authenticateToken, authorizeRole(['admin']), async (req, res) => {
   const userId = parseInt(req.params.id);
 
   try {
-    const result = await pool.query('DELETE FROM users WHERE id = $1 RETURNING id', [userId]);
+    // Use a transaction to ensure all related data is deleted
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+      // Delete from all related tables first
+      await client.query('DELETE FROM favorites WHERE user_id = $1 OR favorite_artisan_id = $1', [userId]);
+      await client.query('DELETE FROM reviews WHERE client_id = $1 OR artisan_id = $1', [userId]);
+      await client.query('DELETE FROM demandes WHERE client_id = $1 OR artisan_id = $1', [userId]);
+      await client.query('DELETE FROM messages WHERE sender_id = $1 OR receiver_id = $1', [userId]);
+      await client.query('DELETE FROM portfolio_items WHERE artisan_id = $1', [userId]);
+      await client.query('DELETE FROM services WHERE artisan_id = $1', [userId]);
+      await client.query('DELETE FROM client_profiles WHERE user_id = $1', [userId]);
+      await client.query('DELETE FROM artisan_profiles WHERE user_id = $1', [userId]);
+      await client.query('DELETE FROM commercant_profiles WHERE user_id = $1', [userId]);
+      await client.query('DELETE FROM reports WHERE reporter_id = $1 OR reported_user_id = $1', [userId]);
+      await client.query('DELETE FROM subscriptions WHERE user_id = $1', [userId]);
+      await client.query('DELETE FROM payments WHERE user_id = $1', [userId]);
+      // Finally, delete from the users table
+      const result = await client.query('DELETE FROM users WHERE id = $1 RETURNING id', [userId]);
+      await client.query('COMMIT');
 
-    if (result.rows.length === 0) {
-      return res.status(404).json({ message: 'Utilisateur non trouvé.' });
+      if (result.rows.length === 0) {
+        return res.status(404).json({ message: 'Utilisateur non trouvé.' });
+      }
+
+      res.status(200).json({ message: 'Utilisateur et toutes ses données associées ont été supprimés avec succès.' });
+
+    } catch (transactionError) {
+      await client.query('ROLLBACK');
+      throw transactionError; // Rethrow to be caught by the outer catch block
+    } finally {
+      client.release();
     }
-
-    res.status(200).json({ message: 'Utilisateur supprimé avec succès.' });
 
   } catch (error) {
-    console.error('Error deleting user:', error);
-    res.status(500).json({ message: 'Erreur interne du serveur.' });
+    console.error('Error deleting user from admin panel:', error);
+    res.status(500).json({ message: 'Erreur interne du serveur lors de la suppression de l\'utilisateur.' });
   }
 });
 
-app.get('/api/artisans/:id/portfolio', artisanController.getArtisanPortfolio);
-app.get('/api/artisans/:id/services', artisanController.getArtisanServices);
 
 
-// Serve frontend build (if present)
-const frontendBuildPath = path.join(__dirname, '..', 'frontend', 'build', 'web');
-if (fs.existsSync(frontendBuildPath)) {
-  console.log('Serving frontend from', frontendBuildPath);
-  app.use(express.static(frontendBuildPath));
-
-  // Fallback for SPA routing: any non-API request should return index.html
-  app.get('*', (req, res, next) => {
-    if (req.path.startsWith('/api') || req.path.startsWith('/uploads')) return next();
-    res.sendFile(path.join(frontendBuildPath, 'index.html'));
-  });
-}
-
-
-const PORT = process.env.PORT || 3001;
-
-// Test the database connection before starting the server
-pool.connect((err, client, release) => {
-  if (err) {
-    return console.error('Erreur de connexion à la base de données', err.stack);
-  }
-  client.query('SELECT NOW()', (err, result) => {
-    release(); // release the client back to the pool
-    if (err) {
-      return console.error('Erreur lors de l\'exécution de la requête de test', err.stack);
-    }
-    console.log('Connexion à la base de données réussie. Horodatage du serveur de base de données:', result.rows[0].now);
-    
-    // Start the server only if the database connection is successful
-    server.listen(PORT, () => {
-      console.log(`Le serveur écoute sur le port ${PORT}`);
-    });
-  });
+// Démarrage du serveur
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+  console.log(`Le serveur est en écoute sur le port ${PORT}`);
 });
-
-module.exports = { app, server };
