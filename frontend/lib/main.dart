@@ -16,7 +16,7 @@ import 'dart:async';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await dotenv.load(fileName: ".env");
+  await dotenv.load(fileName: "assets/.env");
 
   runApp(
     MultiProvider(
