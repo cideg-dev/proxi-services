@@ -16,27 +16,7 @@ import 'dart:async';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Charger les variables d'environnement depuis assets/app.env si présent.
-  // Si le fichier est absent (ex: build ou déploiement mal fait), attraper l'erreur
-  // et fournir des valeurs par défaut afin d'éviter un crash lors du démarrage.
-  try {
-    // await dotenv.load(fileName: "assets/app.env");
-  } catch (e, st) {
-    // Log pour debug local; ne pas interrompre l'exécution en prod.
-    // L'erreur la plus fréquente ici est FileNotFoundError lors du chargement web.
-    // Exemple de message attendu dans les logs du navigateur : FileNotFoundError
-    // Remplir des valeurs par défaut raisonnables.
-    print('Warning: impossible de charger assets/app.env: $e');
-    // Print stack trace for debugging (uses the caught stack trace variable)
-    print(st);
-    // Fournir des valeurs par défaut si elles n'existent pas
-    try {
-      if (dotenv.env['API_URL'] == null) dotenv.env['API_URL'] = 'http://localhost:3000';
-      if (dotenv.env['FRONTEND_URL'] == null) dotenv.env['FRONTEND_URL'] = 'http://localhost:5173';
-    } catch (_) {
-      // Si dotenv.env n'est pas modifiable pour une raison quelconque, on ignore.
-    }
-  }
+  await dotenv.load(fileName: ".env");
 
   runApp(
     MultiProvider(
