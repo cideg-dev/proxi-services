@@ -37,7 +37,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
         );
       } catch (e) {
         setState(() {
-          _errorMessage = 'Une erreur est survenue. L\'email est peut-être déjà utilisé ou le serveur est indisponible.';
+          // Affiche le vrai message d'erreur venant du backend
+          _errorMessage = e.toString().replaceFirst('Exception: ', '');
         });
       } finally {
         setState(() {
