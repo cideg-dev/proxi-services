@@ -93,3 +93,19 @@ Ce fichier suit les tâches de développement basées sur le cahier des charges.
 - [ ] **Backend :** Écrire des tests unitaires pour les `controllers` et `services`.
 - [ ] **Frontend :** Écrire des tests de widgets.
 - [ ] **CI (GitHub Actions) :** Créer un workflow qui installe les dépendances, lance les linters et les tests automatiquement.
+
+---
+
+## Nouvelles Fonctionnalités Suggérées
+
+### Axe 1 : Confiance et Sécurité (Impact Élevé)
+- [ ] **Vérification d'Identité des Artisans :** Intégrer un service de vérification de documents d'identité pour afficher un badge "Identité Vérifiée" sur les profils.
+- [ ] **Paiement Sécurisé / Escrow :** Mettre en place un système où le paiement du client est conservé par la plateforme et n'est versé à l'artisan qu'après confirmation de la fin de la prestation.
+
+### Axe 2 : Recherche et Découverte (Impact Élevé)
+- [ ] **Filtres de Recherche Avancés :** Ajouter des filtres par disponibilité, tarif, distance, et note moyenne.
+- [ ] **Demande de Devis Multiple :** Permettre à un client de poster une demande de service et de recevoir des devis de plusieurs artisans.
+
+### Axe 3 : Outils pour les Artisans (Impact Moyen)
+- [ ] **Gestion de Calendrier et Prise de Rendez-vous :** Intégrer un calendrier de disponibilité pour les artisans avec possibilité de réservation directe par les clients.
+- [ ] **Tableau de Bord de Statistiques :** Créer un dashboard pour les artisans avec des métriques (vues du profil, contacts, revenus, etc.).
