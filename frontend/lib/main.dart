@@ -20,7 +20,7 @@ Future<void> main() async {
   // Si le fichier est absent (ex: build ou déploiement mal fait), attraper l'erreur
   // et fournir des valeurs par défaut afin d'éviter un crash lors du démarrage.
   try {
-    await dotenv.load(fileName: "assets/app.env");
+    // await dotenv.load(fileName: "assets/app.env");
   } catch (e, st) {
     // Log pour debug local; ne pas interrompre l'exécution en prod.
     // L'erreur la plus fréquente ici est FileNotFoundError lors du chargement web.
