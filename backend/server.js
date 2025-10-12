@@ -518,7 +518,7 @@ app.post('/api/reports', authenticateToken,
     try {
       const result = await pool.query(
         `INSERT INTO reports (reporter_id, reported_user_id, reported_message_id, reported_review_id, reported_portfolio_item_id, report_type, reason, status)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, 'pending') RETURNING *`,
+         VALUES ($1, $2, $3, $4, $5, $6, $7, 'pending') RETURNING *`
         [reporterId, reported_user_id, reported_message_id, reported_review_id, reported_portfolio_item_id, report_type, reason]
       );
       const newReport = result.rows[0];
@@ -633,7 +633,7 @@ app.put('/api/admin/reports/:id/resolve', authenticateToken, authorizeRole(['adm
 
   try {
     const result = await pool.query(
-      'UPDATE reports SET status = $1, resolved_at = CURRENT_TIMESTAMP, resolved_by_admin_id = $2 WHERE id = $3 RETURNING *' ,
+      'UPDATE reports SET status = $1, resolved_at = CURRENT_TIMESTAMP, resolved_by_admin_id = $2 WHERE id = $3 RETURNING *',
       [status, adminId, reportId]
     );
 
