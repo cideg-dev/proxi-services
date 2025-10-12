@@ -18,12 +18,15 @@ jobs:
           flutter-version: '3.19.6'
 
       - name: Install dependencies
+        working-directory: ./frontend
         run: flutter pub get
 
       - name: Analyze
+        working-directory: ./frontend
         run: flutter analyze
 
       - name: Build web
+        working-directory: ./frontend
         env:
           REPO_NAME: ${{ github.event.repository.name }}
         run: flutter build web --release --base-href "/${REPO_NAME}/"
@@ -31,14 +34,14 @@ jobs:
       - name: Remove source maps
         # Remove .map files to make it harder to retrieve original sources
         run: |
-          echo "Removing source map files from build/web..."
-          find ./build/web -type f -name '*.map' -print -delete || true
+          echo "Removing source map files from frontend/build/web..."
+          find ./frontend/build/web -type f -name '*.map' -print -delete || true
           # Also remove any debug info files if present
-          find ./build/web -type f -name 'main.dart.js.map' -print -delete || true
+          find ./frontend/build/web -type f -name 'main.dart.js.map' -print -delete || true
 
       - name: Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./build/web
+          publish_dir: ./frontend/build/web
           publish_branch: gh-pages
