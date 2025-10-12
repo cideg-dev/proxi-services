@@ -49,7 +49,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
       } catch (e) {
         setState(() {
-          _errorMessage = e.toString().replaceFirst('Exception: ', '');
+          _errorMessage = 'Email ou mot de passe incorrect. Veuillez réessayer.';
         });
       } finally {
         setState(() {
