@@ -100,7 +100,7 @@ const io = new Server(server, {
 
 // Middlewares
 const corsOptions = {
-  origin: process.env.FRONTEND_URL || 'https://cideg-dev.github.io', // Fallback to your GitHub Pages URL
+  origin: 'https://cideg-dev.github.io',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 };
