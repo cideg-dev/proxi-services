@@ -35,7 +35,7 @@ Ce fichier suit les tâches de développement basées sur le cahier des charges.
 ### ☐ Gérer les URLs d'images et le téléchargement
 - [x] Côté serveur, générer des miniatures (thumbnails) avec `sharp` pour optimiser le chargement.
 - [x] Ajouter un en-tête `Cache-Control` pour que le navigateur mette en cache les images.
-- [ ] **Critère d'acceptation :** Les images sont converties en `.webp`, accessibles via une URL complète, et s'affichent sans erreur 404.
+- [x] **Critère d'acceptation :** Les images sont converties en `.webp`, accessibles via une URL complète, et s'affichent sans erreur 404.
 
 ### ✅ Protéger les routes et gérer les autorisations
 - [x] S'assurer que TOUTES les routes sensibles utilisent `authenticateToken` et `authorizeRole`.

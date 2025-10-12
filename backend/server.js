@@ -1745,7 +1745,7 @@ app.post('/api/users/:id/upload-photo', authenticateToken, upload.single('profil
       .webp({ quality: 80 })
       .toFile(outputPath);
 
-    const photoUrl = `/uploads/${filename}`;
+    const photoUrl = `${req.protocol}://${req.get('host')}/uploads/${filename}`;
 
     let updateQuery = '';
     if (userRole === 'client') {
@@ -1802,7 +1802,7 @@ app.post('/api/users/:id/upload-document', authenticateToken, uploadDocument.sin
       .webp({ quality: 80 })
       .toFile(outputPath);
 
-    const documentUrl = `/uploads/${filename}`;
+    const documentUrl = `${req.protocol}://${req.get('host')}/uploads/${filename}`;
 
     let updateQuery = '';
     if (userRole === 'artisan') {

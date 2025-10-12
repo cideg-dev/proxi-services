@@ -26,7 +26,7 @@ const addPortfolioItem = async (req, res) => {
       .webp({ quality: 80 })
       .toFile(outputPath);
 
-    const imageUrl = `/uploads/${filename}`;
+    const imageUrl = `${req.protocol}://${req.get('host')}/uploads/${filename}`;
 
     const result = await pool.query(
       'INSERT INTO portfolio_items (artisan_id, image_url, caption) VALUES ($1, $2, $3) RETURNING *',
@@ -46,7 +46,7 @@ const updatePortfolioItem = async (req, res) => {
   }
 
   const { caption } = req.body;
-  const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
+  const imageUrl = req.file ? `${req.protocol}://${req.get('host')}${req.file.path.replace(/\\/g, '/').substring(req.file.path.indexOf('/uploads'))}` : null;
 
   try {
     const existingItemResult = await pool.query('SELECT * FROM portfolio_items WHERE id = $1 AND artisan_id = $2', [portfolioId, artisanId]);
