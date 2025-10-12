@@ -99,7 +99,12 @@ const io = new Server(server, {
 });
 
 // Middlewares
-app.use(cors());
+const corsOptions = {
+  origin: process.env.FRONTEND_URL || 'https://cideg-dev.github.io', // Fallback to your GitHub Pages URL
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+};
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // Create a write stream for logging
