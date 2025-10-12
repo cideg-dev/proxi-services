@@ -97,7 +97,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   padding: const EdgeInsets.only(bottom: 10),
                   child: Column(
                     children: [
-                      Lottie.asset('lottie/error.json', height: 80),
+                      const Icon(Icons.error, color: Colors.red, size: 80),
                       const SizedBox(height: 8),
                       Text(
                         _errorMessage,
