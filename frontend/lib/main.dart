@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:frontend/navigation_service.dart';
 import 'package:frontend/providers/notification_ui_provider.dart';
 import 'package:frontend/screens/login_screen.dart';
