@@ -2109,19 +2109,6 @@ app.delete('/api/admin/users/:id', authenticateToken, authorizeRole(['admin']), 
 
 // Démarrage du serveur
 const PORT = process.env.PORT || 3000;
-
-// ROUTE SECRÈTE ET TEMPORAIRE POUR INITIALISER LA DB
-app.get('/__setup_database_from_schema', async (req, res) => {
-  try {
-    const sql = fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8');
-    await pool.query(sql);
-    res.status(200).send('<h1>Félicitations !</h1><p>Les tables de la base de données ont été créées avec succès.</p><p>Vous pouvez maintenant fermer cette page. La route va être supprimée.</p>');
-  } catch (error) {
-    console.error('Erreur lors de l\'initialisation de la base de données via la route secrète:', error);
-    res.status(500).send(`<h1>Erreur</h1><p>Une erreur est survenue : ${error.message}</p>`);
-  }
-});
-
 server.listen(PORT, () => {
   console.log(`Le serveur est en écoute sur le port ${PORT}`);
 });
