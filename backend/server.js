@@ -833,12 +833,7 @@ app.post('/api/payments/kkiapay/webhook', express.raw({ type: 'application/json'
 
     // Update our payment record
     const result = await pool.query(
-      `UPDATE payments SET
-         status = $1,
-         kkiapay_transaction_id = $2,
-         transaction_details = $3,
-         updated_at = CURRENT_TIMESTAMP
-       WHERE kkiapay_transaction_id = $4 RETURNING *`,
+      'UPDATE payments SET status = $1, kkiapay_transaction_id = $2, webhook_event = $3 WHERE kkiapay_transaction_id = $4 RETURNING *',
       [kkiapayStatus.toLowerCase(), kkiapayTransactionId, event, ourTransactionId]
     );
 
