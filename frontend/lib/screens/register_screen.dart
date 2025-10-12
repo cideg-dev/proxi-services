@@ -72,7 +72,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   if (value == null || value.isEmpty) {
                     return 'Veuillez entrer une adresse e-mail';
                   }
-                  final emailRegex = RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+");
+                  final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
                   if (!emailRegex.hasMatch(value)) {
                     return 'Entrez un email valide';
                   }
