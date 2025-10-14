@@ -78,7 +78,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _loadUserData() async {
-    final role = await _tokenManager.getRole();
+    final role = await _tokenManager.getUserRole();
     setState(() {
       _userRole = role;
     });
