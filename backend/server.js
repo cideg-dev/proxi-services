@@ -1,5 +1,3 @@
-
-
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -79,14 +77,14 @@ const { authenticateToken, authorizeRole } = require('./middleware/authMiddlewar
 const authRoutes = require('./routes/authRoutes'); // Import auth routes
 const reviewRoutes = require('./routes/reviewRoutes'); // Import review routes
 
-// Vérification des variables d'environnement critiques
+// Vérification des variables d environnement critiques
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) {
   console.error('JWT_SECRET must be defined in environment variables');
   process.exit(1);
 }
 
-// Initialisation de l'application Express
+// Initialisation de l application Express
 const app = express();
 const server = require('http').createServer(app);
 const { Server } = require('socket.io');
@@ -260,7 +258,7 @@ app.get('/api/system/version', (req, res) => {
   res.json({ latest_version: '1.1.0' });
 });
 
-// --- API Routes --- 
+// --- API Routes ---
 
 app.use('/api/auth', authRoutes()); // Use auth routes
 app.use('/api/reviews', reviewRoutes(io, connectedUsers)); // Use review routes
@@ -275,7 +273,7 @@ app.get('/api/artisans/:id', (req, res) => artisanController.getArtisan(req, res
 // GET /api/messages/:user1Id/:user2Id - Get historical messages between two users
 app.get('/api/messages/:user1Id/:user2Id', authenticateToken, async (req, res) => {
   const { user1Id, user2Id } = req.params;
-  const loggedInUserId = req.user.id.toString();
+  const loggedInUserId = req.user.user.id.toString();
 
   // Authorization: Ensure the logged-in user is one of the participants
   if (loggedInUserId !== user1Id && loggedInUserId !== user2Id) {
@@ -297,7 +295,7 @@ app.get('/api/messages/:user1Id/:user2Id', authenticateToken, async (req, res) =
 
 // GET /api/conversations - Get all conversations for the logged-in user
 app.get('/api/conversations', authenticateToken, async (req, res) => {
-  const loggedInUserId = req.user.id;
+  const loggedInUserId = req.user.user.id;
 
   try {
     const messagesResult = await pool.query(
@@ -362,7 +360,7 @@ app.get('/api/conversations', authenticateToken, async (req, res) => {
 // DELETE /api/messages/:user1Id/:user2Id - Delete all messages between two users
 app.delete('/api/messages/:user1Id/:user2Id', authenticateToken, async (req, res) => {
   const { user1Id, user2Id } = req.params;
-  const loggedInUserId = req.user.id.toString();
+  const loggedInUserId = req.user.user.id.toString();
 
   // Authorization: Ensure the logged-in user is one of the participants
   if (loggedInUserId !== user1Id && loggedInUserId !== user2Id) {
@@ -390,7 +388,7 @@ app.delete('/api/messages/:user1Id/:user2Id', authenticateToken, async (req, res
 // PUT /api/messages/:messageId/read - Mark a message as read
 app.put('/api/messages/:messageId/read', authenticateToken, async (req, res) => {
   const messageId = parseInt(req.params.messageId);
-  const userId = req.user.id; // The user who is marking the message as read
+  const userId = req.user.user.id; // The user who is marking the message as read
 
   try {
     // Verify the message exists and the current user is the receiver
@@ -441,9 +439,9 @@ app.put('/api/messages/:messageId/read', authenticateToken, async (req, res) => 
 // POST /api/demandes - Create a new service request
 app.post('/api/demandes', authenticateToken, authorizeRole(['client']),
   [
-    check('artisanId', 'L\'ID de l\'artisan est requis et doit être un entier').isInt(),
+    check('artisanId', 'L\ ID de l artisan est requis et doit être un entier').isInt(),
     check('serviceDescription', 'La description du service est requise').notEmpty().optional(),
-    check('serviceIds', 'Les IDs de service doivent être un tableau d\'entiers').isArray().optional(),
+    check('serviceIds', 'Les IDs de service doivent être un tableau d entiers').isArray().optional(),
   ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -452,7 +450,7 @@ app.post('/api/demandes', authenticateToken, authorizeRole(['client']),
     }
 
     const { artisanId, serviceDescription, serviceIds } = req.body;
-    const clientId = req.user.id;
+    const clientId = req.user.user.id;
 
     try {
       // Verify artisan exists and has the correct role
@@ -468,7 +466,7 @@ app.post('/api/demandes', authenticateToken, authorizeRole(['client']),
           [artisanId, serviceIds]
         );
         if (serviceCheck.rows.length !== serviceIds.length) {
-          return res.status(400).json({ message: 'Un ou plusieurs services demandés n\'existent pas pour cet artisan.' });
+          return res.status(400).json({ message: 'Un ou plusieurs services demandés n existent pas pour cet artisan.' });
         }
       }
       
@@ -508,7 +506,7 @@ app.post('/api/reports', authenticateToken,
     body().custom((value, { req }) => {
       const { reported_user_id, reported_message_id, reported_review_id, reported_portfolio_item_id } = req.body;
       if (!reported_user_id && !reported_message_id && !reported_review_id && !reported_portfolio_item_id) {
-        throw new Error('Au moins un ID d\'entité signalée (utilisateur, message, avis, ou élément de portfolio) est requis.');
+        throw new Error('Au moins un ID d entité signalée (utilisateur, message, avis, ou élément de portfolio) est requis.');
       }
       return true;
     }),
@@ -519,7 +517,7 @@ app.post('/api/reports', authenticateToken,
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const reporterId = req.user.id;
+    const reporterId = req.user.user.id;
     const { report_type, reason, reported_user_id, reported_message_id, reported_review_id, reported_portfolio_item_id } = req.body;
 
     try {
@@ -632,7 +630,7 @@ app.get('/api/admin/reports', authenticateToken, authorizeRole(['admin']), async
 app.put('/api/admin/reports/:id/resolve', authenticateToken, authorizeRole(['admin']), async (req, res) => {
   const reportId = parseInt(req.params.id);
   const { status } = req.body; // 'resolved' or 'rejected'
-  const adminId = req.user.id;
+  const adminId = req.user.user.id;
 
   if (!['resolved', 'rejected'].includes(status)) {
     return res.status(400).json({ message: 'Statut de résolution invalide.' });
@@ -771,7 +769,7 @@ app.get('/api/admin/audit-logs', authenticateToken, authorizeRole(['admin']), as
 
 // POST /api/payments/kkiapay/initiate - Initiate a Kkiapay payment
 app.post('/api/payments/kkiapay/initiate', authenticateToken, async (req, res) => {
-  const userId = req.user.id;
+  const userId = req.user.user.id;
   const { amount, reason } = req.body;
 
   if (!amount || amount <= 0 || !reason) {
@@ -810,7 +808,7 @@ app.post('/api/payments/kkiapay/initiate', authenticateToken, async (req, res) =
 
   } catch (error) {
     console.error('Error initiating Kkiapay payment:', error);
-    res.status(500).json({ message: 'Erreur interne du serveur lors de l\'initiation du paiement.' });
+    res.status(500).json({ message: 'Erreur interne du serveur lors de l initiation du paiement.' });
   }
 });
 
@@ -869,7 +867,7 @@ app.post('/api/payments/kkiapay/webhook', express.raw({ type: 'application/json'
 
 // GET /api/payments/kkiapay/verify/:ourTransactionId - Verify Kkiapay payment status
 app.get('/api/payments/kkiapay/verify/:ourTransactionId', authenticateToken, async (req, res) => {
-  const userId = req.user.id;
+  const userId = req.user.user.id;
   const { ourTransactionId } = req.params;
 
   try {
@@ -892,7 +890,7 @@ app.get('/api/payments/kkiapay/verify/:ourTransactionId', authenticateToken, asy
 
 // GET /api/subscriptions - Get user's subscriptions
 app.get('/api/subscriptions', authenticateToken, async (req, res) => {
-  const userId = req.user.id;
+  const userId = req.user.user.id;
 
   try {
     const result = await pool.query(
@@ -909,11 +907,11 @@ app.get('/api/subscriptions', authenticateToken, async (req, res) => {
 
 // POST /api/subscriptions/subscribe - Create a new subscription
 app.post('/api/subscriptions/subscribe', authenticateToken, async (req, res) => {
-  const userId = req.user.id;
+  const userId = req.user.user.id;
   const { subscriptionType, paymentId } = req.body; // paymentId is our internal payment ID
 
   if (!subscriptionType || !paymentId) {
-    return res.status(400).json({ message: 'Type d\'abonnement et ID de paiement requis.' });
+    return res.status(400).json({ message: 'Type d abonnement et ID de paiement requis.' });
   }
 
   try {
@@ -929,7 +927,7 @@ app.post('/api/subscriptions/subscribe', authenticateToken, async (req, res) => 
     const payment = paymentResult.rows[0];
 
     if (payment.status !== 'success') {
-      return res.status(400).json({ message: 'Le paiement n\'a pas été effectué avec succès.' });
+      return res.status(400).json({ message: 'Le paiement n a pas été effectué avec succès.' });
     }
 
     // 2. Create the subscription
@@ -942,7 +940,7 @@ app.post('/api/subscriptions/subscribe', authenticateToken, async (req, res) => 
     } else if (subscriptionType === 'profile_boost_3_months') {
       endDate.setMonth(endDate.getMonth() + 3);
     } else {
-      return res.status(400).json({ message: 'Type d\'abonnement invalide.' });
+      return res.status(400).json({ message: 'Type d abonnement invalide.' });
     }
 
     const subscriptionResult = await pool.query(
@@ -967,11 +965,11 @@ app.post('/api/subscriptions/subscribe', authenticateToken, async (req, res) => 
 
 // POST /api/subscriptions/cancel - Cancel an existing subscription
 app.post('/api/subscriptions/cancel', authenticateToken, async (req, res) => {
-  const userId = req.user.id;
+  const userId = req.user.user.id;
   const { subscriptionId } = req.body;
 
   if (!subscriptionId) {
-    return res.status(400).json({ message: 'ID d\'abonnement requis.' });
+    return res.status(400).json({ message: 'ID d abonnement requis.' });
   }
 
   try {
@@ -1001,7 +999,7 @@ app.post('/api/subscriptions/cancel', authenticateToken, async (req, res) => {
 
 // GET /api/invoices - Get user's payment history (invoices)
 app.get('/api/invoices', authenticateToken, async (req, res) => {
-  const userId = req.user.id;
+  const userId = req.user.user.id;
 
   try {
     const result = await pool.query(
@@ -1018,7 +1016,7 @@ app.get('/api/invoices', authenticateToken, async (req, res) => {
 
 // POST /api/payments/kkiapay/initiate - Initiate a Kkiapay payment
 app.post('/api/payments/kkiapay/initiate', authenticateToken, async (req, res) => {
-  const userId = req.user.id;
+  const userId = req.user.user.id;
   const { amount, reason } = req.body;
 
   if (!amount || amount <= 0 || !reason) {
@@ -1057,7 +1055,7 @@ app.post('/api/payments/kkiapay/initiate', authenticateToken, async (req, res) =
 
   } catch (error) {
     console.error('Error initiating Kkiapay payment:', error);
-    res.status(500).json({ message: 'Erreur interne du serveur lors de l\'initiation du paiement.' });
+    res.status(500).json({ message: 'Erreur interne du serveur lors de l initiation du paiement.' });
   }
 });
 
@@ -1072,7 +1070,6 @@ app.post('/api/payments/kkiapay/initiate', authenticateToken, async (req, res) =
 //   const totalRating = artisan.reviews.reduce((sum, review) => sum + review.rating, 0);
 //   return totalRating / artisan.reviews.length;
 // };
-
 
 
 
@@ -1107,8 +1104,8 @@ app.get('/api/clients/featured', async (req, res) => {
 // POST /api/artisans/:artisanId/favorites/:favoriteArtisanId - Add an artisan to favorites
 app.post('/api/artisans/:artisanId/favorites/:favoriteArtisanId', authenticateToken,
   [
-    check('artisanId', 'L\'ID utilisateur est requis et doit être un entier').isInt(),
-    check('favoriteArtisanId', 'L\'ID de l\'artisan favori est requis et doit être un entier').isInt(),
+    check('artisanId', 'L\ ID utilisateur est requis et doit être un entier').isInt(),
+    check('favoriteArtisanId', 'L\ ID de l artisan favori est requis et doit être un entier').isInt(),
   ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -1120,7 +1117,7 @@ app.post('/api/artisans/:artisanId/favorites/:favoriteArtisanId', authenticateTo
     const favoriteArtisanId = parseInt(req.params.favoriteArtisanId); // ID of the artisan to favorite
 
     // Authorization: Ensure the logged-in user is the one whose favorites are being modified
-    if (req.user.id !== userId) {
+    if (req.user.user.id !== userId) {
       return res.status(403).json({ message: 'Action non autorisée. Vous ne pouvez modifier que vos propres favoris.' });
     }
 
@@ -1156,8 +1153,8 @@ app.post('/api/artisans/:artisanId/favorites/:favoriteArtisanId', authenticateTo
 // DELETE /api/artisans/:artisanId/favorites/:favoriteArtisanId - Remove an artisan from favorites
 app.delete('/api/artisans/:artisanId/favorites/:favoriteArtisanId', authenticateToken,
   [
-    check('artisanId', 'L\'ID utilisateur est requis et doit être un entier').isInt(),
-    check('favoriteArtisanId', 'L\'ID de l\'artisan favori est requis et doit être un entier').isInt(),
+    check('artisanId', 'L\ ID utilisateur est requis et doit être un entier').isInt(),
+    check('favoriteArtisanId', 'L\ ID de l artisan favori est requis et doit être un entier').isInt(),
   ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -1169,7 +1166,7 @@ app.delete('/api/artisans/:artisanId/favorites/:favoriteArtisanId', authenticate
     const favoriteArtisanId = parseInt(req.params.favoriteArtisanId); // ID of the artisan to remove
 
     // Authorization: Ensure the logged-in user is the one whose favorites are being modified
-    if (req.user.id !== userId) {
+    if (req.user.user.id !== userId) {
       return res.status(403).json({ message: 'Action non autorisée. Vous ne pouvez modifier que vos propres favoris.' });
     }
 
@@ -1198,10 +1195,10 @@ app.delete('/api/artisans/:artisanId/favorites/:favoriteArtisanId', authenticate
   });
 
 
-// GET /api/artisans/:artisanId/favorites - Get a user\'s favorite artisans
+// GET /api/artisans/:artisanId/favorites - Get a user\s favorite artisans
 app.get('/api/artisans/:artisanId/favorites', authenticateToken,
   [
-    check('artisanId', 'L\'ID utilisateur est requis et doit être un entier').isInt(),
+    check('artisanId', 'L\ ID utilisateur est requis et doit être un entier').isInt(),
   ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -1213,7 +1210,7 @@ app.get('/api/artisans/:artisanId/favorites', authenticateToken,
     const { sortBy, latitude, longitude } = req.query; // New query parameters
 
     // Authorization: Ensure the logged-in user is the one whose favorites are being requested
-    if (req.user.id !== userId) {
+    if (req.user.user.id !== userId) {
       return res.status(403).json({ message: 'Action non autorisée. Vous ne pouvez voir que vos propres favoris.' });
     }
 
@@ -1321,7 +1318,7 @@ app.get('/api/clients', authenticateToken, authorizeRole(['artisan']), async (re
 
 // GET /api/client/demandes - Get all service requests made by the logged-in client
 app.get('/api/client/demandes', authenticateToken, authorizeRole(['client']), async (req, res) => {
-  const clientId = req.user.id;
+  const clientId = req.user.user.id;
 
   try {
     const result = await pool.query(
@@ -1353,7 +1350,7 @@ app.get('/api/client/demandes', authenticateToken, authorizeRole(['client']), as
 
 // GET /api/artisan/demandes - Get all service requests made to the logged-in artisan
 app.get('/api/artisan/demandes', authenticateToken, authorizeRole(['artisan']), async (req, res) => {
-  const artisanId = req.user.id;
+  const artisanId = req.user.user.id;
 
   try {
     const result = await pool.query(
@@ -1399,8 +1396,8 @@ app.post('/api/profile', authenticateToken,
     body('location', 'La localisation est requise').if(body('role').equals('artisan')).notEmpty(),
 
     // Commercant profile validation
-    body('nom_entreprise', 'Le nom de l\'entreprise est requis').if(body('role').equals('commercant')).notEmpty(),
-    body('adresse', 'L\'adresse est requise').if(body('role').equals('commercant')).notEmpty(),
+    body('nom_entreprise', 'Le nom de l entreprise est requis').if(body('role').equals('commercant')).notEmpty(),
+    body('adresse', 'L adresse est requise').if(body('role').equals('commercant')).notEmpty(),
     body('location', 'La localisation est requise').if(body('role').equals('commercant')).notEmpty(),
   ],
   async (req, res) => {
@@ -1409,8 +1406,8 @@ app.post('/api/profile', authenticateToken,
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const userId = req.user.id;
-    const userRole = req.user.role;
+    const userId = req.user.user.id;
+    const userRole = req.user.user.role;
     const profileData = req.body;
 
     const client = await pool.connect();
@@ -1474,7 +1471,7 @@ app.post('/api/profile', authenticateToken,
     }
   });
 
-// PUT /api/profile - Update logged-in user\'s profile
+// PUT /api/profile - Update logged-in user's profile
 app.put('/api/profile', authenticateToken,
   [
     // General email validation
@@ -1490,8 +1487,8 @@ app.put('/api/profile', authenticateToken,
     body('location', 'La localisation est requise').if(body('role').equals('artisan')).optional().notEmpty(),
 
     // Commercant profile validation
-    body('nom_entreprise', 'Le nom de l\'entreprise est requis').if(body('role').equals('commercant')).optional().notEmpty(),
-    body('adresse', 'L\'adresse est requise').if(body('role').equals('commercant')).optional().notEmpty(),
+    body('nom_entreprise', 'Le nom de l entreprise est requis').if(body('role').equals('commercant')).optional().notEmpty(),
+    body('adresse', 'L adresse est requise').if(body('role').equals('commercant')).optional().notEmpty(),
     body('location', 'La localisation est requise').if(body('role').equals('commercant')).optional().notEmpty(),
   ],
   async (req, res) => {
@@ -1500,8 +1497,8 @@ app.put('/api/profile', authenticateToken,
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const userId = req.user.id;
-    const userRole = req.user.role;
+    const userId = req.user.user.id;
+    const userRole = req.user.user.role;
     const { email, ...profileData } = req.body;
 
     const client = await pool.connect();
@@ -1613,7 +1610,7 @@ app.put('/api/profile', authenticateToken,
 app.put('/api/demandes/:id/status', authenticateToken, authorizeRole(['artisan']), async (req, res) => {
   const demandeId = parseInt(req.params.id);
   const { status } = req.body; // e.g., 'accepted', 'declined', 'completed'
-  const artisanId = req.user.id; // Artisan ID from authenticated token
+  const artisanId = req.user.user.id; // Artisan ID from authenticated token
 
   if (!status) {
     return res.status(400).json({ message: 'Le statut est requis.' });
@@ -1644,7 +1641,7 @@ app.put('/api/demandes/:id/status', authenticateToken, authorizeRole(['artisan']
 // DELETE /api/demandes/:id - Cancel a service request (by client)
 app.delete('/api/demandes/:id', authenticateToken, authorizeRole(['client']), async (req, res) => {
   const demandeId = parseInt(req.params.id);
-  const clientId = req.user.id; // Client ID from authenticated token
+  const clientId = req.user.user.id; // Client ID from authenticated token
 
   try {
     // First, get the demand to check its status and owner
@@ -1663,7 +1660,7 @@ app.delete('/api/demandes/:id', authenticateToken, authorizeRole(['client']), as
 
     // Check if the demand is still pending
     if (demand.status !== 'pending') {
-      return res.status(400).json({ message: `Impossible d\'annuler une demande qui est déjà "${demand.status}".` });
+      return res.status(400).json({ message: `Impossible d annuler une demande qui est déjà "${demand.status}".` });
     }
 
     // If all checks pass, delete the demand
@@ -1680,7 +1677,7 @@ app.delete('/api/demandes/:id', authenticateToken, authorizeRole(['client']), as
 // GET /api/demandes/:id - Get details of a specific service request
 app.get('/api/demandes/:id', authenticateToken, async (req, res) => {
   const demandeId = parseInt(req.params.id);
-  const userId = req.user.id;
+  const userId = req.user.user.id;
 
   try {
     const result = await pool.query(`
@@ -1719,14 +1716,14 @@ app.get('/api/demandes/:id', authenticateToken, async (req, res) => {
 // POST /api/users/:id/upload-photo
 app.post('/api/users/:id/upload-photo', authenticateToken, upload.single('profileImage'), async (req, res) => {
   const userId = parseInt(req.params.id);
-  const userRole = req.user.role;
+  const userRole = req.user.user.role;
 
-  if (req.user.id !== userId) {
+  if (req.user.user.id !== userId) {
     return res.status(403).json({ message: 'Action non autorisée.' });
   }
 
   if (!req.file) {
-    return res.status(400).json({ message: 'Aucun fichier n\'a été téléversé.' });
+    return res.status(400).json({ message: 'Aucun fichier n a été téléversé.' });
   }
 
   try {
@@ -1779,14 +1776,14 @@ const uploadDocument = multer({ storage: documentStorage });
 // POST /api/users/:id/upload-document
 app.post('/api/users/:id/upload-document', authenticateToken, uploadDocument.single('verificationDocument'), async (req, res) => {
   const userId = parseInt(req.params.id);
-  const userRole = req.user.role;
+  const userRole = req.user.user.role;
 
-  if (req.user.id !== userId) {
+  if (req.user.user.id !== userId) {
     return res.status(403).json({ message: 'Action non autorisée.' });
   }
 
   if (!req.file) {
-    return res.status(400).json({ message: 'Aucun document n\'a été téléversé.' });
+    return res.status(400).json({ message: 'Aucun document n a été téléversé.' });
   }
 
   try {
@@ -1828,7 +1825,7 @@ app.post('/api/users/:id/upload-document', authenticateToken, uploadDocument.sin
             const html = `
                 <p>Bonjour Administrateur,</p>
                 <p>Un nouveau document a été soumis pour vérification par le professionnel : <strong>${professionalName}</strong>.</p>
-                <p>Veuillez vous connecter au panel d'administration pour le traiter.</p>
+                <p>Veuillez vous connecter au panel d administration pour le traiter.</p>
                 <p>Merci,</p>
                 <p>Le système Proxi-Services</p>
             `;
@@ -1929,7 +1926,7 @@ app.put('/api/admin/verifications/:userId', authenticateToken, authorizeRole(['a
 
     // TODO: Send an email notification to the user
 
-    res.status(200).json({ message: `Le statut de l\'utilisateur ${userId} a été mis à jour à "${status}".` });
+    res.status(200).json({ message: `Le statut de l utilisateur ${userId} a été mis à jour à "${status}".` });
 
   } catch (error) {
     console.error('Error updating verification status:', error);
@@ -2014,7 +2011,7 @@ app.get('/api/admin/users/:id', authenticateToken, authorizeRole(['admin']), asy
       profile = profileResult.rows[0];
     }
 
-    res.json({ ...user, profile });
+    res.json({ user, profile });
 
   } catch (error) {
     console.error('Error fetching user details for admin panel:', error);
@@ -2025,37 +2022,21 @@ app.get('/api/admin/users/:id', authenticateToken, authorizeRole(['admin']), asy
 // PUT /api/admin/users/:id - Update user details (for admin panel)
 app.put('/api/admin/users/:id', authenticateToken, authorizeRole(['admin']), async (req, res) => {
   const userId = parseInt(req.params.id);
-  const { email, role } = req.body;
+  const { email, role, is_verified } = req.body;
 
   try {
-    // Basic validation
-    if (email) {
-      const emailCheck = await pool.query('SELECT id FROM users WHERE email = $1 AND id != $2', [email, userId]);
-      if (emailCheck.rows.length > 0) {
-        return res.status(400).json({ message: 'Cet email est déjà utilisé.' });
-      }
+    // Update users table
+    const userUpdateQuery = 'UPDATE users SET email = $1, role = $2, is_verified = $3 WHERE id = $4 RETURNING *';
+    const userResult = await pool.query(userUpdateQuery, [email, role, is_verified, userId]);
+
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ message: 'Utilisateur non trouvé.' });
     }
 
-    const updates = [];
-    const values = [];
-    let paramIndex = 1;
-
-    if (email) { updates.push(`email = $${paramIndex++}`); values.push(email); }
-    if (role) { updates.push(`role = $${paramIndex++}`); values.push(role); }
-
-    if (updates.length === 0) {
-      return res.status(400).json({ message: 'Aucun champ à mettre à jour.' });
-    }
-
-    values.push(userId);
-    const query = `UPDATE users SET ${updates.join(', ')} WHERE id = $${paramIndex} RETURNING id, email, role`;
-
-    const result = await pool.query(query, values);
-
-    res.json({ message: 'Utilisateur mis à jour avec succès.', user: result.rows[0] });
+    res.json({ message: 'Utilisateur mis à jour avec succès.', user: userResult.rows[0] });
 
   } catch (error) {
-    console.error('Error updating user from admin panel:', error);
+    console.error('Error updating user details from admin panel:', error);
     res.status(500).json({ message: 'Erreur interne du serveur.' });
   }
 });
@@ -2065,50 +2046,23 @@ app.delete('/api/admin/users/:id', authenticateToken, authorizeRole(['admin']), 
   const userId = parseInt(req.params.id);
 
   try {
-    // Use a transaction to ensure all related data is deleted
-    const client = await pool.connect();
-    try {
-      await client.query('BEGIN');
-      // Delete from all related tables first
-      await client.query('DELETE FROM favorites WHERE user_id = $1 OR favorite_artisan_id = $1', [userId]);
-      await client.query('DELETE FROM reviews WHERE client_id = $1 OR artisan_id = $1', [userId]);
-      await client.query('DELETE FROM demandes WHERE client_id = $1 OR artisan_id = $1', [userId]);
-      await client.query('DELETE FROM messages WHERE sender_id = $1 OR receiver_id = $1', [userId]);
-      await client.query('DELETE FROM portfolio_items WHERE artisan_id = $1', [userId]);
-      await client.query('DELETE FROM services WHERE artisan_id = $1', [userId]);
-      await client.query('DELETE FROM client_profiles WHERE user_id = $1', [userId]);
-      await client.query('DELETE FROM artisan_profiles WHERE user_id = $1', [userId]);
-      await client.query('DELETE FROM commercant_profiles WHERE user_id = $1', [userId]);
-      await client.query('DELETE FROM reports WHERE reporter_id = $1 OR reported_user_id = $1', [userId]);
-      await client.query('DELETE FROM subscriptions WHERE user_id = $1', [userId]);
-      await client.query('DELETE FROM payments WHERE user_id = $1', [userId]);
-      // Finally, delete from the users table
-      const result = await client.query('DELETE FROM users WHERE id = $1 RETURNING id', [userId]);
-      await client.query('COMMIT');
+    // Note: This is a hard delete. Consider a soft delete (e.g., setting an 'is_active' flag) in a real application.
+    const deleteResult = await pool.query('DELETE FROM users WHERE id = $1 RETURNING id', [userId]);
 
-      if (result.rows.length === 0) {
-        return res.status(404).json({ message: 'Utilisateur non trouvé.' });
-      }
-
-      res.status(200).json({ message: 'Utilisateur et toutes ses données associées ont été supprimés avec succès.' });
-
-    } catch (transactionError) {
-      await client.query('ROLLBACK');
-      throw transactionError; // Rethrow to be caught by the outer catch block
-    } finally {
-      client.release();
+    if (deleteResult.rows.length === 0) {
+      return res.status(404).json({ message: 'Utilisateur non trouvé.' });
     }
+
+    res.status(200).json({ message: 'Utilisateur supprimé avec succès.' });
 
   } catch (error) {
     console.error('Error deleting user from admin panel:', error);
-    res.status(500).json({ message: 'Erreur interne du serveur lors de la suppression de l\'utilisateur.' });
+    res.status(500).json({ message: 'Erreur interne du serveur.' });
   }
 });
 
 
-
-// Démarrage du serveur
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-  console.log(`Le serveur est en écoute sur le port ${PORT}`);
+  console.log(`Le serveur écoute sur le port ${PORT}`);
 });

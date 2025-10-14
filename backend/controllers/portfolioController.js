@@ -5,7 +5,7 @@ const path = require('path');
 
 const addPortfolioItem = async (req, res) => {
   const artisanId = parseInt(req.params.artisanId);
-  if (req.user.id !== artisanId) {
+  if (req.user.user.id !== artisanId) {
     return res.status(403).json({ message: 'Action non autorisée.' });
   }
 
@@ -41,12 +41,12 @@ const addPortfolioItem = async (req, res) => {
 
 const updatePortfolioItem = async (req, res) => {
   const { artisanId, portfolioId } = req.params;
-  if (req.user.id !== parseInt(artisanId)) {
+  if (req.user.user.id !== parseInt(artisanId)) {
     return res.status(403).json({ message: 'Action non autorisée.' });
   }
 
   const { caption } = req.body;
-  const imageUrl = req.file ? `${req.protocol}://${req.get('host')}${req.file.path.replace(/\\/g, '/').substring(req.file.path.indexOf('/uploads'))}` : null;
+  const imageUrl = req.file ? `${req.protocol}://${req.get('host')}${req.file.path.replace(/\/g, '/').substring(req.file.path.indexOf('/uploads'))}` : null;
 
   try {
     const existingItemResult = await pool.query('SELECT * FROM portfolio_items WHERE id = $1 AND artisan_id = $2', [portfolioId, artisanId]);
@@ -83,7 +83,7 @@ const updatePortfolioItem = async (req, res) => {
 
 const deletePortfolioItem = async (req, res) => {
   const { artisanId, portfolioId } = req.params;
-  if (req.user.id !== parseInt(artisanId)) {
+  if (req.user.user.id !== parseInt(artisanId)) {
     return res.status(403).json({ message: 'Action non autorisée.' });
   }
 

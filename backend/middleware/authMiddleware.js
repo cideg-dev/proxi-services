@@ -15,7 +15,7 @@ const authenticateToken = (req, res, next) => {
 
 const authorizeRole = (roles) => {
   return (req, res, next) => {
-    if (!roles.includes(req.user.role)) {
+    if (!roles.includes(req.user.user.role)) {
       return res.status(403).json({ message: 'Action non autorisée pour votre rôle.' });
     }
     next();

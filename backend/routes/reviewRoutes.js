@@ -23,7 +23,7 @@ module.exports = function(io, connectedUsers) {
       }
 
       const { artisanId, rating, comment } = req.body;
-      const clientId = req.user.id;
+      const clientId = req.user.user.id;
 
       try {
         const newReviewResult = await pool.query(
