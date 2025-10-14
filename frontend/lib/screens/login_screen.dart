@@ -124,7 +124,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
               if (_isLoading)
-                Center(child: Lottie.asset('assets/lottie/loading.json', height: 100))
+                Center(child: Lottie.asset('lottie/loading.json', height: 100))
               else
                 ElevatedButton(
                   onPressed: _tryLogin,
