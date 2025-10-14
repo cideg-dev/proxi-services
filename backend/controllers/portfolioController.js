@@ -46,7 +46,7 @@ const updatePortfolioItem = async (req, res) => {
   }
 
   const { caption } = req.body;
-  const imageUrl = req.file ? `${req.protocol}://${req.get('host')}${req.file.path.replace(/\/g, '/').substring(req.file.path.indexOf('/uploads'))}` : null;
+  const imageUrl = req.file ? `${req.protocol}://${req.get('host')}${req.file.path.replace(/\\/g, '/').substring(req.file.path.indexOf('/uploads'))}` : null;
 
   try {
     const existingItemResult = await pool.query('SELECT * FROM portfolio_items WHERE id = $1 AND artisan_id = $2', [portfolioId, artisanId]);
