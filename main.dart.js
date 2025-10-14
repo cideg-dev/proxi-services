@@ -96133,7 +96133,7 @@ case 1:return A.A(p.at(-1),r)}})
 return A.C($async$BF,r)},
 K(a){var s=this,r=null,q=A.fM(r,r,B.a_b),p=t.p,o=A.b([A.ai("Bienvenue",r,r,r,r,A.T(a).ok.c,B.cS,r),B.TN,A.xN(B.p9,B.m9,!1,new A.ayi(s),new A.ayj()),B.iz,A.xN(B.p8,r,!0,new A.ayk(s),new A.ayl()),B.iA],p),n=s.w
 if(n.length!==0)o.push(new A.b3(B.jU,A.cw(A.b([B.p1,B.cv,A.ai(n,r,r,r,r,B.mb,B.cS,r)],p),B.N,B.B,B.J),r))
-if(s.x)o.push(A.cZ(A.aNo("assets/lottie/loading.json",100),r,r))
+if(s.x)o.push(A.cZ(A.aNo("lottie/loading.json",100),r,r))
 else o.push(A.kS(!1,B.Zj,r,r,r,r,r,r,s.gaoP(),r,A.Ow(r,r,r,r,r,r,r,r,r,r,r,r,B.jV,r,r,r,r,r,r,r)))
 o.push(A.n6(!1,B.Zx,r,r,r,r,r,r,new A.aym(a),r,r))
 return A.fz(q,new A.b3(B.b5,A.abc(A.cw(o,B.cI,B.dg,B.J),s.e),r))}}
@@ -96372,7 +96372,7 @@ case 1:return A.A(p.at(-1),r)}})
 return A.C($async$BG,r)},
 K(a){var s=this,r=null,q=A.fM(r,r,A.ai("Inscription "+s.a.c,r,r,r,r,r,r,r)),p=t.p,o=A.b([A.xN(B.p9,B.m9,!1,new A.aA7(s),new A.aA8()),B.iz,A.xN(B.p8,r,!0,new A.aA9(s),new A.aAa()),B.iA],p),n=s.w
 if(n.length!==0)o.push(new A.b3(B.jU,A.cw(A.b([B.p1,B.cv,A.ai(n,r,r,r,r,B.mb,B.cS,r)],p),B.N,B.B,B.J),r))
-if(s.x)o.push(A.cZ(A.aNo("assets/lottie/loading.json",100),r,r))
+if(s.x)o.push(A.cZ(A.aNo("lottie/loading.json",100),r,r))
 else o.push(A.kS(!1,B.Zb,r,r,r,r,r,r,s.gaoR(),r,A.Ow(r,r,r,r,r,r,r,r,r,r,r,r,B.jV,r,r,r,r,r,r,r)))
 return A.fz(q,new A.b3(B.b5,A.abc(A.cw(o,B.cI,B.dg,B.J),s.e),r))}}
 A.aA2.prototype={
