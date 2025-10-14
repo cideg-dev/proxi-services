@@ -250,9 +250,14 @@ const storage = multer.memoryStorage(); // Store in memory for Sharp processing
 
 const upload = multer({ storage: storage });
 
-// Route de test pour vérifier que le serveur fonctionne
+// Route de test pour vrifier que le serveur fonctionne
 app.get('/', (req, res) => {
   res.send('Le serveur backend Proxi-Services fonctionne !');
+});
+
+// System version endpoint
+app.get('/api/system/version', (req, res) => {
+  res.json({ latest_version: '1.1.0' });
 });
 
 // --- API Routes --- 

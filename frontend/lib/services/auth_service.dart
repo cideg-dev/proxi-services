@@ -50,10 +50,8 @@ class AuthService {
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       final token = data['token'];
-      final user = data['user'];
-      if (token != null && user != null) {
+      if (token != null) {
         await _tokenManager.setToken(token);
-        await _tokenManager.setUser(user);
       }
       return data;
     } else {
@@ -79,10 +77,8 @@ class AuthService {
     if (response.statusCode == 200 || response.statusCode == 201) {
       final data = jsonDecode(response.body);
       final token = data['token'];
-      final user = data['user'];
-      if (token != null && user != null) {
+      if (token != null) {
         await _tokenManager.setToken(token);
-        await _tokenManager.setUser(user);
       }
       return data;
     } else {

@@ -1,3 +1,4 @@
+import 'package:frontend/services/system_service.dart';
 import 'package:frontend/screens/admin_panel_screen.dart';
 import 'package:frontend/screens/artisan_demands_screen.dart';
 import 'package:frontend/screens/client_demands_screen.dart';
@@ -20,6 +21,9 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final ArtisanService _artisanService = ArtisanService();
   final TokenManager _tokenManager = TokenManager();
+  final SystemService _systemService = SystemService(); // Service for system checks
+  static const String _currentVersion = "1.0.0"; // Current app version
+
   late Future<List<dynamic>> _professionalsFuture;
   String? _userRole;
   Set<int> _favoriteProfessionalIds = {};
@@ -33,11 +37,44 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadUserData();
     _loadFavorites(); // Initial load of favorites
     _determinePosition(); // Get user's location
+    _checkForUpdates(); // Check for app updates
     ChatService().onNotification((message) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Nouveau message de ${message['senderName']}: ${message['message']}')),
       );
     });
+  }
+
+  void _checkForUpdates() async {
+    // Wait a bit to not be too intrusive at startup
+    await Future.delayed(const Duration(seconds: 3));
+
+    final latestVersion = await _systemService.getLatestVersion();
+    if (latestVersion != null && latestVersion.compareTo(_currentVersion) > 0) {
+      if (mounted) { // Check if the widget is still in the tree
+        _showUpdateDialog(latestVersion);
+      }
+    }
+  }
+
+  void _showUpdateDialog(String newVersion) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Mise à jour disponible"),
+          content: Text("Une nouvelle version ($newVersion) de Proxi-Services est disponible. Veuillez mettre à jour l'application pour continuer à profiter des dernières fonctionnalités."),
+          actions: <Widget>[
+            TextButton(
+              child: const Text("OK"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _loadUserData() async {
