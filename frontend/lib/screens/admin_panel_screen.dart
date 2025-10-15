@@ -6,6 +6,8 @@ import '../services/api_constants.dart';
 import 'admin_user_management_screen.dart'; // New import
 import 'admin_report_management_screen.dart'; // New import
 import 'admin_audit_logs_screen.dart'; // New import
+import 'package:http/http.dart' as http; // Required for DB migration
+import 'package:frontend/services/token_manager.dart'; // Required for DB migration
 
 class AdminPanelScreen extends StatefulWidget {
   const AdminPanelScreen({Key? key}) : super(key: key);
@@ -57,6 +59,38 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
     }
   }
 
+  Future<void> _runDbMigration() async {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Lancement de la migration de la BDD...')),
+    );
+    try {
+      final token = await TokenManager().getToken();
+      if (token == null) {
+        throw Exception('Token d\'authentification manquant.');
+      }
+
+      final response = await http.get(
+        Uri.parse('${ApiConstants.baseUrl}/api/migrate-db'),
+        headers: {
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Migration de la BDD réussie !'), backgroundColor: Colors.green),
+        );
+      } else {
+        final errorBody = jsonDecode(response.body);
+        throw Exception(errorBody['message'] ?? 'Échec de la migration de la BDD.');
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erreur de migration de la BDD: $e'), backgroundColor: Colors.red),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController( // New: Tab controller
@@ -78,7 +112,20 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
             _buildVerificationsTab(), // Existing content for verifications
             const AdminUserManagementScreen(), // Integrated user management screen
             const AdminReportManagementScreen(), // Integrated report management screen
-            const AdminAuditLogsScreen(), // Integrated audit logs screen
+            Column(
+              children: [
+                const Expanded(child: AdminAuditLogsScreen()),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ElevatedButton.icon(
+                    icon: const Icon(Icons.build),
+                    label: const Text('Lancer la migration de la BDD (Temporaire)'),
+                    onPressed: _runDbMigration,
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),
