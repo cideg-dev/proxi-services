@@ -106,4 +106,30 @@ class ChatService {
       throw Exception(errorMessage);
     }
   }
+
+  // NEW: Fetch all conversations for the logged-in user
+  Future<List<dynamic>> getConversations() async {
+    final token = await _tokenManager.getToken();
+    if (token == null) {
+      throw Exception('Authentication token not found.');
+    }
+
+    final uri = Uri.parse('${ApiConstants.baseUrl}/api/conversations');
+
+    final response = await http.get(
+      uri,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body) as List<dynamic>;
+    } else {
+      final errorBody = jsonDecode(response.body);
+      final errorMessage = errorBody['message'] ?? 'Failed to load conversations';
+      throw Exception(errorMessage);
+    }
+  }
 }
