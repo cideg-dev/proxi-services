@@ -1,9 +1,8 @@
 name: Deploy Flutter Web to GitHub Pages
 
 on:
-  push:
-    branches: [ main ]
-  workflow_dispatch:
+  release:
+    types: [ published ]
 
 permissions:
   contents: write
@@ -14,6 +13,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }} # Checkout the code from the tag of the release
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
