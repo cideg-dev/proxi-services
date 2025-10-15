@@ -8,6 +8,7 @@ import 'package:frontend/services/artisan_service.dart';
 import 'package:frontend/services/token_manager.dart';
 import 'package:frontend/services/chat_service.dart';
 import 'package:geolocator/geolocator.dart'; // New import
+import 'package:frontend/screens/chat_list_screen.dart';
 import 'package:frontend/screens/chat_screen.dart';
 import 'login_screen.dart';
 import 'artisan_detail_screen.dart';
@@ -264,7 +265,7 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const ChatScreen()),
+                MaterialPageRoute(builder: (context) => const ChatListScreen()),
               );
             },
           ),

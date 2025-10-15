@@ -129,7 +129,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
 
   List<Widget> _buildFormFields() {
     if (_userRole == null) {
-      return [const Center(child: Text('Impossible de déterminer le rôle de l'utilisateur.'))];
+      return [const Center(child: Text("Impossible de déterminer le rôle de l'utilisateur."))];
     }
 
     List<Widget> fields = [];
