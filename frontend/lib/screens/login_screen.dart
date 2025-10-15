@@ -20,6 +20,7 @@ class _LoginScreenState extends State<LoginScreen> {
   String _password = '';
   String _errorMessage = '';
   bool _isLoading = false;
+  bool _isPasswordVisible = false;
 
   void _tryLogin() async {
     if (_formKey.currentState!.validate()) {
@@ -99,11 +100,21 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 16.0),
               TextFormField(
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Mot de passe',
-                  border: OutlineInputBorder(),
+                  border: const OutlineInputBorder(),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _isPasswordVisible = !_isPasswordVisible;
+                      });
+                    },
+                  ),
                 ),
-                obscureText: true,
+                obscureText: !_isPasswordVisible,
                 validator: (value) => (value == null || value.length < 6) ? 'Le mot de passe doit faire au moins 6 caractères' : null,
                 onSaved: (value) => _password = value!,
               ),
@@ -113,7 +124,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   padding: const EdgeInsets.only(bottom: 10),
                   child: Column(
                     children: [
-                      const Icon(Icons.error, color: Colors.red, size: 80),
+                      Lottie.asset('assets/lottie/error.json', height: 80),
                       const SizedBox(height: 8),
                       Text(
                         _errorMessage,
@@ -124,7 +135,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
               if (_isLoading)
-                Center(child: Lottie.asset('lottie/loading.json', height: 100))
+                Center(child: Lottie.asset('assets/lottie/loading.json', height: 100))
               else
                 ElevatedButton(
                   onPressed: _tryLogin,

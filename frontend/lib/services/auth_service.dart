@@ -91,4 +91,51 @@ class AuthService {
   Future<void> logout() async {
     await _tokenManager.clearToken();
   }
+
+  Future<Map<String, dynamic>> getProfile() async {
+    final token = await _tokenManager.getToken();
+    if (token == null) {
+      throw Exception('No token found');
+    }
+
+    final response = await http.get(
+      Uri.parse('${ApiConstants.baseUrl}/api/profile'),
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      final errorBody = jsonDecode(response.body);
+      final errorMessage = errorBody['message'] ?? 'Failed to load profile';
+      throw Exception(errorMessage);
+    }
+  }
+
+  Future<Map<String, dynamic>> updateProfile(Map<String, dynamic> profileData) async {
+    final token = await _tokenManager.getToken();
+    if (token == null) {
+      throw Exception('No token found');
+    }
+
+    final response = await http.put(
+      Uri.parse('${ApiConstants.baseUrl}/api/profile'),
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode(profileData),
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      final errorBody = jsonDecode(response.body);
+      final errorMessage = errorBody['message'] ?? 'Failed to update profile';
+      throw Exception(errorMessage);
+    }
+  }
 }

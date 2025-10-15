@@ -13,7 +13,8 @@ CREATE TABLE client_profiles (
     sexe VARCHAR(50),
     location VARCHAR(255),
     telephone VARCHAR(50),
-    photo_url VARCHAR(255)
+    photo_url VARCHAR(255),
+    adresse TEXT
 );
 
 CREATE TABLE artisan_profiles (
@@ -29,7 +30,10 @@ CREATE TABLE artisan_profiles (
     site_web VARCHAR(255),
     photo_url VARCHAR(255),
     document_verification_url VARCHAR(255),
-    verification_status VARCHAR(50) DEFAULT 'not_verified'
+    verification_status VARCHAR(50) DEFAULT 'not_verified',
+    horaires_ouverture TEXT,
+    langues_parlees TEXT[],
+    assurance_professionnelle BOOLEAN DEFAULT FALSE
 );
 
 CREATE TABLE commercant_profiles (
@@ -46,7 +50,9 @@ CREATE TABLE commercant_profiles (
     horaires_ouverture VARCHAR(255),
     photo_url VARCHAR(255),
     document_verification_url VARCHAR(255),
-    verification_status VARCHAR(50) DEFAULT 'not_verified'
+    verification_status VARCHAR(50) DEFAULT 'not_verified',
+    langues_parlees TEXT[],
+    assurance_professionnelle BOOLEAN DEFAULT FALSE
 );
 
 CREATE TABLE messages (

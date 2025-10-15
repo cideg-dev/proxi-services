@@ -20,6 +20,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   String _password = '';
   String _errorMessage = '';
   bool _isLoading = false;
+  bool _isPasswordVisible = false;
 
   void _tryRegister() async {
     if (_formKey.currentState!.validate()) {
@@ -82,11 +83,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
               const SizedBox(height: 16.0),
               TextFormField(
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Mot de passe',
-                  border: OutlineInputBorder(),
+                  border: const OutlineInputBorder(),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _isPasswordVisible = !_isPasswordVisible;
+                      });
+                    },
+                  ),
                 ),
-                obscureText: true,
+                obscureText: !_isPasswordVisible,
                 validator: (value) => (value == null || value.length < 6)
                     ? 'Le mot de passe doit faire au moins 6 caractères'
                     : null,
@@ -98,7 +109,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   padding: const EdgeInsets.only(bottom: 10),
                   child: Column(
                     children: [
-                      const Icon(Icons.error, color: Colors.red, size: 80),
+                      Lottie.asset('assets/lottie/error.json', height: 80),
                       const SizedBox(height: 8),
                       Text(
                         _errorMessage,
@@ -109,7 +120,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                 ),
               if (_isLoading)
-                Center(child: Lottie.asset('lottie/loading.json', height: 100))
+                Center(child: Lottie.asset('assets/lottie/loading.json', height: 100))
               else
                 ElevatedButton(
                   onPressed: _tryRegister,

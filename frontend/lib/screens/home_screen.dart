@@ -1,3 +1,4 @@
+import 'package:frontend/services/auth_service.dart';
 import 'package:frontend/services/system_service.dart';
 import 'package:frontend/screens/admin_panel_screen.dart';
 import 'package:frontend/screens/artisan_demands_screen.dart';
@@ -7,6 +8,7 @@ import 'package:frontend/services/artisan_service.dart';
 import 'package:frontend/services/token_manager.dart';
 import 'package:frontend/services/chat_service.dart';
 import 'package:geolocator/geolocator.dart'; // New import
+import 'package:frontend/screens/chat_screen.dart';
 import 'login_screen.dart';
 import 'artisan_detail_screen.dart';
 import 'profile_screen.dart';
@@ -35,6 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _professionalsFuture = _artisanService.getArtisans(); // Initial load of all professionals
     _loadUserData();
+    _checkProfileCompleteness();
     _loadFavorites(); // Initial load of favorites
     _determinePosition(); // Get user's location
     _checkForUpdates(); // Check for app updates
@@ -192,6 +195,54 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  void _checkProfileCompleteness() async {
+    // Wait a bit for the screen to build
+    await Future.delayed(const Duration(seconds: 2));
+
+    try {
+      final authService = AuthService();
+      final profileData = await authService.getProfile();
+      final completeness = profileData['completeness'] as int? ?? 100;
+
+      if (mounted && completeness < 100) {
+        _showCompleteProfileDialog();
+      }
+    } catch (e) {
+      // Silently fail, not critical for the user to see this error
+      print('Error checking profile completeness: $e');
+    }
+  }
+
+  void _showCompleteProfileDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Complétez votre profil"),
+          content: const Text("Votre profil est incomplet. Un profil complet attire plus de clients ! Souhaitez-vous le compléter maintenant ?"),
+          actions: <Widget>[
+            TextButton(
+              child: const Text("Plus tard"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            ElevatedButton(
+              child: const Text("Compléter"),
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ProfileScreen()),
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void _logout() {
     TokenManager().clearToken();
     ChatService().disconnect();
@@ -211,8 +262,10 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: const Icon(Icons.chat_bubble_outline),
             tooltip: 'Messages',
             onPressed: () {
-              // TODO: Naviguer vers l'écran de chat/messages
-              print('Aller vers l\'écran de chat');
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ChatScreen()),
+              );
             },
           ),
           if (_userRole == 'admin')
@@ -230,6 +283,10 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: const Icon(Icons.work_history_outlined),
             tooltip: 'Mes Demandes',
             onPressed: () {
+              if (_userRole == null) {
+                // Do nothing if role is not loaded yet
+                return;
+              }
               if (_userRole == 'client') {
                 Navigator.push(
                   context,

@@ -51,7 +51,9 @@ const calculateProfileCompleteness = (profile, role) => {
   let filledFields = 0;
 
   const checkField = (field) => {
-    if (field !== null && field !== undefined && field !== '') {
+    // Consider a field filled if it's not null, not undefined, and not an empty string.
+    // For arrays (like languages), check if it's not empty.
+    if (field !== null && field !== undefined && field !== '' && (!Array.isArray(field) || field.length > 0)) {
       filledFields++;
     }
   };
@@ -61,16 +63,16 @@ const calculateProfileCompleteness = (profile, role) => {
     totalFields = fields.length;
     fields.forEach(field => checkField(profile[field]));
   } else if (role === 'artisan') {
-    const fields = ['nom_complet', 'specialite', 'description', 'location', 'telephone', 'annees_experience', 'photo_url', 'site_web'];
+    const fields = ['nom_complet', 'specialite', 'description', 'location', 'telephone', 'annees_experience', 'photo_url', 'horaires_ouverture', 'langues_parlees'];
     totalFields = fields.length;
     fields.forEach(field => checkField(profile[field]));
   } else if (role === 'commercant') {
-    const fields = ['nom_entreprise', 'type_commerce', 'description', 'adresse', 'location', 'telephone', 'photo_url', 'site_web'];
+    const fields = ['nom_entreprise', 'type_commerce', 'description', 'adresse', 'location', 'telephone', 'photo_url', 'horaires_ouverture', 'langues_parlees'];
     totalFields = fields.length;
     fields.forEach(field => checkField(profile[field]));
   }
 
-  if (totalFields === 0) return 100;
+  if (totalFields === 0) return 100; // Avoid division by zero
   return Math.round((filledFields / totalFields) * 100);
 };
 const pool = require('./db.config');
@@ -1434,24 +1436,24 @@ app.post('/api/profile', authenticateToken,
       let newProfile;
 
       if (userRole === 'client') {
-        const { nom_complet, sexe, location, telephone, photo_url } = profileData;
+        const { nom_complet, sexe, location, telephone, photo_url, adresse } = profileData;
         const result = await client.query(
-          'INSERT INTO client_profiles (user_id, nom_complet, sexe, location, telephone, photo_url) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-          [userId, nom_complet, sexe, location, telephone, photo_url]
+          'INSERT INTO client_profiles (user_id, nom_complet, sexe, location, telephone, photo_url, adresse) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
+          [userId, nom_complet, sexe, location, telephone, photo_url, adresse]
         );
         newProfile = result.rows[0];
       } else if (userRole === 'artisan') {
-        const { nom_complet, sexe, specialite, description, location, telephone, annees_experience, siret, site_web, photo_url } = profileData;
+        const { nom_complet, sexe, specialite, description, location, telephone, annees_experience, siret, site_web, photo_url, horaires_ouverture, langues_parlees, assurance_professionnelle } = profileData;
         const result = await client.query(
-          'INSERT INTO artisan_profiles (user_id, nom_complet, sexe, specialite, description, location, telephone, annees_experience, siret, site_web, photo_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *',
-          [userId, nom_complet, sexe, specialite, description, location, telephone, annees_experience, siret, site_web, photo_url]
+          'INSERT INTO artisan_profiles (user_id, nom_complet, sexe, specialite, description, location, telephone, annees_experience, siret, site_web, photo_url, horaires_ouverture, langues_parlees, assurance_professionnelle) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING *',
+          [userId, nom_complet, sexe, specialite, description, location, telephone, annees_experience, siret, site_web, photo_url, horaires_ouverture, langues_parlees, assurance_professionnelle]
         );
         newProfile = result.rows[0];
       } else if (userRole === 'commercant') {
-        const { nom_entreprise, sexe_contact, type_commerce, description, adresse, location, telephone, siret, site_web, horaires_ouverture, photo_url } = profileData;
+        const { nom_entreprise, sexe_contact, type_commerce, description, adresse, location, telephone, siret, site_web, horaires_ouverture, photo_url, langues_parlees, assurance_professionnelle } = profileData;
         const result = await client.query(
-          'INSERT INTO commercant_profiles (user_id, nom_entreprise, sexe_contact, type_commerce, description, adresse, location, telephone, siret, site_web, horaires_ouverture, photo_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *',
-          [userId, nom_entreprise, sexe_contact, type_commerce, description, adresse, location, telephone, siret, site_web, horaires_ouverture, photo_url]
+          'INSERT INTO commercant_profiles (user_id, nom_entreprise, sexe_contact, type_commerce, description, adresse, location, telephone, siret, site_web, horaires_ouverture, photo_url, langues_parlees, assurance_professionnelle) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING *',
+          [userId, nom_entreprise, sexe_contact, type_commerce, description, adresse, location, telephone, siret, site_web, horaires_ouverture, photo_url, langues_parlees, assurance_professionnelle]
         );
         newProfile = result.rows[0];
       } else {
@@ -1531,6 +1533,7 @@ app.put('/api/profile', authenticateToken,
         if (profileData.location !== undefined) { updates.push(`location = $${paramIndex++}`); values.push(profileData.location); }
         if (profileData.telephone !== undefined) { updates.push(`telephone = $${paramIndex++}`); values.push(profileData.telephone); }
         if (profileData.photo_url !== undefined) { updates.push(`photo_url = $${paramIndex++}`); values.push(profileData.photo_url); }
+        if (profileData.adresse !== undefined) { updates.push(`adresse = $${paramIndex++}`); values.push(profileData.adresse); }
 
         if (updates.length > 0) {
           values.push(userId);
@@ -1554,6 +1557,9 @@ app.put('/api/profile', authenticateToken,
         if (profileData.site_web !== undefined) { updates.push(`site_web = $${paramIndex++}`); values.push(profileData.site_web); }
         if (profileData.photo_url !== undefined) { updates.push(`photo_url = $${paramIndex++}`); values.push(profileData.photo_url); }
         if (profileData.document_verification_url !== undefined) { updates.push(`document_verification_url = $${paramIndex++}`); values.push(profileData.document_verification_url); }
+        if (profileData.horaires_ouverture !== undefined) { updates.push(`horaires_ouverture = $${paramIndex++}`); values.push(profileData.horaires_ouverture); }
+        if (profileData.langues_parlees !== undefined) { updates.push(`langues_parlees = $${paramIndex++}`); values.push(profileData.langues_parlees); }
+        if (profileData.assurance_professionnelle !== undefined) { updates.push(`assurance_professionnelle = $${paramIndex++}`); values.push(profileData.assurance_professionnelle); }
 
         if (updates.length > 0) {
           values.push(userId);
@@ -1578,6 +1584,8 @@ app.put('/api/profile', authenticateToken,
         if (profileData.horaires_ouverture !== undefined) { updates.push(`horaires_ouverture = $${paramIndex++}`); values.push(profileData.horaires_ouverture); }
         if (profileData.photo_url !== undefined) { updates.push(`photo_url = $${paramIndex++}`); values.push(profileData.photo_url); }
         if (profileData.document_verification_url !== undefined) { updates.push(`document_verification_url = $${paramIndex++}`); values.push(profileData.document_verification_url); }
+        if (profileData.langues_parlees !== undefined) { updates.push(`langues_parlees = $${paramIndex++}`); values.push(profileData.langues_parlees); }
+        if (profileData.assurance_professionnelle !== undefined) { updates.push(`assurance_professionnelle = $${paramIndex++}`); values.push(profileData.assurance_professionnelle); }
 
         if (updates.length > 0) {
           values.push(userId);
@@ -1606,6 +1614,42 @@ app.put('/api/profile', authenticateToken,
       client.release();
     }
   });
+
+// GET /api/profile - Get logged-in user's profile and completeness
+app.get('/api/profile', authenticateToken, async (req, res) => {
+  const userId = req.user.user.id;
+  const userRole = req.user.user.role;
+
+  try {
+    let profileQuery = '';
+    if (userRole === 'client') {
+      profileQuery = 'SELECT * FROM client_profiles WHERE user_id = $1';
+    } else if (userRole === 'artisan') {
+      profileQuery = 'SELECT * FROM artisan_profiles WHERE user_id = $1';
+    } else if (userRole === 'commercant') {
+      profileQuery = 'SELECT * FROM commercant_profiles WHERE user_id = $1';
+    } else {
+      return res.status(400).json({ message: 'Rôle utilisateur inconnu.' });
+    }
+
+    const profileResult = await pool.query(profileQuery, [userId]);
+
+    if (profileResult.rows.length === 0) {
+      // If no profile, return a default structure with 0% completeness
+      return res.json({ profile: null, completeness: 0 });
+    }
+
+    const profile = profileResult.rows[0];
+    const completeness = calculateProfileCompleteness(profile, userRole);
+
+    res.json({ profile, completeness });
+
+  } catch (error) {
+    console.error('Error fetching user profile:', error);
+    res.status(500).json({ message: 'Erreur interne du serveur lors de la récupération du profil.' });
+  }
+});
+
 
 // PUT /api/demandes/:id/status - Update status of a service request (by artisan)
 app.put('/api/demandes/:id/status', authenticateToken, authorizeRole(['artisan']), async (req, res) => {

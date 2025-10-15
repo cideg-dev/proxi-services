@@ -40,12 +40,10 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    // It's better to initialize listeners where context is available and after the first frame.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final socketService = Provider.of<SocketService>(context, listen: false);
       final notificationProvider = Provider.of<NotificationUIProvider>(context, listen: false);
 
-      // Listen to notifications from the socket service
       _notificationSubscription = socketService.notifications.listen((data) {
         notificationProvider.showNotification(
           NotificationData(
@@ -68,17 +66,39 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    final colorSchemeSeed = Color(0xFF00FFC2);
+
+    final lightTheme = ThemeData(
+      useMaterial3: true,
+      brightness: Brightness.light,
+      colorScheme: ColorScheme.fromSeed(seedColor: colorSchemeSeed, brightness: Brightness.light),
+      appBarTheme: AppBarTheme(
+        backgroundColor: Colors.grey[50],
+        foregroundColor: Colors.black87,
+        elevation: 0.5,
+      ),
+    );
+
+    final darkTheme = ThemeData(
+      useMaterial3: true,
+      brightness: Brightness.dark,
+      colorScheme: ColorScheme.fromSeed(seedColor: colorSchemeSeed, brightness: Brightness.dark),
+      scaffoldBackgroundColor: const Color(0xFF121212),
+    );
+
     return Consumer<ThemeProvider>(
       builder: (context, themeProvider, child) {
         return MaterialApp(
           title: 'Proxi-Services',
           navigatorKey: NavigationService.navigatorKey,
-          theme: themeProvider.currentTheme,
+          theme: lightTheme,
+          darkTheme: darkTheme,
+          themeMode: themeProvider.themeMode,
           home: const Scaffold(
             body: Stack(
               children: [
-                SplashScreen(), // Your initial screen
-                InAppNotification(), // Overlay notification widget
+                SplashScreen(),
+                InAppNotification(),
               ],
             ),
           ),
