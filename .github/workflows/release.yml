@@ -1,0 +1,51 @@
+name: Create Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'The version to release (e.g., v1.0.0)'
+        required: true
+        type: string
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write 
+      pull-requests: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 
+
+      - name: Get previous tag
+        id: previoustag
+        run: |
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          echo "tag=$LATEST_TAG" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          CHANGELOG=$(git log --pretty=format:'* %s (%h)' ${{ steps.previoustag.outputs.tag }}..HEAD)
+          CHANGELOG="${CHANGELOG//'%'/'%25'}"
+          CHANGELOG="${CHANGELOG//$''$
+''/'%0A'}"
+          CHANGELOG="${CHANGELOG//$''$''/'%0D'}"
+          echo "log=$CHANGELOG" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.version }}
+          name: Release ${{ github.event.inputs.version }}
+          body: |
+            ## Changes
+            ${{ steps.changelog.outputs.log }}
+          draft: false
+          prerelease: false
+
