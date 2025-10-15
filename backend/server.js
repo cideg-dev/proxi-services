@@ -1688,7 +1688,7 @@ app.get('/api/migrate-db', authenticateToken, authorizeRole(['admin']), async (r
   try {
     const schemaSql = fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8');
     await pool.query(schemaSql);
-    res.status(200).json({ message: 'Base de données migrée avec succès. N'oubliez pas de supprimer cette route temporaire !', success: true });
+    res.status(200).json({ message: "Base de données migrée avec succès. N'oubliez pas de supprimer cette route temporaire !", success: true });
   } catch (error) {
     console.error('Error during temporary DB migration:', error);
     res.status(500).json({ message: 'Erreur lors de la migration temporaire de la base de données.', error: error.message });
