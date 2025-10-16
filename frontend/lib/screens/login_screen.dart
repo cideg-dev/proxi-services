@@ -124,7 +124,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   padding: const EdgeInsets.only(bottom: 10),
                   child: Column(
                     children: [
-                      Lottie.asset('assets/lottie/error.json', height: 80),
+                      Lottie.asset('lottie/error.json', height: 80),
                       const SizedBox(height: 8),
                       Text(
                         _errorMessage,
