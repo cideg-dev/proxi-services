@@ -112,7 +112,7 @@ class ArtisanService {
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {
-      throw Exception('Failed to load favorite artisans');
+      throw Exception('Failed to load favorite artisans: ${response.body}');
     }
   }
 
@@ -134,9 +134,13 @@ class ArtisanService {
     );
 
     if (response.statusCode != 200) {
-      final errorBody = jsonDecode(response.body);
-      final errorMessage = errorBody['message'] ?? 'Failed to add favorite';
-      throw Exception(errorMessage);
+      try {
+        final errorBody = jsonDecode(response.body);
+        final errorMessage = errorBody['message'] ?? 'Failed to add favorite';
+        throw Exception(errorMessage);
+      } catch (e) {
+        throw Exception('Failed to add favorite: ${response.body}');
+      }
     }
   }
 
@@ -158,9 +162,13 @@ class ArtisanService {
     );
 
     if (response.statusCode != 200) {
-      final errorBody = jsonDecode(response.body);
-      final errorMessage = errorBody['message'] ?? 'Failed to remove favorite';
-      throw Exception(errorMessage);
+      try {
+        final errorBody = jsonDecode(response.body);
+        final errorMessage = errorBody['message'] ?? 'Failed to remove favorite';
+        throw Exception(errorMessage);
+      } catch (e) {
+        throw Exception('Failed to remove favorite: ${response.body}');
+      }
     }
   }
 }

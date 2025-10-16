@@ -55,9 +55,13 @@ class AuthService {
       }
       return data;
     } else {
-      final errorBody = jsonDecode(response.body);
-      final errorMessage = errorBody['message'] ?? 'Failed to login';
-      throw Exception(errorMessage);
+      try {
+        final errorBody = jsonDecode(response.body);
+        final errorMessage = errorBody['message'] ?? 'Failed to login';
+        throw Exception(errorMessage);
+      } catch (e) {
+        throw Exception('Failed to login: ${response.body}');
+      }
     }
   }
 
@@ -82,9 +86,13 @@ class AuthService {
       }
       return data;
     } else {
-      final errorBody = jsonDecode(response.body);
-      final errorMessage = errorBody['message'] ?? 'Failed to register';
-      throw Exception(errorMessage);
+      try {
+        final errorBody = jsonDecode(response.body);
+        final errorMessage = errorBody['message'] ?? 'Failed to register';
+        throw Exception(errorMessage);
+      } catch (e) {
+        throw Exception('Failed to register: ${response.body}');
+      }
     }
   }
 
@@ -109,9 +117,13 @@ class AuthService {
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {
-      final errorBody = jsonDecode(response.body);
-      final errorMessage = errorBody['message'] ?? 'Failed to load profile';
-      throw Exception(errorMessage);
+      try {
+        final errorBody = jsonDecode(response.body);
+        final errorMessage = errorBody['message'] ?? 'Failed to load profile';
+        throw Exception(errorMessage);
+      } catch (e) {
+        throw Exception('Failed to load profile: ${response.body}');
+      }
     }
   }
 
@@ -133,9 +145,13 @@ class AuthService {
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {
-      final errorBody = jsonDecode(response.body);
-      final errorMessage = errorBody['message'] ?? 'Failed to update profile';
-      throw Exception(errorMessage);
+      try {
+        final errorBody = jsonDecode(response.body);
+        final errorMessage = errorBody['message'] ?? 'Failed to update profile';
+        throw Exception(errorMessage);
+      } catch (e) {
+        throw Exception('Failed to update profile: ${response.body}');
+      }
     }
   }
 }

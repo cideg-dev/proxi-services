@@ -124,7 +124,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   padding: const EdgeInsets.only(bottom: 10),
                   child: Column(
                     children: [
-                      Lottie.asset('lottie/error.json', height: 80),
+                      const Icon(Icons.error, color: Colors.red, size: 80),
                       const SizedBox(height: 8),
                       Text(
                         _errorMessage,
@@ -135,7 +135,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
               if (_isLoading)
-                Center(child: Lottie.asset('lottie/loading.json', height: 100))
+                Center(child: Lottie.asset('assets/lottie/loading.json', height: 100))
               else
                 ElevatedButton(
                   onPressed: _tryLogin,
