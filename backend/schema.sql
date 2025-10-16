@@ -1,4 +1,4 @@
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
     email VARCHAR(255) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
@@ -7,7 +7,7 @@ CREATE TABLE users (
     last_seen TIMESTAMP
 );
 
-CREATE TABLE client_profiles (
+CREATE TABLE IF NOT EXISTS client_profiles (
     user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
     nom_complet VARCHAR(255),
     sexe VARCHAR(50),
@@ -17,7 +17,7 @@ CREATE TABLE client_profiles (
     adresse TEXT
 );
 
-CREATE TABLE artisan_profiles (
+CREATE TABLE IF NOT EXISTS artisan_profiles (
     user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
     nom_complet VARCHAR(255),
     sexe VARCHAR(50),
@@ -36,7 +36,7 @@ CREATE TABLE artisan_profiles (
     assurance_professionnelle BOOLEAN DEFAULT FALSE
 );
 
-CREATE TABLE commercant_profiles (
+CREATE TABLE IF NOT EXISTS commercant_profiles (
     user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
     nom_entreprise VARCHAR(255),
     sexe_contact VARCHAR(50),
@@ -55,7 +55,7 @@ CREATE TABLE commercant_profiles (
     assurance_professionnelle BOOLEAN DEFAULT FALSE
 );
 
-CREATE TABLE messages (
+CREATE TABLE IF NOT EXISTS messages (
     id SERIAL PRIMARY KEY,
     sender_id INTEGER NOT NULL REFERENCES users(id),
     receiver_id INTEGER NOT NULL REFERENCES users(id),
@@ -64,7 +64,7 @@ CREATE TABLE messages (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE demandes (
+CREATE TABLE IF NOT EXISTS demandes (
     id SERIAL PRIMARY KEY,
     client_id INTEGER NOT NULL REFERENCES users(id),
     artisan_id INTEGER NOT NULL REFERENCES users(id),
@@ -75,7 +75,7 @@ CREATE TABLE demandes (
     updated_at TIMESTAMP WITH TIME ZONE
 );
 
-CREATE TABLE reviews (
+CREATE TABLE IF NOT EXISTS reviews (
     id SERIAL PRIMARY KEY,
     artisan_id INTEGER NOT NULL REFERENCES users(id),
     client_id INTEGER NOT NULL REFERENCES users(id),
@@ -84,13 +84,13 @@ CREATE TABLE reviews (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE favorites (
+CREATE TABLE IF NOT EXISTS favorites (
     user_id INTEGER NOT NULL REFERENCES users(id),
     favorite_artisan_id INTEGER NOT NULL REFERENCES users(id),
     PRIMARY KEY (user_id, favorite_artisan_id)
 );
 
-CREATE TABLE services (
+CREATE TABLE IF NOT EXISTS services (
     id SERIAL PRIMARY KEY,
     artisan_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     name VARCHAR(255) NOT NULL,
@@ -98,14 +98,14 @@ CREATE TABLE services (
     price VARCHAR(100)
 );
 
-CREATE TABLE portfolio_items (
+CREATE TABLE IF NOT EXISTS portfolio_items (
     id SERIAL PRIMARY KEY,
     artisan_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     image_url VARCHAR(255) NOT NULL,
     caption VARCHAR(255)
 );
 
-CREATE TABLE reports (
+CREATE TABLE IF NOT EXISTS reports (
     id SERIAL PRIMARY KEY,
     reporter_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     reported_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
@@ -120,7 +120,7 @@ CREATE TABLE reports (
     resolved_by_admin_id INTEGER REFERENCES users(id) ON DELETE SET NULL
 );
 
-CREATE TABLE audit_logs (
+CREATE TABLE IF NOT EXISTS audit_logs (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(id) ON DELETE SET NULL, -- User who performed the action
     action_type VARCHAR(255) NOT NULL, -- e.g., 'user_login', 'user_blocked', 'report_resolved'
@@ -130,7 +130,7 @@ CREATE TABLE audit_logs (
     timestamp TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE payments (
+CREATE TABLE IF NOT EXISTS payments (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
     amount NUMERIC(10, 2) NOT NULL,
@@ -144,7 +144,7 @@ CREATE TABLE payments (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE subscriptions (
+CREATE TABLE IF NOT EXISTS subscriptions (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     subscription_type VARCHAR(50) NOT NULL, -- e.g., 'profile_boost_monthly', 'premium_access'
