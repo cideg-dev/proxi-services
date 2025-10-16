@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:frontend/providers/notification_ui_provider.dart';
 import 'package:frontend/services/socket_service.dart';
+import 'package:frontend/services/token_manager.dart'; // Import TokenManager
 import 'package:provider/provider.dart';
 import '../services/demand_service.dart';
 import '../widgets/glass_card.dart';
@@ -15,18 +16,39 @@ class ArtisanDemandsScreen extends StatefulWidget {
 
 class _ArtisanDemandsScreenState extends State<ArtisanDemandsScreen> {
   final DemandService _demandService = DemandService();
+  final TokenManager _tokenManager = TokenManager(); // Instance of TokenManager
   List<dynamic> _demands = [];
   String? _error;
   bool _isLoading = true;
+  String? _userRole; // State variable for user role
   StreamSubscription? _demandUpdateSubscription;
 
   @override
   void initState() {
     super.initState();
-    _loadDemands();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _setupSocketListener();
+    _initializeScreen(); // Call the new initialization method
+  }
+
+  Future<void> _initializeScreen() async {
+    // Get user role first
+    final role = await _tokenManager.getUserRole();
+    if (!mounted) return;
+
+    setState(() {
+      _userRole = role;
     });
+
+    // Only load demands if the user is an artisan
+    if (_userRole == 'artisan') {
+      _loadDemands();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _setupSocketListener();
+      });
+    } else {
+      setState(() {
+        _isLoading = false; // Stop loading as we don't need to fetch data
+      });
+    }
   }
 
   @override
@@ -58,6 +80,9 @@ class _ArtisanDemandsScreenState extends State<ArtisanDemandsScreen> {
   }
 
   void _setupSocketListener() {
+    // Ensure we only listen for sockets if the user is an artisan
+    if (_userRole != 'artisan' || !mounted) return;
+    
     final socketService = context.read<SocketService>();
     _demandUpdateSubscription = socketService.demandUpdates.listen((demandData) {
       if (!mounted) return;
@@ -67,11 +92,8 @@ class _ArtisanDemandsScreenState extends State<ArtisanDemandsScreen> {
 
       setState(() {
         if (index != -1) {
-          // This is an update to an existing demand (e.g., client cancelled)
-          // For now, we just update the status
           _demands[index]['status'] = demandData['status'];
         } else {
-          // This is a new demand, add it to the top of the list
           _demands.insert(0, demandData);
           notificationProvider.showNotification(
             NotificationData(
@@ -92,7 +114,6 @@ class _ArtisanDemandsScreenState extends State<ArtisanDemandsScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Demande mise à jour.'), backgroundColor: Colors.green),
       );
-      // Optimistically update the UI
       final int index = _demands.indexWhere((d) => d['id'] == demandId);
       if (index != -1) {
         setState(() {
@@ -117,6 +138,26 @@ class _ArtisanDemandsScreenState extends State<ArtisanDemandsScreen> {
   }
 
   Widget _buildBody() {
+    // First, check if the role has been determined
+    if (_userRole == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    // If the user is not an artisan, show an access denied message
+    if (_userRole != 'artisan') {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Text(
+            'Cette section est réservée aux artisans.',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 16),
+          ),
+        ),
+      );
+    }
+
+    // Original body logic for artisans
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
     }

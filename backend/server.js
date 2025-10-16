@@ -1,5 +1,6 @@
 require('dotenv').config();
 const express = require('express');
+const { version } = require('./package.json');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
@@ -258,7 +259,7 @@ app.get('/', (req, res) => {
 
 // System version endpoint
 app.get('/api/system/version', (req, res) => {
-  res.json({ latest_version: '1.1.0' });
+  res.json({ latest_version: version });
 });
 
 // --- API Routes ---

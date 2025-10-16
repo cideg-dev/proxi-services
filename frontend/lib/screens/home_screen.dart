@@ -10,6 +10,8 @@ import 'package:frontend/services/chat_service.dart';
 import 'package:geolocator/geolocator.dart'; // New import
 import 'package:frontend/screens/chat_list_screen.dart';
 import 'package:frontend/screens/chat_screen.dart';
+import 'package:package_info_plus/package_info_plus.dart'; // Import package_info_plus
+import 'package:version/version.dart'; // Import version
 import 'login_screen.dart';
 import 'artisan_detail_screen.dart';
 import 'profile_screen.dart';
