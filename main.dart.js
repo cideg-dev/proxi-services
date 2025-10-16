@@ -98851,7 +98851,7 @@ K(a){var s=this,r=null,q=A.hg(r,r,B.a0o),p=A.ai("Bienvenue",r,r,r,r,A.T(a).ok.c,
 n=A.b([p,B.UR,o,B.fN,A.ui(r,A.afm(r,B.aV,r,r,r,r,r,r,!0,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,"Mot de passe",!0,!0,r,r,r,r,r,r,r,r,A.em(r,r,A.i1(n?B.px:B.py,r,r,r),r,r,new A.aBR(s),r,r,r),r,r,r,r,r),r,1,!n,new A.aBS(s),new A.aBT()),B.fO],m)
 p=s.w
 if(p.length!==0)n.push(new A.aX(B.kc,A.cs(A.b([A.agX("lottie/error.json",80),B.cA,A.ai(p,r,r,r,r,B.mz,B.cf,r)],m),B.L,B.B,B.M),r))
-if(s.x)n.push(A.cD(A.agX("assets/lottie/loading.json",100),r,r))
+if(s.x)n.push(A.cD(A.agX("lottie/loading.json",100),r,r))
 else n.push(A.mx(!1,B.a_s,r,r,r,r,r,r,s.garA(),r,A.Ck(r,r,r,r,r,r,r,r,r,r,r,r,B.kd,r,r,r,r,r,r,r)))
 n.push(A.lK(!1,B.a_I,r,r,r,r,r,r,new A.aBU(a),r,r))
 return A.h6(q,new A.aX(B.aS,A.Q8(A.cs(n,B.cR,B.cv,B.M),s.e),r))}}
