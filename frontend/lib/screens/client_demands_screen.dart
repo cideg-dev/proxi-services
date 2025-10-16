@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:frontend/providers/notification_ui_provider.dart';
 import 'package:frontend/services/socket_service.dart';
+import 'package:frontend/services/token_manager.dart';
 import 'package:provider/provider.dart';
 import '../services/demand_service.dart';
 import '../widgets/glass_card.dart';
@@ -16,19 +17,37 @@ class ClientDemandsScreen extends StatefulWidget {
 
 class _ClientDemandsScreenState extends State<ClientDemandsScreen> {
   final DemandService _demandService = DemandService();
+  final TokenManager _tokenManager = TokenManager();
   List<dynamic> _demands = [];
   String? _error;
   bool _isLoading = true;
+  String? _userRole;
   StreamSubscription? _demandUpdateSubscription;
 
   @override
   void initState() {
     super.initState();
-    _loadDemands();
-    // We need a post-frame callback to access the provider safely.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _setupSocketListener();
+    _initializeScreen();
+  }
+
+  Future<void> _initializeScreen() async {
+    final role = await _tokenManager.getUserRole();
+    if (!mounted) return;
+
+    setState(() {
+      _userRole = role;
     });
+
+    if (_userRole == 'client') {
+      _loadDemands();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _setupSocketListener();
+      });
+    } else {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -60,6 +79,8 @@ class _ClientDemandsScreenState extends State<ClientDemandsScreen> {
   }
 
   void _setupSocketListener() {
+    if (_userRole != 'client' || !mounted) return;
+
     final socketService = context.read<SocketService>();
     _demandUpdateSubscription = socketService.demandUpdates.listen((updatedDemand) {
       if (!mounted) return;
@@ -108,6 +129,23 @@ class _ClientDemandsScreenState extends State<ClientDemandsScreen> {
   }
 
   Widget _buildBody() {
+    if (_userRole == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_userRole != 'client') {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Text(
+            'Cette section est réservée aux clients.',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 16),
+          ),
+        ),
+      );
+    }
+
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
