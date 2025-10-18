@@ -3,7 +3,7 @@ import 'package:frontend/screens/admin_panel_screen.dart';
 import 'package:frontend/screens/artisan_demands_screen.dart';
 import 'package:frontend/screens/chat_list_screen.dart';
 import 'package:frontend/screens/client_demands_screen.dart';
-import 'package:frontend/screens/my_profile_screen.dart';
+
 import 'package:frontend/screens/professionals_list_screen.dart';
 import 'package:frontend/screens/profile_screen.dart';
 
@@ -42,7 +42,7 @@ class DashboardScreen extends StatelessWidget {
           DashboardItem(
             icon: Icons.person,
             title: 'Mon Profil',
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const MyProfileScreen())),
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfileScreen())),
           ),
           DashboardItem(
             icon: Icons.chat,
@@ -62,7 +62,7 @@ class DashboardScreen extends StatelessWidget {
           DashboardItem(
             icon: Icons.person,
             title: 'Mon Profil',
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const MyProfileScreen())),
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfileScreen())),
           ),
           DashboardItem(
             icon: Icons.build,

@@ -157,4 +157,32 @@ class AuthService {
       }
     }
   }
+
+  Future<void> changePassword(String currentPassword, String newPassword) async {
+    final token = await _tokenManager.getToken();
+    if (token == null) {
+      throw Exception('Utilisateur non authentifié');
+    }
+
+    final response = await http.post(
+      Uri.parse('${ApiConstants.baseUrl}/api/auth/change-password'),
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({
+        'currentPassword': currentPassword,
+        'newPassword': newPassword,
+      }),
+    );
+
+    if (response.statusCode != 200) {
+       try {
+        final body = jsonDecode(response.body);
+        throw Exception(body['message'] ?? 'Échec de la mise à jour du mot de passe');
+      } catch (e) {
+         throw Exception('Échec de la mise à jour du mot de passe: ${response.body}');
+      }
+    }
+  }
 }

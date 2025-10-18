@@ -76,3 +76,131 @@
 2025-10-11T01:39:01.568Z - GET /api/artisans/15/favorites
 2025-10-11T01:39:01.576Z - GET /api/artisans/15/favorites? 403 {"message":"Action non autorisée. Vous ne pouvez voir que vos propres favoris."}
 2025-10-11T01:39:01.607Z - GET /api/artisans 304 
+2025-10-17T00:45:16.929Z - POST /api/auth/register
+2025-10-17T00:45:17.701Z - POST /api/auth/register 201 {"message":"Utilisateur enregistré avec succès.","token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoxLCJyb2xlIjoiY2xpZW50In0sImlhdCI6MTc2MDY2MTkxNywiZXhwIjoxNzYwNjc5OTE3fQ.M2T2KbVViM5SYHlSflM5Ge_DWqd7mauqu6WSJS0qJ9o","user":{"id":1,"email":"auth.test.client@example.com","role":"client"}}
+2025-10-17T00:45:17.718Z - POST /api/auth/register
+2025-10-17T00:45:17.857Z - POST /api/auth/register 201 {"message":"Utilisateur enregistré avec succès.","token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoyLCJyb2xlIjoiYXJ0aXNhbiJ9LCJpYXQiOjE3NjA2NjE5MTcsImV4cCI6MTc2MDY3OTkxN30.-2eReyWIcdbzWrkRTtrWwryom2IumxJNG7vPS3lv5Sc","user":{"id":2,"email":"auth.test.artisan@example.com","role":"artisan"}}
+2025-10-17T00:45:17.868Z - POST /api/auth/register
+2025-10-17T00:45:18.010Z - POST /api/auth/register 201 {"message":"Utilisateur enregistré avec succès.","token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjozLCJyb2xlIjoiYXJ0aXNhbiJ9LCJpYXQiOjE3NjA2NjE5MTgsImV4cCI6MTc2MDY3OTkxOH0.B3fik1HqCEyJ5JSL3tMcE_3xWEuayP0EpOV7Z9mOOJI","user":{"id":3,"email":"auth.test.otherartisan@example.com","role":"artisan"}}
+2025-10-17T00:45:18.020Z - POST /api/auth/register
+2025-10-17T00:45:18.024Z - POST /api/auth/register 400 {"errors":[{"type":"field","value":"admin","msg":"Le rôle est requis","path":"role","location":"body"}]}
+2025-10-17T00:45:20.597Z - POST /api/auth/register
+2025-10-17T00:45:21.105Z - POST /api/auth/register 201 {"message":"Utilisateur enregistré avec succès.","token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjo0LCJyb2xlIjoiY2xpZW50In0sImlhdCI6MTc2MDY2MTkyMSwiZXhwIjoxNzYwNjc5OTIxfQ.BDwFk3k-LICyi8IjPEMyIkD-7LlYnEBlKstKLtOHf2w","user":{"id":4,"email":"auth.test.newuser@example.com","role":"client"}}
+2025-10-17T00:45:21.161Z - POST /api/auth/register
+2025-10-17T00:45:21.324Z - POST /api/auth/register 201 {"message":"Utilisateur enregistré avec succès.","token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjo1LCJyb2xlIjoiY2xpZW50In0sImlhdCI6MTc2MDY2MTkyMSwiZXhwIjoxNzYwNjc5OTIxfQ.IxEN-rrMQOiV4jceoPs0kD7lHeFjyzpJrUXiws3Xm7g","user":{"id":5,"email":"auth.test.existing@example.com","role":"client"}}
+2025-10-17T00:45:21.333Z - POST /api/auth/register
+2025-10-17T00:45:21.336Z - POST /api/auth/register 409 {"message":"Cet email est déjà utilisé."}
+2025-10-17T00:45:21.351Z - POST /api/auth/register
+2025-10-17T00:45:21.496Z - POST /api/auth/register 201 {"message":"Utilisateur enregistré avec succès.","token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjo2LCJyb2xlIjoiY2xpZW50In0sImlhdCI6MTc2MDY2MTkyMSwiZXhwIjoxNzYwNjc5OTIxfQ.dgxMhBxOIGU4qlbM0O_XuDQVCDCIAlHxFLpWkTBtF8s","user":{"id":6,"email":"auth.test.loginuser@example.com","role":"client"}}
+2025-10-17T00:45:21.505Z - POST /api/auth/login
+2025-10-17T00:45:21.644Z - POST /api/auth/login 200 {"message":"Connexion réussie.","token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjo2LCJyb2xlIjoiY2xpZW50In0sImlhdCI6MTc2MDY2MTkyMSwiZXhwIjoxNzYwNjc5OTIxfQ.dgxMhBxOIGU4qlbM0O_XuDQVCDCIAlHxFLpWkTBtF8s","user":{"id":6,"email":"auth.test.loginuser@example.com","role":"client"}}
+2025-10-17T00:45:21.662Z - POST /api/auth/register
+2025-10-17T00:45:21.814Z - POST /api/auth/register 201 {"message":"Utilisateur enregistré avec succès.","token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjo3LCJyb2xlIjoiY2xpZW50In0sImlhdCI6MTc2MDY2MTkyMSwiZXhwIjoxNzYwNjc5OTIxfQ.sdS0rEJE7YrhVf3QsolGImy91jiT1tamSRdlbikMWfo","user":{"id":7,"email":"auth.test.wrongpass@example.com","role":"client"}}
+2025-10-17T00:45:21.824Z - POST /api/auth/login
+2025-10-17T00:45:22.128Z - POST /api/auth/login 401 {"message":"Email ou mot de passe incorrect."}
+2025-10-17T00:45:22.259Z - POST /api/auth/login
+2025-10-17T00:45:22.265Z - POST /api/auth/login 401 {"message":"Email ou mot de passe incorrect."}
+2025-10-17T00:45:23.853Z - GET /api/artisans
+2025-10-17T00:45:24.126Z - GET /api/artisans 200 []
+2025-10-17T02:35:30.356Z - POST /api/auth/register
+2025-10-17T02:35:31.090Z - POST /api/auth/register 201 {"message":"Utilisateur enregistré avec succès.","token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjo4LCJyb2xlIjoiY2xpZW50In0sImlhdCI6MTc2MDY2ODUzMSwiZXhwIjoxNzYwNjg2NTMxfQ.9Ig8Gf1tAPiTUL1PAPFkxKkQHVUU67L9NeQZPY4vvWA","user":{"id":8,"email":"auth.test.client@example.com","role":"client"}}
+2025-10-17T02:35:31.121Z - POST /api/auth/register
+2025-10-17T02:35:31.532Z - POST /api/auth/register 201 {"message":"Utilisateur enregistré avec succès.","token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjo5LCJyb2xlIjoiYXJ0aXNhbiJ9LCJpYXQiOjE3NjA2Njg1MzEsImV4cCI6MTc2MDY4NjUzMX0.nyEbq4O3dxH-00Q4dCb7QbCjrHpvr_2uW8CyexE5UKU","user":{"id":9,"email":"auth.test.artisan@example.com","role":"artisan"}}
+2025-10-17T02:35:31.545Z - POST /api/auth/register
+2025-10-17T02:35:32.071Z - POST /api/auth/register 201 {"message":"Utilisateur enregistré avec succès.","token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoxMCwicm9sZSI6ImFydGlzYW4ifSwiaWF0IjoxNzYwNjY4NTMyLCJleHAiOjE3NjA2ODY1MzJ9.ruQ4ScauK5jsiJ1cuyXKQ0Zc-SCPIxGkzIoY4WHYBj8","user":{"id":10,"email":"auth.test.otherartisan@example.com","role":"artisan"}}
+2025-10-17T02:35:33.191Z - POST /api/auth/register
+2025-10-17T02:35:45.125Z - POST /api/auth/register
+2025-10-17T02:35:46.276Z - POST /api/auth/register 500 Erreur du serveur
+2025-10-17T02:35:46.845Z - POST /api/auth/register 201 {"message":"Utilisateur enregistré avec succès.","token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoxMSwicm9sZSI6ImNsaWVudCJ9LCJpYXQiOjE3NjA2Njg1NDYsImV4cCI6MTc2MDY4NjU0Nn0.bq9LmxEJ8RnwXQBPGHQwG671x-jdKATnXOz3JXnYBDs","user":{"id":11,"email":"auth.test.newuser@example.com","role":"client"}}
+2025-10-17T02:35:47.026Z - POST /api/auth/register
+2025-10-17T02:35:47.416Z - POST /api/auth/register 201 {"message":"Utilisateur enregistré avec succès.","token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoxMiwicm9sZSI6ImNsaWVudCJ9LCJpYXQiOjE3NjA2Njg1NDcsImV4cCI6MTc2MDY4NjU0N30.UR_p8aUd8acvmJbg2KVQlwimNvGN0qEqlMyMyJUSKz0","user":{"id":12,"email":"auth.test.existing@example.com","role":"client"}}
+2025-10-17T02:35:47.432Z - POST /api/auth/register
+2025-10-17T02:35:47.457Z - POST /api/auth/register 409 {"message":"Cet email est déjà utilisé."}
+2025-10-17T02:35:47.497Z - POST /api/auth/register
+2025-10-17T02:35:47.913Z - POST /api/auth/register 201 {"message":"Utilisateur enregistré avec succès.","token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoxMywicm9sZSI6ImNsaWVudCJ9LCJpYXQiOjE3NjA2Njg1NDcsImV4cCI6MTc2MDY4NjU0N30.ddHqdUDg7cXS4fCxAUNXz6AyTxDfgMpAlmhyoTbXoEE","user":{"id":13,"email":"auth.test.loginuser@example.com","role":"client"}}
+2025-10-17T02:35:47.927Z - POST /api/auth/login
+2025-10-17T02:35:48.228Z - POST /api/auth/login 200 {"message":"Connexion réussie.","token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoxMywicm9sZSI6ImNsaWVudCJ9LCJpYXQiOjE3NjA2Njg1NDgsImV4cCI6MTc2MDY4NjU0OH0.UzRMLZfiP1ALcJC46zQI-Tl8JROy3Zw96bGlS8Rkq-0","user":{"id":13,"email":"auth.test.loginuser@example.com","role":"client"}}
+2025-10-17T02:35:48.304Z - POST /api/auth/register
+2025-10-17T02:35:48.713Z - POST /api/auth/register 201 {"message":"Utilisateur enregistré avec succès.","token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoxNCwicm9sZSI6ImNsaWVudCJ9LCJpYXQiOjE3NjA2Njg1NDgsImV4cCI6MTc2MDY4NjU0OH0.vDuk5T1erGrVldxakRB_IfaAidOe1V5RanwcRG74ZG4","user":{"id":14,"email":"auth.test.wrongpass@example.com","role":"client"}}
+2025-10-17T02:35:48.727Z - POST /api/auth/login
+2025-10-17T02:35:49.096Z - POST /api/auth/login 401 {"message":"Email ou mot de passe incorrect."}
+2025-10-17T02:35:49.270Z - POST /api/auth/login
+2025-10-17T02:35:49.283Z - POST /api/auth/login 401 {"message":"Email ou mot de passe incorrect."}
+2025-10-17T02:35:54.407Z - GET /api/artisans
+2025-10-17T02:35:55.832Z - GET /api/artisans 200 []
+2025-10-17T02:48:44.724Z - POST /api/auth/register
+2025-10-17T02:48:46.734Z - POST /api/auth/register 201 {"message":"Utilisateur enregistré avec succès.","token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoxNSwicm9sZSI6ImFkbWluIn0sImlhdCI6MTc2MDY2OTMyNiwiZXhwIjoxNzYwNjg3MzI2fQ.otO9mS-WJpIDvLNADHKCm2osQ8aQf7RTwC2WI4Y07Ng","user":{"id":15,"email":"auth.test.admin@example.com","role":"admin"}}
+2025-10-17T03:20:29.817Z - POST /api/auth/register
+2025-10-17T03:20:34.525Z - POST /api/auth/register
+2025-10-17T03:20:35.927Z - POST /api/auth/register 201 {"message":"Utilisateur enregistré avec succès.","token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoxNiwicm9sZSI6ImNsaWVudCJ9LCJpYXQiOjE3NjA2NzEyMzUsImV4cCI6MTc2MDY4OTIzNX0.SUN8DWCpmfNV3VsCcexvg1U25dnR-VXuo15Vj8uPgbU","user":{"id":16,"email":"auth.test.existing@example.com","role":"client"}}
+2025-10-17T03:20:35.932Z - POST /api/auth/register 201 {"message":"Utilisateur enregistré avec succès.","token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoxNywicm9sZSI6ImNsaWVudCJ9LCJpYXQiOjE3NjA2NzEyMzUsImV4cCI6MTc2MDY4OTIzNX0.xzxPwI8RN8-3LniPJK6BU5PxLlqyZBJxh_4OIg6d-4U","user":{"id":17,"email":"auth.test.newuser@example.com","role":"client"}}
+2025-10-17T03:20:35.954Z - POST /api/auth/register
+2025-10-17T03:20:36.386Z - POST /api/auth/register 409 {"message":"Cet email est déjà utilisé."}
+2025-10-17T03:20:36.428Z - POST /api/auth/register
+2025-10-17T03:20:36.644Z - POST /api/auth/register 201 {"message":"Utilisateur enregistré avec succès.","token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoxOCwicm9sZSI6ImNsaWVudCJ9LCJpYXQiOjE3NjA2NzEyMzYsImV4cCI6MTc2MDY4OTIzNn0.SQJr4xRaJ8iPVIukLSYI9yD19rgBYT5oV_0zPJkGISE","user":{"id":18,"email":"auth.test.loginuser@example.com","role":"client"}}
+2025-10-17T03:20:36.655Z - POST /api/auth/login
+2025-10-17T03:20:36.806Z - POST /api/auth/login 200 {"message":"Connexion réussie.","token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoxOCwicm9sZSI6ImNsaWVudCJ9LCJpYXQiOjE3NjA2NzEyMzYsImV4cCI6MTc2MDY4OTIzNn0.SQJr4xRaJ8iPVIukLSYI9yD19rgBYT5oV_0zPJkGISE","user":{"id":18,"email":"auth.test.loginuser@example.com","role":"client"}}
+2025-10-17T03:20:38.067Z - POST /api/auth/register
+2025-10-17T03:20:38.861Z - POST /api/auth/register 201 {"message":"Utilisateur enregistré avec succès.","token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoxOSwicm9sZSI6ImNsaWVudCJ9LCJpYXQiOjE3NjA2NzEyMzgsImV4cCI6MTc2MDY4OTIzOH0._csH0V8xjDMHesQj06hxLDJvs6iIcKGaSO2vmNmALro","user":{"id":19,"email":"auth.test.wrongpass@example.com","role":"client"}}
+2025-10-17T03:20:38.872Z - POST /api/auth/login
+2025-10-17T03:20:39.021Z - POST /api/auth/login 401 {"message":"Email ou mot de passe incorrect."}
+2025-10-17T03:20:39.420Z - POST /api/auth/login
+2025-10-17T03:20:39.424Z - POST /api/auth/login 401 {"message":"Email ou mot de passe incorrect."}
+2025-10-17T03:20:42.148Z - GET /api/artisans
+2025-10-17T03:20:44.154Z - GET /api/artisans 200 []
+2025-10-17T03:57:53.402Z - POST /api/auth/register
+2025-10-17T03:57:53.733Z - POST /api/auth/register 201 {"message":"Utilisateur enregistré avec succès.","token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoyMCwicm9sZSI6ImNsaWVudCJ9LCJpYXQiOjE3NjA2NzM0NzMsImV4cCI6MTc2MDY5MTQ3M30.ZtbCixIZG4r-tQwLxYQdTGf2nG_9b7vhOs3b8v_vHPY","user":{"id":20,"email":"auth.test.client@example.com","role":"client"}}
+2025-10-17T03:57:53.750Z - POST /api/auth/register
+2025-10-17T03:57:53.896Z - POST /api/auth/register 201 {"message":"Utilisateur enregistré avec succès.","token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoyMSwicm9sZSI6ImFydGlzYW4ifSwiaWF0IjoxNzYwNjczNDczLCJleHAiOjE3NjA2OTE0NzN9.OIQ7S7pfVhjvp7r2-btyFYACOIHvnlus73BYgNc7fPw","user":{"id":21,"email":"auth.test.artisan@example.com","role":"artisan"}}
+2025-10-17T03:57:53.907Z - POST /api/auth/register
+2025-10-17T03:57:54.052Z - POST /api/auth/register 201 {"message":"Utilisateur enregistré avec succès.","token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoyMiwicm9sZSI6ImFydGlzYW4ifSwiaWF0IjoxNzYwNjczNDc0LCJleHAiOjE3NjA2OTE0NzR9.wwHcIAqsqBRrYtoidajgUN245d-2SC81aPbY9HG5ZVA","user":{"id":22,"email":"auth.test.otherartisan@example.com","role":"artisan"}}
+2025-10-17T03:57:54.062Z - POST /api/auth/register
+2025-10-17T03:57:54.242Z - POST /api/auth/register 201 {"message":"Utilisateur enregistré avec succès.","token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoyMywicm9sZSI6ImFkbWluIn0sImlhdCI6MTc2MDY3MzQ3NCwiZXhwIjoxNzYwNjkxNDc0fQ.RKaMkBgknBMkov8mxDvPtSeTyO9FCSnxJ_lRim7-aXI","user":{"id":23,"email":"auth.test.admin@example.com","role":"admin"}}
+2025-10-17T03:57:54.396Z - POST /api/artisans/21/services
+2025-10-17T03:57:54.407Z - POST /api/artisans/21/services 403 {"message":"Action non autorisée pour votre rôle."}
+2025-10-17T03:57:54.488Z - POST /api/artisans/21/services
+2025-10-17T03:57:54.549Z - POST /api/artisans/21/services 403 {"message":"Action non autorisée."}
+2025-10-17T03:57:54.566Z - GET /api/artisan/demandes
+2025-10-17T03:57:54.570Z - GET /api/artisan/demandes 403 {"message":"Action non autorisée pour votre rôle."}
+2025-10-17T03:57:54.584Z - POST /api/artisans/21/services
+2025-10-17T03:57:54.684Z - POST /api/artisans/21/services 201 {"message":"Service ajouté avec succès.","service":{"id":1,"artisan_id":21,"name":"Legit Service","description":"A service added by the owner","price":"120"}}
+2025-10-17T03:57:54.699Z - GET /api/admin/users
+2025-10-17T03:57:54.702Z - GET /api/admin/users 403 {"message":"Action non autorisée pour votre rôle."}
+2025-10-17T03:57:54.715Z - GET /api/admin/users
+2025-10-17T03:57:55.114Z - GET /api/admin/users 200 {"total":4,"page":1,"limit":10,"users":[{"id":20,"email":"auth.test.client@example.com","role":"client","last_seen":null,"name":null,"photo_url":null,"verification_status":null},{"id":21,"email":"auth.test.artisan@example.com","role":"artisan","last_seen":null,"name":"Test Artisan","photo_url":null,"verification_status":"not_verified"},{"id":22,"email":"auth.test.otherartisan@example.com","role":"artisan","last_seen":null,"name":"Other Artisan","photo_url":null,"verification_status":"not_verified"},{"id":23,"email":"auth.test.admin@example.com","role":"admin","last_seen":null,"name":null,"photo_url":null,"verification_status":null}]}
+2025-10-17T03:57:55.161Z - GET /api/admin/users/21
+2025-10-17T03:57:55.164Z - GET /api/admin/users/21 403 {"message":"Action non autorisée pour votre rôle."}
+2025-10-17T03:57:55.176Z - GET /api/admin/users/21
+2025-10-17T03:57:55.183Z - GET /api/admin/users/21 200 {"id":21,"email":"auth.test.artisan@example.com","role":"artisan","last_seen":null}
+2025-10-17T03:57:55.198Z - PUT /api/admin/users/21/block
+2025-10-17T03:57:55.202Z - PUT /api/admin/users/21/block 403 {"message":"Action non autorisée pour votre rôle."}
+2025-10-17T03:57:55.217Z - PUT /api/admin/users/21/block
+2025-10-17T03:57:55.242Z - PUT /api/admin/users/21/block 200 {"user":{"id":21,"email":"auth.test.artisan@example.com","role":"artisan","is_blocked":true}}
+2025-10-17T03:57:55.253Z - PUT /api/admin/users/21/block
+2025-10-17T03:57:55.258Z - PUT /api/admin/users/21/block 200 {"user":{"id":21,"email":"auth.test.artisan@example.com","role":"artisan","is_blocked":false}}
+2025-10-17T03:57:55.284Z - DELETE /api/admin/users/22
+2025-10-17T03:57:55.287Z - DELETE /api/admin/users/22 403 {"message":"Action non autorisée pour votre rôle."}
+2025-10-17T03:57:55.349Z - POST /api/auth/register
+2025-10-17T03:57:55.580Z - POST /api/auth/register 201 {"message":"Utilisateur enregistré avec succès.","token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoyNCwicm9sZSI6ImNsaWVudCJ9LCJpYXQiOjE3NjA2NzM0NzUsImV4cCI6MTc2MDY5MTQ3NX0.qCsv6xg7fjgPKxz_S64iz1UERMDNTM9Zw5T5vfLjMUA","user":{"id":24,"email":"auth.test.todelete@example.com","role":"client"}}
+2025-10-17T03:57:55.588Z - DELETE /api/admin/users/24
+2025-10-17T03:57:55.607Z - DELETE /api/admin/users/24 200 {"message":"Utilisateur supprimé avec succès."}
+2025-10-17T03:57:55.619Z - POST /api/artisans/21/services
+2025-10-17T03:57:55.621Z - POST /api/artisans/21/services 403 {"message":"Action non autorisée pour votre rôle."}
+2025-10-17T03:57:57.223Z - POST /api/auth/register
+2025-10-17T03:57:57.551Z - POST /api/auth/register 201 {"message":"Utilisateur enregistré avec succès.","token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoyNSwicm9sZSI6ImNsaWVudCJ9LCJpYXQiOjE3NjA2NzM0NzcsImV4cCI6MTc2MDY5MTQ3N30.2sdVAjdTd0xc81kNFINC9F5Qv_zWuq4qnUjSep9lTHE","user":{"id":25,"email":"auth.test.newuser@example.com","role":"client"}}
+2025-10-17T03:57:57.607Z - POST /api/auth/register
+2025-10-17T03:57:57.751Z - POST /api/auth/register 201 {"message":"Utilisateur enregistré avec succès.","token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoyNiwicm9sZSI6ImNsaWVudCJ9LCJpYXQiOjE3NjA2NzM0NzcsImV4cCI6MTc2MDY5MTQ3N30.YzwPJivGZyrPrZHsZnGS6Y5ejIvHlNdK9saU0YzKfJA","user":{"id":26,"email":"auth.test.existing@example.com","role":"client"}}
+2025-10-17T03:57:57.760Z - POST /api/auth/register
+2025-10-17T03:57:57.764Z - POST /api/auth/register 409 {"message":"Cet email est déjà utilisé."}
+2025-10-17T03:57:57.778Z - POST /api/auth/register
+2025-10-17T03:57:57.919Z - POST /api/auth/register 201 {"message":"Utilisateur enregistré avec succès.","token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoyNywicm9sZSI6ImNsaWVudCJ9LCJpYXQiOjE3NjA2NzM0NzcsImV4cCI6MTc2MDY5MTQ3N30.HmNlc0PhMqkOaXpWjL8c6UQPrnAYsdAd9jfHgKH-N0A","user":{"id":27,"email":"auth.test.loginuser@example.com","role":"client"}}
+2025-10-17T03:57:57.927Z - POST /api/auth/login
+2025-10-17T03:57:58.068Z - POST /api/auth/login 200 {"message":"Connexion réussie.","token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoyNywicm9sZSI6ImNsaWVudCJ9LCJpYXQiOjE3NjA2NzM0NzgsImV4cCI6MTc2MDY5MTQ3OH0.DIbgjC7aSbPLXs3lBm-1O0kOlrch7ReC43Hz2p8aUqw","user":{"id":27,"email":"auth.test.loginuser@example.com","role":"client"}}
+2025-10-17T03:57:58.084Z - POST /api/auth/register
+2025-10-17T03:57:58.229Z - POST /api/auth/register 201 {"message":"Utilisateur enregistré avec succès.","token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoyOCwicm9sZSI6ImNsaWVudCJ9LCJpYXQiOjE3NjA2NzM0NzgsImV4cCI6MTc2MDY5MTQ3OH0.abIIFa9FFj2oWjDi5AUCVdUcszp0hK3EwIENXgjvAg8","user":{"id":28,"email":"auth.test.wrongpass@example.com","role":"client"}}
+2025-10-17T03:57:58.237Z - POST /api/auth/login
+2025-10-17T03:57:58.375Z - POST /api/auth/login 401 {"message":"Email ou mot de passe incorrect."}
+2025-10-17T03:57:58.404Z - POST /api/auth/login
+2025-10-17T03:57:58.406Z - POST /api/auth/login 401 {"message":"Email ou mot de passe incorrect."}
+2025-10-17T03:57:59.626Z - GET /api/artisans
+2025-10-17T03:57:59.819Z - GET /api/artisans 200 []

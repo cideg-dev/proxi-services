@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const pool = require('../db.config');
 const { check, validationResult } = require('express-validator');
+const { authenticateToken } = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
@@ -151,6 +152,49 @@ module.exports = function() {
             res.status(200).json({ message: 'Connexion réussie.', token, user: { id: user.id, email: user.email, role: user.role } });
           }
         );
+      } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Erreur du serveur');
+      }
+    }
+  );
+
+  // Change user password
+  router.post(
+    '/change-password',
+    [
+      authenticateToken,
+      check('currentPassword', 'Le mot de passe actuel est requis').not().isEmpty(),
+      check('newPassword', 'Le nouveau mot de passe doit faire au moins 6 caractères').isLength({ min: 6 }),
+    ],
+    async (req, res) => {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }
+
+      const { currentPassword, newPassword } = req.body;
+      const userId = req.user.user.id; // From authenticateToken middleware
+
+      try {
+        const userResult = await pool.query('SELECT password FROM users WHERE id = $1', [userId]);
+        if (userResult.rows.length === 0) {
+          return res.status(404).json({ message: 'Utilisateur non trouvé.' });
+        }
+        const user = userResult.rows[0];
+
+        const isMatch = await bcrypt.compare(currentPassword, user.password);
+        if (!isMatch) {
+          return res.status(401).json({ message: 'Le mot de passe actuel est incorrect.' });
+        }
+
+        const salt = await bcrypt.genSalt(10);
+        const hashedNewPassword = await bcrypt.hash(newPassword, salt);
+
+        await pool.query('UPDATE users SET password = $1 WHERE id = $2', [hashedNewPassword, userId]);
+
+        res.status(200).json({ message: 'Mot de passe mis à jour avec succès.' });
+
       } catch (err) {
         console.error(err.message);
         res.status(500).send('Erreur du serveur');

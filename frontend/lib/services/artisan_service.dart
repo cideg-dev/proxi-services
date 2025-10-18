@@ -171,4 +171,79 @@ class ArtisanService {
       }
     }
   }
+
+  // --- Service Management ---
+
+  Future<List<dynamic>> getMyArtisanServices() async {
+    final token = await _tokenManager.getToken();
+    final userId = await _tokenManager.getUserId();
+    if (token == null || userId == null) {
+      throw Exception('User not authenticated');
+    }
+    // Re-use getArtisanServices, but with the logged-in user's ID
+    return getArtisanServices(userId);
+  }
+
+  Future<dynamic> addArtisanService(Map<String, dynamic> serviceData) async {
+    final token = await _tokenManager.getToken();
+    final userId = await _tokenManager.getUserId();
+    if (token == null || userId == null) {
+      throw Exception('User not authenticated');
+    }
+
+    final response = await http.post(
+      Uri.parse('${ApiConstants.baseUrl}/api/artisans/$userId/services'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode(serviceData),
+    );
+
+    if (response.statusCode == 201) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Failed to add service: ${response.body}');
+    }
+  }
+
+  Future<dynamic> updateArtisanService(int serviceId, Map<String, dynamic> serviceData) async {
+    final token = await _tokenManager.getToken();
+    if (token == null) {
+      throw Exception('User not authenticated');
+    }
+
+    final response = await http.put(
+      Uri.parse('${ApiConstants.baseUrl}/api/services/$serviceId'), // Assuming a /api/services/:id endpoint
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode(serviceData),
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Failed to update service: ${response.body}');
+    }
+  }
+
+  Future<void> deleteArtisanService(int serviceId) async {
+    final token = await _tokenManager.getToken();
+    if (token == null) {
+      throw Exception('User not authenticated');
+    }
+
+    final response = await http.delete(
+      Uri.parse('${ApiConstants.baseUrl}/api/services/$serviceId'), // Assuming a /api/services/:id endpoint
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode != 204) {
+      throw Exception('Failed to delete service: ${response.body}');
+    }
+  }
 }

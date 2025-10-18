@@ -2,9 +2,10 @@ const pool = require('../db.config');
 
 const addService = async (req, res) => {
   const artisanId = parseInt(req.params.artisanId);
-  console.log('req.user.id', req.user.id);
+  console.log('req.user.user.id', req.user?.user?.id);
   console.log('artisanId', artisanId);
-  if (req.user.id !== artisanId) {
+  // Vérifie que l'utilisateur authentifié est bien l'artisan propriétaire
+  if (req.user?.user?.id !== artisanId) {
     return res.status(403).json({ message: 'Action non autorisée.' });
   }
 
@@ -15,7 +16,7 @@ const addService = async (req, res) => {
       'INSERT INTO services (artisan_id, name, description, price) VALUES ($1, $2, $3, $4) RETURNING *',
       [artisanId, name, description, price]
     );
-    res.status(201).json(result.rows[0]);
+    res.status(201).json({ message: 'Service ajouté avec succès.', service: result.rows[0] });
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Erreur du serveur');
@@ -24,7 +25,7 @@ const addService = async (req, res) => {
 
 const updateService = async (req, res) => {
   const { artisanId, serviceId } = req.params;
-  if (req.user.id !== parseInt(artisanId)) {
+  if (req.user?.user?.id !== parseInt(artisanId)) {
     return res.status(403).json({ message: 'Action non autorisée.' });
   }
 
@@ -49,7 +50,7 @@ const updateService = async (req, res) => {
 
 const deleteService = async (req, res) => {
   const { artisanId, serviceId } = req.params;
-  if (req.user.id !== parseInt(artisanId)) {
+  if (req.user?.user?.id !== parseInt(artisanId)) {
     return res.status(403).json({ message: 'Action non autorisée.' });
   }
 
