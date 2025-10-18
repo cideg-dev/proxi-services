@@ -95,7 +95,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
           final user = snapshot.data!['user'] ?? {};
           final profile = snapshot.data!['profile'] ?? {};
-          final allData = {...user, ...profile};
+          final allData = <String, dynamic>{...user, ...profile};
           final completionPercentage = _calculateProfileCompletion(allData);
           final role = allData['role'];
 
