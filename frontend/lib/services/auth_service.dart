@@ -65,17 +65,20 @@ class AuthService {
     }
   }
 
-  Future<Map<String, dynamic>> register(String email, String password, String role) async {
+  Future<Map<String, dynamic>> register(String email, String password, String role, Map<String, dynamic> profileData) async {
+    final body = {
+      'email': email,
+      'password': password,
+      'role': role,
+      'profileData': profileData,
+    };
+
     final response = await _postWithRetry(
       Uri.parse('${ApiConstants.baseUrl}/api/auth/register'),
       <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
-      jsonEncode(<String, String>{
-        'email': email,
-        'password': password,
-        'role': role,
-      }),
+      jsonEncode(body),
     );
 
     if (response.statusCode == 200 || response.statusCode == 201) {

@@ -160,6 +160,19 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
+  String _formatTimestamp(String? timestamp) {
+    if (timestamp == null) return '';
+    try {
+      final dateTime = DateTime.parse(timestamp).toLocal();
+      final hour = dateTime.hour.toString().padLeft(2, '0');
+      final minute = dateTime.minute.toString().padLeft(2, '0');
+      return '$hour:$minute';
+    } catch (e) {
+      print('Error parsing timestamp: $e');
+      return '';
+    }
+  }
+
   Icon _getMessageStatusIcon(String status, bool isMe) {
     switch (status) {
       case 'sent':
@@ -215,8 +228,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              // Format timestamp
-                              DateTime.parse(message['timestamp']).toLocal().toString().substring(11, 16),
+                              _formatTimestamp(message['timestamp'] as String?),
                               style: const TextStyle(color: Colors.white70, fontSize: 10),
                             ),
                             if (isMe) ...[
