@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/screens/admin_panel_screen.dart';
 import 'package:frontend/screens/artisan_demands_screen.dart';
+import 'package:frontend/screens/artisan_portfolio_screen.dart';
+import 'package:frontend/screens/artisan_services_screen.dart';
 import 'package:frontend/screens/chat_list_screen.dart';
 import 'package:frontend/screens/client_demands_screen.dart';
 
@@ -34,11 +36,7 @@ class DashboardScreen extends StatelessWidget {
             title: 'Parcourir les artisans',
             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => ProfessionalsListScreen())),
           ),
-          DashboardItem(
-            icon: Icons.work,
-            title: 'Mes Demandes',
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ClientDemandsScreen())),
-          ),
+
           DashboardItem(
             icon: Icons.person,
             title: 'Mon Profil',
@@ -67,16 +65,12 @@ class DashboardScreen extends StatelessWidget {
           DashboardItem(
             icon: Icons.build,
             title: 'Mes Services',
-            onTap: () {
-              // Navigate to a screen to manage services
-            },
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ArtisanServicesScreen())),
           ),
           DashboardItem(
             icon: Icons.photo_library,
             title: 'Mon Portfolio',
-            onTap: () {
-              // Navigate to a screen to manage portfolio
-            },
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ArtisanPortfolioScreen())),
           ),
           DashboardItem(
             icon: Icons.chat,

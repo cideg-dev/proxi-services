@@ -1919,16 +1919,16 @@ app.post('/api/users/:id/upload-document', authenticateToken, uploadDocument.sin
 const serviceController = require('./controllers/serviceController');
 
 // Service Management Endpoints
-app.post('/api/artisans/:artisanId/services', authenticateToken, authorizeRole(['artisan']), serviceController.addService);
-app.put('/api/artisans/:artisanId/services/:serviceId', authenticateToken, authorizeRole(['artisan']), serviceController.updateService);
-app.delete('/api/artisans/:artisanId/services/:serviceId', authenticateToken, authorizeRole(['artisan']), serviceController.deleteService);
+app.post('/api/artisans/:artisanId/services', authenticateToken, authorizeRole(['artisan', 'commercant']), serviceController.addService);
+app.put('/api/artisans/:artisanId/services/:serviceId', authenticateToken, authorizeRole(['artisan', 'commercant']), serviceController.updateService);
+app.delete('/api/artisans/:artisanId/services/:serviceId', authenticateToken, authorizeRole(['artisan', 'commercant']), serviceController.deleteService);
 
 const portfolioController = require('./controllers/portfolioController');
 
 // Portfolio Management Endpoints
-app.post('/api/artisans/:artisanId/portfolio', authenticateToken, authorizeRole(['artisan']), upload.single('portfolioImage'), portfolioController.addPortfolioItem);
-app.put('/api/artisans/:artisanId/portfolio/:portfolioId', authenticateToken, authorizeRole(['artisan']), upload.single('portfolioImage'), portfolioController.updatePortfolioItem);
-app.delete('/api/artisans/:artisanId/portfolio/:portfolioId', authenticateToken, authorizeRole(['artisan']), portfolioController.deletePortfolioItem);
+app.post('/api/artisans/:artisanId/portfolio', authenticateToken, authorizeRole(['artisan', 'commercant']), upload.single('portfolioImage'), portfolioController.addPortfolioItem);
+app.put('/api/artisans/:artisanId/portfolio/:portfolioId', authenticateToken, authorizeRole(['artisan', 'commercant']), upload.single('portfolioImage'), portfolioController.updatePortfolioItem);
+app.delete('/api/artisans/:artisanId/portfolio/:portfolioId', authenticateToken, authorizeRole(['artisan', 'commercant']), portfolioController.deletePortfolioItem);
 
 // --- Admin Verification Endpoints ---
 

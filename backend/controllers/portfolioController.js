@@ -4,8 +4,8 @@ const fs = require('fs');
 const path = require('path');
 
 const addPortfolioItem = async (req, res) => {
-  const artisanId = parseInt(req.params.artisanId);
-  if (req.user.user.id !== artisanId) {
+  const professionalId = parseInt(req.params.artisanId);
+  if (req.user.user.id !== professionalId) {
     return res.status(403).json({ message: 'Action non autorisée.' });
   }
 
@@ -17,7 +17,7 @@ const addPortfolioItem = async (req, res) => {
 
   try {
     // Generate a unique filename with .webp extension
-    const filename = `portfolio-${artisanId}-${Date.now()}.webp`;
+    const filename = `portfolio-${professionalId}-${Date.now()}.webp`;
     const outputPath = path.join(__dirname, '..', 'uploads', filename);
 
     // Process image with sharp: resize, convert to webp, and save
@@ -30,7 +30,7 @@ const addPortfolioItem = async (req, res) => {
 
     const result = await pool.query(
       'INSERT INTO portfolio_items (artisan_id, image_url, caption) VALUES ($1, $2, $3) RETURNING *',
-      [artisanId, imageUrl, caption]
+      [professionalId, imageUrl, caption]
     );
     res.status(201).json(result.rows[0]);
   } catch (err) {
@@ -40,8 +40,8 @@ const addPortfolioItem = async (req, res) => {
 };
 
 const updatePortfolioItem = async (req, res) => {
-  const { artisanId, portfolioId } = req.params;
-  if (req.user.user.id !== parseInt(artisanId)) {
+  const { artisanId: professionalId, portfolioId } = req.params;
+  if (req.user.user.id !== parseInt(professionalId)) {
     return res.status(403).json({ message: 'Action non autorisée.' });
   }
 
@@ -49,7 +49,7 @@ const updatePortfolioItem = async (req, res) => {
   const imageUrl = req.file ? `${req.protocol}://${req.get('host')}${req.file.path.replace(/\\/g, '/').substring(req.file.path.indexOf('/uploads'))}` : null;
 
   try {
-    const existingItemResult = await pool.query('SELECT * FROM portfolio_items WHERE id = $1 AND artisan_id = $2', [portfolioId, artisanId]);
+    const existingItemResult = await pool.query('SELECT * FROM portfolio_items WHERE id = $1 AND artisan_id = $2', [portfolioId, professionalId]);
     if (existingItemResult.rows.length === 0) {
       return res.status(404).json({ message: 'Élément de portfolio non trouvé.' });
     }
@@ -60,7 +60,7 @@ const updatePortfolioItem = async (req, res) => {
 
     const result = await pool.query(
       'UPDATE portfolio_items SET caption = $1, image_url = $2 WHERE id = $3 AND artisan_id = $4 RETURNING *',
-      [caption, newImageUrl, portfolioId, artisanId]
+      [caption, newImageUrl, portfolioId, professionalId]
     );
 
     if (result.rows.length === 0) {
@@ -82,13 +82,13 @@ const updatePortfolioItem = async (req, res) => {
 };
 
 const deletePortfolioItem = async (req, res) => {
-  const { artisanId, portfolioId } = req.params;
-  if (req.user.user.id !== parseInt(artisanId)) {
+  const { artisanId: professionalId, portfolioId } = req.params;
+  if (req.user.user.id !== parseInt(professionalId)) {
     return res.status(403).json({ message: 'Action non autorisée.' });
   }
 
   try {
-    const result = await pool.query('DELETE FROM portfolio_items WHERE id = $1 AND artisan_id = $2 RETURNING image_url', [portfolioId, artisanId]);
+    const result = await pool.query('DELETE FROM portfolio_items WHERE id = $1 AND artisan_id = $2 RETURNING image_url', [portfolioId, professionalId]);
 
     if (result.rowCount === 0) {
       return res.status(404).json({ message: 'Élément de portfolio non trouvé.' });
