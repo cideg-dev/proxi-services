@@ -12,7 +12,7 @@ class RegisterScreen extends StatefulWidget {
   State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _RegisterScreenState extends State<RegisterScreen> {
+class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProviderStateMixin {
   final AuthService _authService = AuthService();
   final _formKey = GlobalKey<FormState>();
 
@@ -28,15 +28,30 @@ class _RegisterScreenState extends State<RegisterScreen> {
   List<String> _selectedLangues = [];
   String? _sexe;
   bool _isPasswordVisible = false;
+  bool _isHoveringRegister = false;
 
   final List<String> _availableLanguages = ['Français', 'Anglais', 'Fon', 'Yoruba', 'Bariba', 'Dendi', 'Mina'];
 
   String _errorMessage = '';
   bool _isLoading = false;
 
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+
   @override
   void initState() {
     super.initState();
+    // Animation setup
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
+    _fadeAnimation = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOut,
+    );
+    _animationController.forward();
+
     // Initialize controllers for common fields that are always present
     _controllers['nom_complet'] = TextEditingController();
     _controllers['telephone'] = TextEditingController();
@@ -65,6 +80,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   void dispose() {
     _controllers.forEach((_, controller) => controller.dispose());
+    _animationController.dispose();
     super.dispose();
   }
 
@@ -85,8 +101,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
       if (widget.role == 'client') {
         profileData['sexe'] = _sexe;
       } else {
-        profileData['assurance_professionnelle'] = _assuranceProfessionnelle;
         profileData['langues_parlees'] = _selectedLangues;
+        profileData['assurance_professionnelle'] = _assuranceProfessionnelle;
       }
 
       try {
@@ -97,66 +113,106 @@ class _RegisterScreenState extends State<RegisterScreen> {
           (Route<dynamic> route) => false,
         );
       } catch (e) {
-        setState(() {
-          _errorMessage = e.toString().replaceFirst('Exception: ', '');
-        });
+        if (mounted) {
+          setState(() {
+            _errorMessage = e.toString().replaceFirst('Exception: ', '');
+          });
+        }
       } finally {
-        setState(() {
-          _isLoading = false;
-        });
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
         title: Text('Inscription ${widget.role}'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
       ),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(16.0),
-          children: _buildFormFields(),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              theme.colorScheme.surface,
+              theme.colorScheme.surface.withOpacity(0.8),
+            ],
+          ),
+        ),
+        child: Center(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 600),
+                child: FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: GlassCard(
+                    child: Form(
+                      key: _formKey,
+                      child: ListView(
+                        padding: const EdgeInsets.all(24.0),
+                        children: _buildFormFields(context),
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
         ),
       ),
     );
   }
 
-  List<Widget> _buildFormFields() {
+  List<Widget> _buildFormFields(BuildContext context) {
+    final theme = Theme.of(context);
     List<Widget> fields = [];
 
+    // --- Titre ---
+    fields.add(Text(
+      'Créez votre compte',
+      style: theme.textTheme.displaySmall?.copyWith(
+        color: theme.colorScheme.primary,
+        fontWeight: FontWeight.bold,
+      ),
+      textAlign: TextAlign.center,
+    ));
+    fields.add(const SizedBox(height: 24.0));
+
     // --- Champs d'authentification ---
-    fields.add(
-      TextFormField(
-        decoration: const InputDecoration(labelText: 'Email', border: OutlineInputBorder()),
-        keyboardType: TextInputType.emailAddress,
-        validator: (value) {
-          if (value == null || value.isEmpty) return 'Veuillez entrer une adresse e-mail';
-          final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
-          if (!emailRegex.hasMatch(value)) return 'Entrez un email valide';
-          return null;
-        },
-        onSaved: (value) => _email = value!,
-      ),
-    );
+    fields.add(TextFormField(
+      decoration: const InputDecoration(labelText: 'Email'),
+      keyboardType: TextInputType.emailAddress,
+      validator: (value) {
+        if (value == null || value.isEmpty) return 'Veuillez entrer une adresse e-mail';
+        final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
+        if (!emailRegex.hasMatch(value)) return 'Entrez un email valide';
+        return null;
+      },
+      onSaved: (value) => _email = value!,
+    ));
     fields.add(const SizedBox(height: 16.0));
-    fields.add(
-      TextFormField(
-        decoration: InputDecoration(
-          labelText: 'Mot de passe',
-          border: const OutlineInputBorder(),
-          suffixIcon: IconButton(
-            icon: Icon(_isPasswordVisible ? Icons.visibility : Icons.visibility_off),
-            onPressed: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
-          ),
+    fields.add(TextFormField(
+      decoration: InputDecoration(
+        labelText: 'Mot de passe',
+        suffixIcon: IconButton(
+          icon: Icon(_isPasswordVisible ? Icons.visibility : Icons.visibility_off, color: theme.colorScheme.secondary),
+          onPressed: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
         ),
-        obscureText: !_isPasswordVisible,
-        validator: (value) => (value == null || value.length < 6) ? 'Le mot de passe doit faire au moins 6 caractères' : null,
-        onSaved: (value) => _password = value!,
       ),
-    );
+      obscureText: !_isPasswordVisible,
+      validator: (value) => (value == null || value.length < 6) ? 'Le mot de passe doit faire au moins 6 caractères' : null,
+      onSaved: (value) => _password = value!,
+    ));
     fields.add(const SizedBox(height: 24.0));
 
     // --- Champs de profil communs ---
@@ -167,7 +223,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     // --- Champs Spécifiques au rôle ---
     if (widget.role == 'client') {
       fields.add(_buildTextField('adresse', 'Adresse'));
-      fields.add(_buildSexeDropdown());
+      fields.add(_buildSexeDropdown(context));
     } else if (widget.role == 'artisan') {
       fields.addAll([
         _buildTextField('specialite', 'Spécialité'),
@@ -176,8 +232,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
         _buildTextField('horaires_ouverture', 'Horaires d\'ouverture'),
         _buildTextField('siret', 'Numéro SIRET (Optionnel)'),
         _buildTextField('site_web', 'Site Web (Optionnel)'),
-        _buildLanguagesPicker(),
-        _buildAssuranceSwitch(),
+        _buildLanguagesPicker(context),
+        _buildAssuranceSwitch(context),
       ]);
     } else if (widget.role == 'commercant') {
       fields.addAll([
@@ -187,8 +243,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
         _buildTextField('horaires_ouverture', 'Horaires d\'ouverture'),
         _buildTextField('siret', 'Numéro SIRET (Optionnel)'),
         _buildTextField('site_web', 'Site Web (Optionnel)'),
-        _buildLanguagesPicker(),
-        _buildAssuranceSwitch(),
+        _buildLanguagesPicker(context),
+        _buildAssuranceSwitch(context),
       ]);
     }
     
@@ -201,11 +257,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
           padding: const EdgeInsets.only(bottom: 10),
           child: Column(
             children: [
-              Lottie.asset('assets/lottie/error.json', height: 80),
+              Lottie.asset('assets/lottie/error.json', height: 80, errorBuilder: (context, error, stackTrace) => Icon(Icons.error, color: theme.colorScheme.error, size: 60)),
               const SizedBox(height: 8),
               Text(
                 _errorMessage,
-                style: const TextStyle(color: Colors.red, fontSize: 14),
+                style: TextStyle(color: theme.colorScheme.error, fontSize: 14),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -217,11 +273,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
       fields.add(Center(child: Lottie.asset('assets/lottie/loading.json', height: 100)));
     } else {
       fields.add(
-        ElevatedButton(
-          onPressed: _tryRegister,
-          child: const Text('S\'inscrire'),
-          style: ElevatedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(vertical: 16.0),
+        MouseRegion(
+          onEnter: (_) => setState(() => _isHoveringRegister = true),
+          onExit: (_) => setState(() => _isHoveringRegister = false),
+          child: ElevatedButton(
+            onPressed: _tryRegister,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: _isHoveringRegister ? theme.colorScheme.secondary : theme.colorScheme.primary,
+              foregroundColor: theme.colorScheme.onSecondary,
+            ),
+            child: const Text('S\'inscrire'),
           ),
         ),
       );
@@ -235,14 +296,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: TextFormField(
         controller: _controllers[key],
-        decoration: InputDecoration(
-          labelText: label,
-          border: const OutlineInputBorder(),
-        ),
+        decoration: InputDecoration(labelText: label),
         maxLines: maxLines,
         keyboardType: keyboardType,
         validator: (value) {
-          if (!key.contains('(Optionnel)') && (value == null || value.isEmpty)) {
+          if (!label.contains('(Optionnel)') && (value == null || value.isEmpty)) {
             return 'Ce champ est requis';
           }
           return null;
@@ -251,15 +309,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
   
-  Widget _buildSexeDropdown() {
+  Widget _buildSexeDropdown(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: DropdownButtonFormField<String>(
         value: _sexe,
-        decoration: const InputDecoration(
-          labelText: 'Sexe',
-          border: OutlineInputBorder(),
-        ),
+        decoration: const InputDecoration(labelText: 'Sexe'),
         items: ['Homme', 'Femme', 'Autre'].map((String value) {
           return DropdownMenuItem<String>(
             value: value,
@@ -276,7 +331,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  Widget _buildAssuranceSwitch() {
+  Widget _buildAssuranceSwitch(BuildContext context) {
+    final theme = Theme.of(context);
     return SwitchListTile(
       title: const Text('Assurance professionnelle'),
       value: _assuranceProfessionnelle,
@@ -285,23 +341,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
           _assuranceProfessionnelle = value;
         });
       },
+      activeColor: theme.colorScheme.primary,
+      inactiveThumbColor: theme.colorScheme.surface,
     );
   }
 
-  Widget _buildLanguagesPicker() {
+  Widget _buildLanguagesPicker(BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: InputDecorator(
-        decoration: const InputDecoration(
-          labelText: 'Langues parlées',
-          border: OutlineInputBorder(),
-        ),
+        decoration: const InputDecoration(labelText: 'Langues parlées'),
         child: Wrap(
           spacing: 8.0,
           children: _availableLanguages.map((lang) {
+            final isSelected = _selectedLangues.contains(lang);
             return FilterChip(
               label: Text(lang),
-              selected: _selectedLangues.contains(lang),
+              selected: isSelected,
               onSelected: (bool selected) {
                 setState(() {
                   if (selected) {
@@ -311,6 +368,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   }
                 });
               },
+              backgroundColor: theme.colorScheme.surface.withOpacity(0.5),
+              selectedColor: theme.colorScheme.primary,
+              labelStyle: TextStyle(color: isSelected ? Colors.black : Colors.white),
+              shape: StadiumBorder(
+                side: BorderSide(
+                  color: isSelected ? theme.colorScheme.primary : theme.colorScheme.secondary.withOpacity(0.5),
+                ),
+              ),
             );
           }).toList(),
         ),
