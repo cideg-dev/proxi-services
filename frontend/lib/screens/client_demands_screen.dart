@@ -7,6 +7,8 @@ import 'package:provider/provider.dart';
 import '../services/demand_service.dart';
 import '../widgets/glass_card.dart';
 import 'demand_detail_screen.dart';
+import 'package:lottie/lottie.dart';
+import '../widgets/empty_state.dart';
 
 class ClientDemandsScreen extends StatefulWidget {
   const ClientDemandsScreen({Key? key}) : super(key: key);
@@ -130,7 +132,7 @@ class _ClientDemandsScreenState extends State<ClientDemandsScreen> {
 
   Widget _buildBody() {
     if (_userRole == null) {
-      return const Center(child: CircularProgressIndicator());
+      return Center(child: Lottie.asset('assets/lottie/loading.json', width: 150, height: 150));
     }
 
     if (_userRole != 'client') {
@@ -147,17 +149,20 @@ class _ClientDemandsScreenState extends State<ClientDemandsScreen> {
     }
 
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return Center(child: Lottie.asset('assets/lottie/loading.json', width: 150, height: 150));
     }
     if (_error != null) {
-      return Center(child: Text(_error!));
+      return EmptyState(message: _error!);
     }
     if (_demands.isEmpty) {
       return RefreshIndicator(
         onRefresh: _loadDemands,
         child: ListView(
-          children: const [
-            Center(child: Text('Vous n\'avez fait aucune demande.'))
+          children: [
+            SizedBox(
+              height: MediaQuery.of(context).size.height * 0.6,
+              child: const EmptyState(message: 'Vous n\'avez fait aucune demande.'),
+            )
           ],
         ),
       );

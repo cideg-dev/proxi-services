@@ -11,6 +11,7 @@ import 'package:frontend/screens/my_groups_screen.dart';
 import 'package:frontend/screens/create_group_screen.dart';
 import 'package:frontend/widgets/in_app_notification.dart';
 import 'dart:async';
+import 'package:google_fonts/google_fonts.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -66,24 +67,103 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    final colorSchemeSeed = Color(0xFF00FFC2);
+    const primaryNeon = Color(0xFF00FFC2);
+    const secondaryNeon = Color(0xFFFF6EC7);
+    const darkBackground = Color(0xFF121212);
+    const darkSurface = Color(0xFF1E1E1E);
 
-    final lightTheme = ThemeData(
-      useMaterial3: true,
-      brightness: Brightness.light,
-      colorScheme: ColorScheme.fromSeed(seedColor: colorSchemeSeed, brightness: Brightness.light),
+    final baseDarkTheme = ThemeData.dark(useMaterial3: true);
+    final darkTheme = baseDarkTheme.copyWith(
+      scaffoldBackgroundColor: darkBackground,
+      primaryColor: primaryNeon,
+      colorScheme: baseDarkTheme.colorScheme.copyWith(
+        primary: primaryNeon,
+        secondary: secondaryNeon,
+        surface: darkSurface,
+        onSurface: Colors.white,
+        background: darkBackground,
+        onBackground: Colors.white,
+        brightness: Brightness.dark,
+      ),
+      textTheme: GoogleFonts.poppinsTextTheme(baseDarkTheme.textTheme).apply(
+        bodyColor: Colors.white,
+        displayColor: Colors.white,
+      ),
+      appBarTheme: const AppBarTheme(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        foregroundColor: Colors.white,
+      ),
+      cardColor: darkSurface,
+      cardTheme: CardTheme(
+        elevation: 0,
+        color: darkSurface.withOpacity(0.5),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.0),
+        ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: darkSurface.withOpacity(0.5),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.0),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.0),
+          borderSide: const BorderSide(color: primaryNeon, width: 2.0),
+        ),
+        labelStyle: GoogleFonts.poppins(color: Colors.white70),
+        hintStyle: GoogleFonts.poppins(color: Colors.white54),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: primaryNeon,
+          foregroundColor: Colors.black,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12.0),
+          ),
+          textStyle: GoogleFonts.poppins(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: primaryNeon,
+          textStyle: GoogleFonts.poppins(),
+        ),
+      ),
+    );
+
+    // A more modern light theme to match
+    final baseLightTheme = ThemeData.light(useMaterial3: true);
+    final lightTheme = baseLightTheme.copyWith(
+      primaryColor: primaryNeon,
+      colorScheme: baseLightTheme.colorScheme.copyWith(
+        primary: primaryNeon,
+        secondary: secondaryNeon,
+      ),
+      textTheme: GoogleFonts.poppinsTextTheme(baseLightTheme.textTheme),
       appBarTheme: AppBarTheme(
         backgroundColor: Colors.grey[50],
         foregroundColor: Colors.black87,
         elevation: 0.5,
       ),
-    );
-
-    final darkTheme = ThemeData(
-      useMaterial3: true,
-      brightness: Brightness.dark,
-      colorScheme: ColorScheme.fromSeed(seedColor: colorSchemeSeed, brightness: Brightness.dark),
-      scaffoldBackgroundColor: const Color(0xFF121212),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: primaryNeon,
+          foregroundColor: Colors.black,
+           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12.0),
+          ),
+           textStyle: GoogleFonts.poppins(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
     );
 
     return Consumer<ThemeProvider>(

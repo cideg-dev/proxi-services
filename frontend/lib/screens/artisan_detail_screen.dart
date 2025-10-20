@@ -5,6 +5,9 @@ import 'package:frontend/services/token_manager.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:frontend/services/api_constants.dart';
 import 'dart:ui'; // For BackdropFilter
+import 'package:frontend/widgets/glass_card.dart';
+import 'package:lottie/lottie.dart';
+import 'package:frontend/widgets/empty_state.dart';
 
 class ArtisanDetailScreen extends StatefulWidget {
   final int artisanId;
@@ -129,13 +132,13 @@ class _ArtisanDetailScreenState extends State<ArtisanDetailScreen> {
         future: _dataFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return Center(child: Lottie.asset('assets/lottie/loading.json', width: 150, height: 150));
           }
           if (snapshot.hasError) {
-            return Center(child: Text('Erreur de chargement: ${snapshot.error}'));
+            return EmptyState(message: 'Erreur de chargement: ${snapshot.error}');
           }
           if (!snapshot.hasData) {
-            return const Center(child: Text('Professionnel non trouvé.'));
+            return const EmptyState(message: 'Professionnel non trouvé.');
           }
 
           final professional = snapshot.data!;
@@ -259,14 +262,24 @@ class _ArtisanDetailScreenState extends State<ArtisanDetailScreen> {
     return _buildSection(
       title: 'Avis',
       content: _professionalReviews.isEmpty
-          ? const Text('Aucun avis pour le moment.')
+          ? const EmptyState(message: 'Aucun avis pour le moment.')
           : Column(
               children: _professionalReviews.map((review) {
-                return Card(
+                return GlassCard(
                   margin: const EdgeInsets.symmetric(vertical: 4.0),
-                  child: ListTile(
-                    title: Text(review['comment']),
-                    subtitle: Text('${review['client_name']} - ${review['rating']}/5'),
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(review['comment']),
+                      const SizedBox(height: 8),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Text('${review['client_name']} - ${review['rating']}/5', style: Theme.of(context).textTheme.bodySmall),
+                        ],
+                      ),
+                    ],
                   ),
                 );
               }).toList(),
@@ -278,7 +291,7 @@ class _ArtisanDetailScreenState extends State<ArtisanDetailScreen> {
     return _buildSection(
       title: 'Portfolio',
       content: _professionalPortfolio.isEmpty
-          ? const Text('Aucun élément de portfolio pour le moment.')
+          ? const EmptyState(message: 'Aucun élément de portfolio pour le moment.')
           : GridView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
@@ -307,10 +320,10 @@ class _ArtisanDetailScreenState extends State<ArtisanDetailScreen> {
     return _buildSection(
       title: 'Questions & Réponses',
       content: _questions.isEmpty
-          ? const Text('Aucune question pour le moment. Soyez le premier à en poser une !')
+          ? const EmptyState(message: 'Aucune question pour le moment. Soyez le premier à en poser une !')
           : Column(
               children: _questions.map((q) {
-                return Card(
+                return GlassCard(
                   margin: const EdgeInsets.symmetric(vertical: 4.0),
                   child: ExpansionTile(
                     title: Text(q['question_text']),
@@ -331,14 +344,24 @@ class _ArtisanDetailScreenState extends State<ArtisanDetailScreen> {
     return _buildSection(
       title: 'Services',
       content: _professionalServices.isEmpty
-          ? const Text('Aucun service proposé pour le moment.')
+          ? const EmptyState(message: 'Aucun service proposé pour le moment.')
           : Column(
               children: _professionalServices.map((service) {
-                return Card(
+                return GlassCard(
                   margin: const EdgeInsets.symmetric(vertical: 4.0),
-                  child: ListTile(
-                    title: Text(service['name']),
-                    subtitle: Text('${service['description']} - ${service['price']} €'),
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(service['name'], style: Theme.of(context).textTheme.titleMedium),
+                      const SizedBox(height: 4),
+                      Text(service['description']),
+                      const SizedBox(height: 8),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: Text('${service['price']} €', style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Theme.of(context).colorScheme.primary)),
+                      ),
+                    ],
                   ),
                 );
               }).toList(),

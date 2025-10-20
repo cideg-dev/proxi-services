@@ -6,6 +6,8 @@ import 'package:frontend/services/token_manager.dart'; // Import TokenManager
 import 'package:provider/provider.dart';
 import '../services/demand_service.dart';
 import '../widgets/glass_card.dart';
+import 'package:lottie/lottie.dart';
+import '../widgets/empty_state.dart';
 
 class ArtisanDemandsScreen extends StatefulWidget {
   const ArtisanDemandsScreen({Key? key}) : super(key: key);
@@ -140,7 +142,7 @@ class _ArtisanDemandsScreenState extends State<ArtisanDemandsScreen> {
   Widget _buildBody() {
     // First, check if the role has been determined
     if (_userRole == null) {
-      return const Center(child: CircularProgressIndicator());
+      return Center(child: Lottie.asset('assets/lottie/loading.json', width: 150, height: 150));
     }
 
     // If the user is not an artisan, show an access denied message
@@ -159,19 +161,19 @@ class _ArtisanDemandsScreenState extends State<ArtisanDemandsScreen> {
 
     // Original body logic for artisans
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return Center(child: Lottie.asset('assets/lottie/loading.json', width: 150, height: 150));
     }
     if (_error != null) {
-      return Center(child: Text(_error!));
+      return EmptyState(message: _error!);
     }
     if (_demands.isEmpty) {
       return RefreshIndicator(
         onRefresh: _loadDemands,
         child: ListView(
-          children: const [
-            Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Center(child: Text('Vous n\'avez reçu aucune demande.')),
+          children: [
+            SizedBox(
+              height: MediaQuery.of(context).size.height * 0.6,
+              child: const EmptyState(message: 'Vous n\'avez reçu aucune demande.'),
             )
           ],
         ),
