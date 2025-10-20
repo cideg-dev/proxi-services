@@ -4,6 +4,7 @@ import '../services/auth_service.dart';
 import '../services/chat_service.dart'; // Importer le ChatService
 import 'register_choice_screen.dart';
 import 'home_screen.dart';
+import '../widgets/glass_card.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);

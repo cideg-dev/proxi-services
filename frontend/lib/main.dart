@@ -95,7 +95,7 @@ class _MyAppState extends State<MyApp> {
         foregroundColor: Colors.white,
       ),
       cardColor: darkSurface,
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         elevation: 0,
         color: darkSurface.withOpacity(0.5),
         shape: RoundedRectangleBorder(

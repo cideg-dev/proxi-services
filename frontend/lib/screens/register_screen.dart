@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/services/auth_service.dart';
 import 'package:lottie/lottie.dart';
 import 'home_screen.dart';
+import '../widgets/glass_card.dart';
 
 class RegisterScreen extends StatefulWidget {
   final String role;
