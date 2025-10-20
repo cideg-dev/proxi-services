@@ -101,8 +101,27 @@ const io = new Server(server, {
 });
 
 // Middlewares
+const allowedOrigins = [
+    process.env.FRONTEND_URL || 'http://localhost:5173',
+    'http://localhost:2438',
+    'https://cideg-dev.github.io',
+    'https://cideg-dev.github.io.' // The problematic one from the error log
+];
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    // The endsWith('.') check is a workaround for the specific error observed.
+    if (allowedOrigins.indexOf(origin) !== -1 || (origin.endsWith('.') && allowedOrigins.indexOf(origin.slice(0, -1)) !== -1)) {
+      callback(null, true);
+    } else {
+      var msg = 'The CORS policy for this site does not ' +
+                'allow access from the specified Origin.';
+      callback(new Error(msg), false);
+    }
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true
 }));
