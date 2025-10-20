@@ -33,29 +33,55 @@ class _ArtisanDetailScreenState extends State<ArtisanDetailScreen> {
   @override
   void initState() {
     super.initState();
+    // Fetch main professional data first
     _dataFuture = _fetchProfessionalDetails();
+    // Then load secondary data independently
+    _loadSecondaryData();
     _loadUserData();
   }
 
   Future<Map<String, dynamic>> _fetchProfessionalDetails() async {
-    final results = await Future.wait([
-      _artisanService.getArtisanById(widget.artisanId),
-      _artisanService.getArtisanReviews(widget.artisanId),
-      _artisanService.getArtisanPortfolio(widget.artisanId),
-      _artisanService.getArtisanServices(widget.artisanId),
-      _qaService.getQuestions(widget.artisanId),
-    ]);
-
-    setState(() {
-      _professionalReviews = results[1] as List<dynamic>;
-      _professionalPortfolio = results[2] as List<dynamic>;
-      _professionalServices = results[3] as List<dynamic>;
-      _questions = results[4] as List<dynamic>;
-    });
-
-    final professionalData = results[0] as Map<String, dynamic>;
+    final professionalData = await _artisanService.getArtisanById(widget.artisanId);
     _checkFavoriteStatus(professionalData['id']); // Check favorite status after loading details
     return professionalData;
+  }
+
+  void _loadSecondaryData() async {
+    // Load reviews
+    try {
+      final reviews = await _artisanService.getArtisanReviews(widget.artisanId);
+      if (mounted) setState(() => _professionalReviews = reviews);
+    } catch (e) {
+      print('Failed to load reviews: $e');
+      if (mounted) setState(() => _professionalReviews = []); // Ensure it's an empty list on error
+    }
+
+    // Load portfolio
+    try {
+      final portfolio = await _artisanService.getArtisanPortfolio(widget.artisanId);
+      if (mounted) setState(() => _professionalPortfolio = portfolio);
+    } catch (e) {
+      print('Failed to load portfolio: $e');
+      if (mounted) setState(() => _professionalPortfolio = []); // Ensure it's an empty list on error
+    }
+
+    // Load services
+    try {
+      final services = await _artisanService.getArtisanServices(widget.artisanId);
+      if (mounted) setState(() => _professionalServices = services);
+    } catch (e) {
+      print('Failed to load services: $e');
+      if (mounted) setState(() => _professionalServices = []); // Ensure it's an empty list on error
+    }
+
+    // Load questions
+    try {
+      final questions = await _qaService.getQuestions(widget.artisanId);
+      if (mounted) setState(() => _questions = questions);
+    } catch (e) {
+      print('Failed to load questions: $e');
+      if (mounted) setState(() => _questions = []); // Ensure it's an empty list on error
+    }
   }
 
   void _loadUserData() async {
