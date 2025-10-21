@@ -24,15 +24,15 @@ module.exports = function() {
       body('profileData.sexe', 'Le sexe est requis').if(body('role').equals('client')).notEmpty(),
 
       body('profileData.nom_complet', 'Le nom complet est requis').if(body('role').equals('artisan')).notEmpty(),
-      body('profileData.specialite', 'La spécialité est requise').if(body('role').equals('artisan')).notEmpty(),
-      body('profileData.location', 'La localisation est requise').if(body('role').equals('artisan')).notEmpty(),
-      body('profileData.telephone', 'Le numéro de téléphone est requis').if(body('role').equals('artisan')).notEmpty(),
-      body('profileData.annees_experience', 'Les années d\'expérience sont requises').if(body('role').equals('artisan')).notEmpty().isInt(),
+      body('profileData.specialite', 'La spécialité est requise').if(body('role').equals('artisan')).optional(),
+      body('profileData.location', 'La localisation est requise').if(body('role').equals('artisan')).optional(),
+      body('profileData.telephone', 'Le numéro de téléphone est requis').if(body('role').equals('artisan')).optional(),
+      body('profileData.annees_experience', 'Les années d\'expérience sont requises').if(body('role').equals('artisan')).optional().isInt(),
 
       body('profileData.nom_entreprise', 'Le nom de l\'entreprise est requis').if(body('role').equals('commercant')).notEmpty(),
-      body('profileData.type_commerce', 'Le type de commerce est requis').if(body('role').equals('commercant')).notEmpty(),
+      body('profileData.type_commerce', 'Le type de commerce est requis').if(body('role').equals('commercant')).optional(),
       body('profileData.adresse', 'L\'adresse est requise').if(body('role').equals('commercant')).notEmpty(),
-      body('profileData.location', 'La localisation est requise').if(body('role').equals('commercant')).notEmpty(),
+      body('profileData.location', 'La localisation est requise').if(body('role').equals('commercant')).optional(),
       body('profileData.telephone', 'Le numéro de téléphone est requis').if(body('role').equals('commercant')).notEmpty(),
     ],
     async (req, res) => {

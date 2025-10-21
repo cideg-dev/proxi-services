@@ -223,7 +223,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
 
     // --- Champs de profil communs ---
     fields.add(_buildTextField('nom_complet', widget.role == 'commercant' ? 'Nom de l\'entreprise' : 'Nom complet'));
-    fields.add(_buildTextField('telephone', 'Téléphone'));
+    fields.add(_buildTextField('telephone', 'Téléphone (Optionnel)'));
     fields.add(_buildTextField('location', 'Coordonnées GPS (lat,lon) (Optionnel)'));
 
     // --- Champs Spécifiques au rôle ---
@@ -232,9 +232,9 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
       fields.add(_buildSexeDropdown(context));
     } else if (widget.role == 'artisan') {
       fields.addAll([
-        _buildTextField('specialite', 'Spécialité'),
+        _buildTextField('specialite', 'Spécialité (Optionnel)'),
         _buildTextField('description', 'Description', maxLines: 3),
-        _buildTextField('annees_experience', 'Années d\'expérience', keyboardType: TextInputType.number),
+        _buildTextField('annees_experience', 'Années d\'expérience (Optionnel)', keyboardType: TextInputType.number),
         _buildTextField('horaires_ouverture', 'Horaires d\'ouverture'),
         _buildTextField('siret', 'Numéro SIRET (Optionnel)'),
         _buildTextField('site_web', 'Site Web (Optionnel)'),
