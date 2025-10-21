@@ -70,7 +70,7 @@ module.exports = function() {
         switch (role) {
           case 'client':
             profileTable = 'client_profiles';
-            profileColumns = ['nom_complet', 'sexe', 'location', 'telephone', 'adresse'];
+            profileColumns = ['nom_complet', 'sexe', 'location', 'telephone'];
             break;
           case 'artisan':
             profileTable = 'artisan_profiles';
