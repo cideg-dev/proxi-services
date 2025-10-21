@@ -1684,6 +1684,60 @@ app.get('/api/profile', authenticateToken, async (req, res) => {
   }
 });
 
+// GET /api/profile/:userId - Get a specific user's profile and completeness
+app.get('/api/profile/:userId', authenticateToken, async (req, res) => {
+  const requestedUserId = parseInt(req.params.userId);
+  const loggedInUserId = req.user.user.id;
+  const loggedInUserRole = req.user.user.role;
+
+  // Authorization: Only the user themselves or an admin can view a specific profile
+  if (loggedInUserId !== requestedUserId && loggedInUserRole !== 'admin') {
+    return res.status(403).json({ message: 'Action non autorisée. Vous ne pouvez voir que votre propre profil ou être administrateur.' });
+  }
+
+  try {
+    // The user's email and role are fundamental, let's get them directly.
+    const userResult = await pool.query('SELECT id, email, role FROM users WHERE id = $1', [requestedUserId]);
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ message: 'Utilisateur non trouvé.' });
+    }
+    const userData = userResult.rows[0];
+    const userRole = userData.role;
+
+    let profileData = null;
+    let profileCompleteness = 0;
+    let profileQuery = '';
+
+    if (userRole === 'client') {
+      profileQuery = 'SELECT * FROM client_profiles WHERE user_id = $1';
+    } else if (userRole === 'artisan') {
+      profileQuery = 'SELECT * FROM artisan_profiles WHERE user_id = $1';
+    } else if (userRole === 'commercant') {
+      profileQuery = 'SELECT * FROM commercant_profiles WHERE user_id = $1';
+    }
+
+    if (profileQuery) {
+      const profileResult = await pool.query(profileQuery, [requestedUserId]);
+      if (profileResult.rows.length > 0) {
+        profileData = profileResult.rows[0];
+        profileCompleteness = calculateProfileCompleteness(profileData, userRole);
+      }
+    }
+
+    // Combine user data and profile data
+    const fullProfile = {
+      ...userData, // id, email, role
+      ...(profileData || {})
+    };
+
+    res.json({ profile: fullProfile, completeness: profileCompleteness });
+
+  } catch (error) {
+    console.error('Error fetching specific user profile:', error);
+    res.status(500).json({ message: 'Erreur interne du serveur lors de la récupération du profil.' });
+  }
+});
+
 
 // GET /api/professionals/featured - Get a few featured artisans and commercants
 app.get('/api/professionals/featured', async (req, res) => {
