@@ -190,7 +190,7 @@ class _ArtisanDemandsScreenState extends State<ArtisanDemandsScreen> {
           final isPending = demand['status'] == 'pending';
 
           return Padding(
-            padding: const EdgeInsets.only(bottom: 8.0),
+            padding: const EdgeInsets.all(8.0), // Changed from only(bottom: 8.0) to all(8.0) for consistency
             child: GlassCard(
               child: ListTile(
                 title: Text('Demande de ${demand['clientNom'] ?? 'Client inconnu'}'),

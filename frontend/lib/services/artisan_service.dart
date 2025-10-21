@@ -172,6 +172,27 @@ class ArtisanService {
     }
   }
 
+  Future<List<dynamic>> getFeaturedProfessionals() async {
+    final token = await _tokenManager.getToken();
+    if (token == null) {
+      throw Exception('Authentication token not found.');
+    }
+
+    final response = await http.get(
+      Uri.parse('${ApiConstants.baseUrl}/api/professionals/featured'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Failed to load featured professionals: ${response.body}');
+    }
+  }
+
   // --- Service Management ---
 
   Future<List<dynamic>> getMyArtisanServices() async {

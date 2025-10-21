@@ -215,4 +215,31 @@ class AuthService {
       }
     }
   }
+
+  Future<Map<String, dynamic>> getProfileById(int userId) async {
+    final token = await _tokenManager.getToken();
+    if (token == null) {
+      throw Exception('No token found');
+    }
+
+    final response = await http.get(
+      Uri.parse('${ApiConstants.baseUrl}/api/profile/$userId'), // Assuming a /api/profile/:userId endpoint
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      try {
+        final errorBody = jsonDecode(response.body);
+        final errorMessage = errorBody['message'] ?? 'Failed to load profile';
+        throw Exception(errorMessage);
+      } catch (e) {
+        throw Exception('Failed to load profile: ${response.body}');
+      }
+    }
+  }
 }

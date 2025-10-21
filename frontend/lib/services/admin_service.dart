@@ -49,6 +49,34 @@ class AdminService {
     }
   }
 
+    // Get all users for the global list with optional role filter and search
+  Future<List<dynamic>> getAllUsers({String? role, String? search}) async {
+    final token = await _tokenManager.getToken();
+    if (token == null) {
+      throw Exception('Authentication token not found.');
+    }
+
+    final Map<String, String> queryParams = {};
+    if (role != null) queryParams['role'] = role;
+    if (search != null && search.isNotEmpty) queryParams['search'] = search;
+
+    final uri = Uri.parse('${ApiConstants.baseUrl}/api/users/all').replace(queryParameters: queryParams);
+
+    final response = await http.get(
+      uri,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Failed to load all users');
+    }
+  }
+
   // Get all users for admin panel with pagination and search
   Future<Map<String, dynamic>> getUsers({int page = 1, int limit = 10, String search = ''}) async {
     final token = await _tokenManager.getToken();

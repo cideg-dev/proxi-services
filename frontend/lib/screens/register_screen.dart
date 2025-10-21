@@ -224,7 +224,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
     // --- Champs de profil communs ---
     fields.add(_buildTextField('nom_complet', widget.role == 'commercant' ? 'Nom de l\'entreprise' : 'Nom complet'));
     fields.add(_buildTextField('telephone', 'Téléphone'));
-    fields.add(_buildTextField('location', 'Coordonnées GPS (lat,lon)'));
+    fields.add(_buildTextField('location', 'Coordonnées GPS (lat,lon) (Optionnel)'));
 
     // --- Champs Spécifiques au rôle ---
     if (widget.role == 'client') {
@@ -243,7 +243,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
       ]);
     } else if (widget.role == 'commercant') {
       fields.addAll([
-        _buildTextField('type_commerce', 'Type de commerce'),
+        _buildTextField('type_commerce', 'Type de commerce (Optionnel)'),
         _buildTextField('description', 'Description', maxLines: 3),
         _buildTextField('adresse', 'Adresse'),
         _buildTextField('horaires_ouverture', 'Horaires d\'ouverture'),
@@ -263,7 +263,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
           padding: const EdgeInsets.only(bottom: 10),
           child: Column(
             children: [
-              Lottie.asset('assets/lottie/error.json', height: 80, errorBuilder: (context, error, stackTrace) => Icon(Icons.error, color: theme.colorScheme.error, size: 60)),
+              Lottie.asset('lottie/error.json', height: 80, errorBuilder: (context, error, stackTrace) => Icon(Icons.error, color: theme.colorScheme.error, size: 60)),
               const SizedBox(height: 8),
               Text(
                 _errorMessage,
@@ -276,7 +276,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
       );
     }
     if (_isLoading) {
-      fields.add(Center(child: Lottie.asset('assets/lottie/loading.json', height: 100)));
+      fields.add(Center(child: Lottie.asset('lottie/loading.json', height: 100)));
     } else {
       fields.add(
         MouseRegion(
@@ -301,7 +301,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: TextFormField(
-        controller: _controllers[key],
+        controller: _controllers[key] ?? TextEditingController(),
         decoration: InputDecoration(labelText: label),
         maxLines: maxLines,
         keyboardType: keyboardType,
@@ -376,7 +376,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
               },
               backgroundColor: theme.colorScheme.surface.withOpacity(0.5),
               selectedColor: theme.colorScheme.primary,
-              labelStyle: TextStyle(color: isSelected ? Colors.black : Colors.white),
+              labelStyle: TextStyle(color: isSelected ? Colors.black : theme.colorScheme.onSurface),
               shape: StadiumBorder(
                 side: BorderSide(
                   color: isSelected ? theme.colorScheme.primary : theme.colorScheme.secondary.withOpacity(0.5),

@@ -132,7 +132,7 @@ class _ClientDemandsScreenState extends State<ClientDemandsScreen> {
 
   Widget _buildBody() {
     if (_userRole == null) {
-      return Center(child: Lottie.asset('assets/lottie/loading.json', width: 150, height: 150));
+      return Center(child: Lottie.asset('lottie/loading.json', width: 150, height: 150));
     }
 
     if (_userRole != 'client') {

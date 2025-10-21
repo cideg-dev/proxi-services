@@ -174,7 +174,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                 padding: const EdgeInsets.only(bottom: 10),
                                 child: Column(
                                   children: [
-                                    Lottie.asset('assets/lottie/error.json', height: 80, errorBuilder: (context, error, stackTrace) => Icon(Icons.error, color: theme.colorScheme.error, size: 60)),
+                                    Lottie.asset('lottie/error.json', height: 80, errorBuilder: (context, error, stackTrace) => Icon(Icons.error, color: theme.colorScheme.error, size: 60)),
                                     const SizedBox(height: 8),
                                     Text(
                                       _errorMessage,
@@ -185,7 +185,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                 ),
                               ),
                             if (_isLoading)
-                              Center(child: Lottie.asset('assets/lottie/loading.json', height: 100))
+                              Center(child: Lottie.asset('lottie/loading.json', height: 100))
                             else
                               MouseRegion(
                                 onEnter: (_) => setState(() => _isHoveringLogin = true),

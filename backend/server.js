@@ -103,9 +103,8 @@ const io = new Server(server, {
 // Middlewares
 const allowedOrigins = [
     process.env.FRONTEND_URL || 'http://localhost:5173',
-    'http://localhost:2438',
-    'https://cideg-dev.github.io',
-    'https://cideg-dev.github.io.' // The problematic one from the error log
+    'http://localhost:2438', // For Flutter web development
+    'https://cideg-dev.github.io' // Explicitly allow the deployed GitHub Pages URL
 ];
 
 app.use(cors({
@@ -113,12 +112,11 @@ app.use(cors({
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     
-    // The endsWith('.') check is a workaround for the specific error observed.
-    if (allowedOrigins.indexOf(origin) !== -1 || (origin.endsWith('.') && allowedOrigins.indexOf(origin.slice(0, -1)) !== -1)) {
+    if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
       var msg = 'The CORS policy for this site does not ' +
-                'allow access from the specified Origin.';
+                'allow access from the specified Origin: ' + origin;
       callback(new Error(msg), false);
     }
   },
@@ -1686,6 +1684,88 @@ app.get('/api/profile', authenticateToken, async (req, res) => {
   }
 });
 
+
+// GET /api/professionals/featured - Get a few featured artisans and commercants
+app.get('/api/professionals/featured', async (req, res) => {
+  try {
+    // Fetch a few random artisans
+    const artisansResult = await pool.query(
+      `SELECT
+         u.id, u.email, u.role, ap.nom_complet as name, ap.photo_url, ap.specialite as specialty_or_type
+       FROM users u
+       JOIN artisan_profiles ap ON u.id = ap.user_id
+       WHERE u.role = 'artisan'
+       ORDER BY RANDOM()
+       LIMIT 2`
+    );
+
+    // Fetch a few random commercants
+    const commercantsResult = await pool.query(
+      `SELECT
+         u.id, u.email, u.role, cp.nom_entreprise as name, cp.photo_url, cp.type_commerce as specialty_or_type
+       FROM users u
+       JOIN commercant_profiles cp ON u.id = cp.user_id
+       WHERE u.role = 'commercant'
+       ORDER BY RANDOM()
+       LIMIT 2`
+    );
+
+    const featuredProfessionals = [...artisansResult.rows, ...commercantsResult.rows];
+
+    res.json(featuredProfessionals);
+
+  } catch (error) {
+    console.error('Error fetching featured professionals:', error);
+    res.status(500).json({ message: 'Erreur interne du serveur lors de la récupération des professionnels en vedette.' });
+  }
+});
+
+// GET /api/users/all - Get all users with their profiles, with optional role filter and search
+app.get('/api/users/all', authenticateToken, async (req, res) => {
+  const { role, search } = req.query;
+
+  try {
+    let query = `
+      SELECT
+        u.id, u.email, u.role,
+        COALESCE(cp.nom_complet, ap.nom_complet, comp.nom_entreprise) AS name,
+        COALESCE(cp.photo_url, ap.photo_url, comp.photo_url) AS photo_url,
+        COALESCE(ap.specialite, comp.type_commerce) AS specialty_or_type
+      FROM users u
+      LEFT JOIN client_profiles cp ON u.id = cp.user_id
+      LEFT JOIN artisan_profiles ap ON u.id = ap.user_id
+      LEFT JOIN commercant_profiles comp ON u.id = comp.user_id
+      WHERE 1=1
+    `;
+    const queryParams = [];
+    let paramIndex = 1;
+
+    if (role) {
+      query += ` AND u.role = $${paramIndex}`;
+      queryParams.push(role);
+      paramIndex++;
+    }
+
+    if (search) {
+      const searchTerm = `%${search.toLowerCase()}%`;
+      query += ` AND (
+        LOWER(u.email) LIKE $${paramIndex} OR
+        LOWER(cp.nom_complet) LIKE $${paramIndex} OR
+        LOWER(ap.nom_complet) LIKE $${paramIndex} OR
+        LOWER(comp.nom_entreprise) LIKE $${paramIndex}
+      )`;
+      queryParams.push(searchTerm);
+      paramIndex++;
+    }
+
+    const result = await pool.query(query, queryParams);
+    res.json(result.rows);
+
+  } catch (error) {
+    console.error('Error fetching all users:', error);
+    res.status(500).json({ message: 'Erreur interne du serveur lors de la récupération des utilisateurs.' });
+  }
+});
 
 // PUT /api/demandes/:id/status - Update status of a service request (by artisan)
 app.put('/api/demandes/:id/status', authenticateToken, authorizeRole(['artisan']), async (req, res) => {

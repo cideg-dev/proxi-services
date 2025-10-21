@@ -8,7 +8,8 @@ import 'package:percent_indicator/percent_indicator.dart';
 import 'package:frontend/screens/my_profile_screen.dart'; // Pour la modification
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+  final int? userId;
+  const ProfileScreen({super.key, this.userId});
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -21,7 +22,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     super.initState();
-    _profileFuture = _authService.getProfile();
+    if (widget.userId != null) {
+      _profileFuture = _authService.getProfileById(widget.userId!);
+    } else {
+      _profileFuture = _authService.getProfile();
+    }
   }
 
   // Fonction pour calculer le pourcentage de complétion du profil
