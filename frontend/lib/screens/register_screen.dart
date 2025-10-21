@@ -53,15 +53,16 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
     );
     _animationController.forward();
 
-    // Initialize controllers for common fields that are always present
-    _controllers['nom_complet'] = TextEditingController();
+    // Initialize controllers for common fields
     _controllers['telephone'] = TextEditingController();
     _controllers['location'] = TextEditingController();
     
     // Initialize controllers based on role
     if (widget.role == 'client') {
+      _controllers['nom_complet'] = TextEditingController();
       _controllers['adresse'] = TextEditingController();
     } else if (widget.role == 'artisan') {
+      _controllers['nom_complet'] = TextEditingController();
       _controllers['specialite'] = TextEditingController();
       _controllers['description'] = TextEditingController();
       _controllers['annees_experience'] = TextEditingController();
@@ -69,6 +70,8 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
       _controllers['siret'] = TextEditingController();
       _controllers['site_web'] = TextEditingController();
     } else if (widget.role == 'commercant') {
+      // Use nom_entreprise for commercant, not nom_complet
+      _controllers['nom_entreprise'] = TextEditingController(); 
       _controllers['type_commerce'] = TextEditingController();
       _controllers['description'] = TextEditingController();
       _controllers['adresse'] = TextEditingController();
@@ -98,10 +101,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
         profileData[key] = controller.text;
       });
 
-      // HOTFIX: Align frontend key 'nom_complet' with backend expectation 'nom_entreprise' for commercants
-      if (widget.role == 'commercant' && profileData.containsKey('nom_complet')) {
-        profileData['nom_entreprise'] = profileData.remove('nom_complet');
-      }
+      // The HOTFIX is now removed.
 
       // Add special fields data
       if (widget.role == 'client') {
@@ -221,8 +221,13 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
     ));
     fields.add(const SizedBox(height: 24.0));
 
-    // --- Champs de profil communs ---
-    fields.add(_buildTextField('nom_complet', widget.role == 'commercant' ? 'Nom de l\'entreprise' : 'Nom complet'));
+    // --- Champs de profil ---
+    // Use the correct field based on the role
+    if (widget.role == 'commercant') {
+      fields.add(_buildTextField('nom_entreprise', 'Nom de l\'entreprise'));
+    } else {
+      fields.add(_buildTextField('nom_complet', 'Nom complet'));
+    }
     fields.add(_buildTextField('telephone', 'Téléphone (Optionnel)'));
     fields.add(_buildTextField('location', 'Coordonnées GPS (lat,lon) (Optionnel)'));
 
