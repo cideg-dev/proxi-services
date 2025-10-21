@@ -48,178 +48,179 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     final theme = Theme.of(context);
     final items = _buildDashboardItems(context);
 
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              FutureBuilder<Map<String, dynamic>>(
-                future: AuthService().getProfile(), // Fetch profile to get user's name
-                builder: (context, snapshot) {
-                  String userName = 'Utilisateur';
-                  if (snapshot.hasData && snapshot.data!['profile'] != null) {
-                    final profile = snapshot.data!['profile'];
-                    if (widget.userRole == 'client' || widget.userRole == 'artisan') {
-                      userName = profile['nom_complet'] ?? 'Utilisateur';
-                    } else if (widget.userRole == 'commercant') {
-                      userName = profile['nom_entreprise'] ?? 'Commerçant';
-                    }
-                  }
-                  return FadeTransition(
-                    opacity: Tween<double>(begin: 0.0, end: 1.0).animate(_animationController),
-                    child: Text(
-                      'Bonjour, $userName !',
-                      style: theme.textTheme.headlineMedium?.copyWith(
-                        color: theme.colorScheme.onSurface,
-                        fontWeight: FontWeight.bold,
+                return SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            FutureBuilder<Map<String, dynamic>>(
+                              future: AuthService().getProfile(), // Fetch profile to get user's name
+                              builder: (context, snapshot) {
+                                String userName = 'Utilisateur';
+                                if (snapshot.hasData && snapshot.data!['profile'] != null) {
+                                  final profile = snapshot.data!['profile'];
+                                  if (widget.userRole == 'client' || widget.userRole == 'artisan') {
+                                    userName = profile['nom_complet'] ?? 'Utilisateur';
+                                  } else if (widget.userRole == 'commercant') {
+                                    userName = profile['nom_entreprise'] ?? 'Commerçant';
+                                  }
+                                }
+                                return FadeTransition(
+                                  opacity: Tween<double>(begin: 0.0, end: 1.0).animate(_animationController),
+                                  child: Text(
+                                    'Bonjour, $userName !',
+                                    style: theme.textTheme.headlineMedium?.copyWith(
+                                      color: theme.colorScheme.onSurface,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                            const SizedBox(height: 16.0),
+                            FadeTransition(
+                              opacity: Tween<double>(begin: 0.0, end: 1.0).animate(
+                                CurvedAnimation(parent: _animationController, curve: const Interval(0.2, 1.0, curve: Curves.easeInOut)),
+                              ),
+                              child: TextField(
+                                decoration: InputDecoration(
+                                  hintText: 'Rechercher un service ou un professionnel...',                          
+                                  prefixIcon: Icon(Icons.search, color: theme.colorScheme.secondary),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12.0),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  filled: true,
+                                  fillColor: theme.colorScheme.surfaceVariant.withOpacity(0.5),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 24.0),
+                            FadeTransition(
+                              opacity: Tween<double>(begin: 0.0, end: 1.0).animate(
+                                CurvedAnimation(parent: _animationController, curve: const Interval(0.4, 1.0, curve: Curves.easeInOut)),
+                              ),
+                              child: Text(
+                                'Professionnels en vedette',
+                                style: theme.textTheme.titleLarge?.copyWith(
+                                  color: theme.colorScheme.onSurface,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 16.0),
+                            // Featured professionals/services
+                            FadeTransition(
+                              opacity: Tween<double>(begin: 0.0, end: 1.0).animate(
+                                CurvedAnimation(parent: _animationController, curve: const Interval(0.6, 1.0, curve: Curves.easeInOut)),
+                              ),
+                              child: SizedBox(
+                                height: 200, // Adjust height as needed
+                                child: FutureBuilder<List<dynamic>>(
+                                  future: ArtisanService().getFeaturedProfessionals(),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.connectionState == ConnectionState.waiting) {
+                                      return const Center(child: CircularProgressIndicator());
+                                    }
+                                    if (snapshot.hasError) {
+                                      return Center(child: Text('Erreur: ${snapshot.error}'));
+                                    }
+                                    if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                                      return const Center(child: Text('Aucun professionnel en vedette pour le moment.'));
+                                    }
+            
+                                    final professionals = snapshot.data!;
+            
+                                    return ListView.builder(
+                                      scrollDirection: Axis.horizontal,
+                                      itemCount: professionals.length,
+                                      itemBuilder: (context, index) {
+                                        final professional = professionals[index];
+                                        return Card(
+                                          margin: const EdgeInsets.only(right: 16.0),
+                                          child: SizedBox(
+                                            width: 150,
+                                            child: Column(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                CircleAvatar(
+                                                  radius: 40,
+                                                  backgroundImage: professional['photo_url'] != null
+                                                      ? NetworkImage('${ApiConstants.baseUrl}${professional['photo_url']}')
+                                                      : null,
+                                                  child: professional['photo_url'] == null
+                                                      ? Text(professional['name'] != null ? professional['name'][0].toUpperCase() : '')
+                                                      : null,
+                                                ),
+                                                const SizedBox(height: 8.0),
+                                                Text(
+                                                  professional['name'] ?? 'Inconnu',
+                                                  style: theme.textTheme.titleSmall,
+                                                  textAlign: TextAlign.center,
+                                                  overflow: TextOverflow.ellipsis,
+                                                ),
+                                                Text(
+                                                  professional['specialty_or_type'] ?? '',
+                                                  style: theme.textTheme.bodySmall,
+                                                  textAlign: TextAlign.center,
+                                                  overflow: TextOverflow.ellipsis,
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    );
+                                  },
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(height: 16.0),
-              FadeTransition(
-                opacity: Tween<double>(begin: 0.0, end: 1.0).animate(
-                  CurvedAnimation(parent: _animationController, curve: const Interval(0.2, 1.0, curve: Curves.easeInOut)),
-                ),
-                child: TextField(
-                  decoration: InputDecoration(
-                    hintText: 'Rechercher un service ou un professionnel...',
-                    prefixIcon: Icon(Icons.search, color: theme.colorScheme.secondary),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12.0),
-                      borderSide: BorderSide.none,
-                    ),
-                    filled: true,
-                    fillColor: theme.colorScheme.surfaceVariant.withOpacity(0.5),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24.0),
-              FadeTransition(
-                opacity: Tween<double>(begin: 0.0, end: 1.0).animate(
-                  CurvedAnimation(parent: _animationController, curve: const Interval(0.4, 1.0, curve: Curves.easeInOut)),
-                ),
-                child: Text(
-                  'Professionnels en vedette',
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    color: theme.colorScheme.onSurface,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16.0),
-              // Featured professionals/services
-              FadeTransition(
-                opacity: Tween<double>(begin: 0.0, end: 1.0).animate(
-                  CurvedAnimation(parent: _animationController, curve: const Interval(0.6, 1.0, curve: Curves.easeInOut)),
-                ),
-                child: SizedBox(
-                  height: 200, // Adjust height as needed
-                  child: FutureBuilder<List<dynamic>>(
-                    future: ArtisanService().getFeaturedProfessionals(),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
-                      if (snapshot.hasError) {
-                        return Center(child: Text('Erreur: ${snapshot.error}'));
-                      }
-                      if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                        return const Center(child: Text('Aucun professionnel en vedette pour le moment.'));
-                      }
-
-                      final professionals = snapshot.data!;
-
-                      return ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: professionals.length,
+                      GridView.builder(
+                        shrinkWrap: true, // Permet au GridView de prendre seulement l'espace nécessaire
+                        physics: const NeverScrollableScrollPhysics(), // Désactive le défilement propre au GridView
+                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          mainAxisSpacing: 16.0,
+                          crossAxisSpacing: 16.0,
+                        ),
+                        padding: const EdgeInsets.all(16.0),
+                        itemCount: items.length,
                         itemBuilder: (context, index) {
-                          final professional = professionals[index];
-                          return Card(
-                            margin: const EdgeInsets.only(right: 16.0),
-                            child: SizedBox(
-                              width: 150,
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  CircleAvatar(
-                                    radius: 40,
-                                    backgroundImage: professional['photo_url'] != null
-                                        ? NetworkImage('${ApiConstants.baseUrl}${professional['photo_url']}')
-                                        : null,
-                                    child: professional['photo_url'] == null
-                                        ? Text(professional['name'] != null ? professional['name'][0].toUpperCase() : '')
-                                        : null,
-                                  ),
-                                  const SizedBox(height: 8.0),
-                                  Text(
-                                    professional['name'] ?? 'Inconnu',
-                                    style: theme.textTheme.titleSmall,
-                                    textAlign: TextAlign.center,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  Text(
-                                    professional['specialty_or_type'] ?? '',
-                                    style: theme.textTheme.bodySmall,
-                                    textAlign: TextAlign.center,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ],
+                          // Staggered animation for each item
+                          final animation = Tween<double>(begin: 0.0, end: 1.0).animate(
+                            CurvedAnimation(
+                              parent: _animationController,
+                              curve: Interval(
+                                (1 / items.length) * index,
+                                1.0,
+                                curve: Curves.easeOut,
                               ),
                             ),
                           );
+                          return FadeTransition(
+                            opacity: animation,
+                            child: SlideTransition(
+                              position: Tween<Offset>(
+                                begin: const Offset(0, 0.2),
+                                end: Offset.zero,
+                              ).animate(animation),
+                              child: items[index],
+                            ),
+                          );
                         },
-                      );
-                    },
+                      ),
+                    ],
                   ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        Expanded(
-          child: GridView.builder(
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              mainAxisSpacing: 16.0,
-              crossAxisSpacing: 16.0,
-            ),
-            padding: const EdgeInsets.all(16.0),
-            itemCount: items.length,
-            itemBuilder: (context, index) {
-              // Staggered animation for each item
-              final animation = Tween<double>(begin: 0.0, end: 1.0).animate(
-                CurvedAnimation(
-                  parent: _animationController,
-                  curve: Interval(
-                    (1 / items.length) * index,
-                    1.0,
-                    curve: Curves.easeOut,
-                  ),
-                ),
-              );
-              return FadeTransition(
-                opacity: animation,
-                child: SlideTransition(
-                  position: Tween<Offset>(
-                    begin: const Offset(0, 0.2),
-                    end: Offset.zero,
-                  ).animate(animation),
-                  child: items[index],
-                ),
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  List<Widget> _buildDashboardItems(BuildContext context) {
-    List<DashboardItem> items = [];
+                );
+          }
+        
+          List<Widget> _buildDashboardItems(BuildContext context) {    List<DashboardItem> items = [];
 
     switch (widget.userRole) {
       case 'client':
