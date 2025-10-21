@@ -102,8 +102,7 @@ const io = new Server(server, {
 
 // Middlewares
 const allowedOrigins = [
-    process.env.FRONTEND_URL || 'http://localhost:5173',
-    'http://localhost:2438', // For Flutter web development
+    process.env.FRONTEND_URL, // This should be set to the deployed frontend URL in production
     'https://cideg-dev.github.io' // Explicitly allow the deployed GitHub Pages URL
 ];
 
@@ -111,7 +110,13 @@ app.use(cors({
   origin: function (origin, callback) {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
+
+    // Allow any localhost origin during development
+    if (process.env.NODE_ENV === 'development' && origin.startsWith('http://localhost:')) {
+      return callback(null, true);
+    }
     
+    // Allow explicitly defined origins
     if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {

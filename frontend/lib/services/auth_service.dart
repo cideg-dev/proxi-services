@@ -107,8 +107,14 @@ class AuthService {
     } else {
       try {
         final errorBody = jsonDecode(response.body);
-        final errorMessage = errorBody['message'] ?? 'Failed to register';
-        throw Exception(errorMessage);
+        if (response.statusCode == 400 && errorBody.containsKey('errors')) {
+          // If backend sends validation errors array
+          final errors = (errorBody['errors'] as List).map((e) => e['msg'] as String).join('\n');
+          throw Exception(errors);
+        } else {
+          final errorMessage = errorBody['message'] ?? 'Failed to register';
+          throw Exception(errorMessage);
+        }
       } catch (e) {
         throw Exception('Failed to register: ${response.body}');
       }

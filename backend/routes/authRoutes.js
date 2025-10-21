@@ -19,8 +19,8 @@ module.exports = function() {
 
       // Conditional validations for profileData based on role
       body('profileData.nom_complet', 'Le nom complet est requis').if(body('role').equals('client')).notEmpty(),
-      body('profileData.location', 'La localisation est requise').if(body('role').equals('client')).notEmpty(),
-      body('profileData.telephone', 'Le numéro de téléphone est requis').if(body('role').equals('client')).notEmpty(),
+      body('profileData.location', 'La localisation est requise').if(body('role').equals('client')).optional(),
+      body('profileData.telephone', 'Le numéro de téléphone est requis').if(body('role').equals('client')).optional(),
       body('profileData.sexe', 'Le sexe est requis').if(body('role').equals('client')).notEmpty(),
 
       body('profileData.nom_complet', 'Le nom complet est requis').if(body('role').equals('artisan')).notEmpty(),
