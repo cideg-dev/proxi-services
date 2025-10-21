@@ -1645,28 +1645,40 @@ app.get('/api/profile', authenticateToken, async (req, res) => {
   const userRole = req.user.user.role;
 
   try {
+    // The user's email and role are fundamental, let's get them directly.
+    const userResult = await pool.query('SELECT email, role FROM users WHERE id = $1', [userId]);
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ message: 'Utilisateur non trouvé.' });
+    }
+    const userData = userResult.rows[0];
+
+    let profileData = null;
+    let profileCompleteness = 0;
     let profileQuery = '';
+
     if (userRole === 'client') {
       profileQuery = 'SELECT * FROM client_profiles WHERE user_id = $1';
     } else if (userRole === 'artisan') {
       profileQuery = 'SELECT * FROM artisan_profiles WHERE user_id = $1';
     } else if (userRole === 'commercant') {
       profileQuery = 'SELECT * FROM commercant_profiles WHERE user_id = $1';
-    } else {
-      return res.status(400).json({ message: 'Rôle utilisateur inconnu.' });
     }
 
-    const profileResult = await pool.query(profileQuery, [userId]);
-
-    if (profileResult.rows.length === 0) {
-      // If no profile, return a default structure with 0% completeness
-      return res.json({ profile: null, completeness: 0 });
+    if (profileQuery) {
+      const profileResult = await pool.query(profileQuery, [userId]);
+      if (profileResult.rows.length > 0) {
+        profileData = profileResult.rows[0];
+        profileCompleteness = calculateProfileCompleteness(profileData, userRole);
+      }
     }
 
-    const profile = profileResult.rows[0];
-    const completeness = calculateProfileCompleteness(profile, userRole);
+    // Combine user data and profile data
+    const fullProfile = {
+      ...userData, // email, role
+      ...(profileData || {}) // all fields from the specific profile table
+    };
 
-    res.json({ profile, completeness });
+    res.json({ profile: fullProfile, completeness: profileCompleteness });
 
   } catch (error) {
     console.error('Error fetching user profile:', error);

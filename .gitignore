@@ -47,3 +47,5 @@ android/build/
 android/app/build/
 android/app/.cxx/
 android/app/src/main/assets/flutter_assets/
+.gemini/
+gha-creds-*.json

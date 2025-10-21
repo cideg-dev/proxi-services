@@ -52,6 +52,14 @@ class AuthService {
       final token = data['token'];
       if (token != null) {
         await _tokenManager.setToken(token);
+        // Persist user role and email after successful login
+        final user = data['user'] as Map<String, dynamic>?;
+        if (user != null) {
+          await _tokenManager.persistUserIdentity(
+            role: user['role'] as String?,
+            email: user['email'] as String?,
+          );
+        }
       }
       return data;
     } else {
@@ -86,6 +94,14 @@ class AuthService {
       final token = data['token'];
       if (token != null) {
         await _tokenManager.setToken(token);
+        // Persist user role and email after successful registration
+        final user = data['user'] as Map<String, dynamic>?;
+        if (user != null) {
+          await _tokenManager.persistUserIdentity(
+            role: user['role'] as String?,
+            email: user['email'] as String?,
+          );
+        }
       }
       return data;
     } else {
@@ -118,7 +134,21 @@ class AuthService {
     );
 
     if (response.statusCode == 200) {
-      return jsonDecode(response.body);
+      final data = jsonDecode(response.body);
+      // Ensure 'user' map exists
+      if (!data.containsKey('user') || data['user'] == null) {
+        data['user'] = <String, dynamic>{};
+      }
+      final userMap = data['user'] as Map<String, dynamic>;
+
+      // Fill missing role/email from TokenManager if API doesn't provide them
+      if (userMap['role'] == null) {
+        userMap['role'] = await _tokenManager.getUserRole();
+      }
+      if (userMap['email'] == null) {
+        userMap['email'] = await _tokenManager.getUserEmail();
+      }
+      return data;
     } else {
       try {
         final errorBody = jsonDecode(response.body);

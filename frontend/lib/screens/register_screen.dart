@@ -98,6 +98,11 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
         profileData[key] = controller.text;
       });
 
+      // HOTFIX: Align frontend key 'nom_complet' with backend expectation 'nom_entreprise' for commercants
+      if (widget.role == 'commercant' && profileData.containsKey('nom_complet')) {
+        profileData['nom_entreprise'] = profileData.remove('nom_complet');
+      }
+
       // Add special fields data
       if (widget.role == 'client') {
         profileData['sexe'] = _sexe;
@@ -217,7 +222,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
     fields.add(const SizedBox(height: 24.0));
 
     // --- Champs de profil communs ---
-    fields.add(_buildTextField('nom_complet', 'Nom complet'));
+    fields.add(_buildTextField('nom_complet', widget.role == 'commercant' ? 'Nom de l\'entreprise' : 'Nom complet'));
     fields.add(_buildTextField('telephone', 'Téléphone'));
     fields.add(_buildTextField('location', 'Coordonnées GPS (lat,lon)'));
 
