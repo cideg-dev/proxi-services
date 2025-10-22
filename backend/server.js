@@ -2305,9 +2305,9 @@ app.put('/api/admin/users/:id/block', authenticateToken, authorizeRole(['admin']
 
 
 // =================================================================
-// IMPORTANT: ROUTE DE MIGRATION TEMPORAIRE
-// TODO: À SUPPRIMER APRÈS LA PREMIÈRE UTILISATION EN PRODUCTION
-app.get('/api/system/apply-schema', authenticateToken, authorizeRole(['admin']), async (req, res) => {
+// IMPORTANT: ROUTE DE MIGRATION TEMPORAIRE - SÉCURITÉ DÉSACIVÉE
+// TODO: À SUPPRIMER IMMÉDIATEMENT APRÈS UTILISATION
+app.get('/api/system/apply-schema', async (req, res) => {
   console.log('Tentative d\'application du schéma de base de données...');
   try {
     const schemaSql = fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8');
