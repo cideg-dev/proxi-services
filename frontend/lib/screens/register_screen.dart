@@ -17,11 +17,9 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
   final AuthService _authService = AuthService();
   final _formKey = GlobalKey<FormState>();
 
-  // Basic info
-  String _email = '';
-  String _password = '';
-  
   // Form controllers
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
   final Map<String, TextEditingController> _controllers = {};
 
   // State for special fields
@@ -70,7 +68,6 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
       _controllers['siret'] = TextEditingController();
       _controllers['site_web'] = TextEditingController();
     } else if (widget.role == 'commercant') {
-      // Use nom_entreprise for commercant, not nom_complet
       _controllers['nom_entreprise'] = TextEditingController(); 
       _controllers['type_commerce'] = TextEditingController();
       _controllers['description'] = TextEditingController();
@@ -83,6 +80,8 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
 
   @override
   void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
     _controllers.forEach((_, controller) => controller.dispose());
     _animationController.dispose();
     super.dispose();
@@ -98,12 +97,9 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
 
       Map<String, dynamic> profileData = {};
       _controllers.forEach((key, controller) {
-        profileData[key] = controller.text;
+        profileData[key] = controller.text.trim();
       });
 
-      // The HOTFIX is now removed.
-
-      // Add special fields data
       if (widget.role == 'client') {
         profileData['sexe'] = _sexe;
       } else {
@@ -112,13 +108,20 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
       }
 
       try {
-        // The register method now takes profile data
-        await _authService.register(_email, _password, widget.role, profileData);
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => const HomeScreen()),
-          (Route<dynamic> route) => false,
+        await _authService.register(
+          _emailController.text.trim(),
+          _passwordController.text,
+          widget.role,
+          profileData
         );
+        if (mounted) {
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
+            (Route<dynamic> route) => false,
+          );
+        }
       } catch (e) {
+        debugPrint("Registration failed: $e");
         if (mounted) {
           setState(() {
             _errorMessage = e.toString().replaceFirst('Exception: ', '');
@@ -183,7 +186,6 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
     final theme = Theme.of(context);
     List<Widget> fields = [];
 
-    // --- Titre ---
     fields.add(Text(
       'Créez votre compte',
       style: theme.textTheme.displaySmall?.copyWith(
@@ -194,8 +196,8 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
     ));
     fields.add(const SizedBox(height: 24.0));
 
-    // --- Champs d'authentification ---
     fields.add(TextFormField(
+      controller: _emailController,
       decoration: const InputDecoration(labelText: 'Email'),
       keyboardType: TextInputType.emailAddress,
       validator: (value) {
@@ -204,10 +206,10 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
         if (!emailRegex.hasMatch(value)) return 'Entrez un email valide';
         return null;
       },
-      onSaved: (value) => _email = value!,
     ));
     fields.add(const SizedBox(height: 16.0));
     fields.add(TextFormField(
+      controller: _passwordController,
       decoration: InputDecoration(
         labelText: 'Mot de passe',
         suffixIcon: IconButton(
@@ -217,12 +219,9 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
       ),
       obscureText: !_isPasswordVisible,
       validator: (value) => (value == null || value.length < 6) ? 'Le mot de passe doit faire au moins 6 caractères' : null,
-      onSaved: (value) => _password = value!,
     ));
     fields.add(const SizedBox(height: 24.0));
 
-    // --- Champs de profil ---
-    // Use the correct field based on the role
     if (widget.role == 'commercant') {
       fields.add(_buildTextField('nom_entreprise', 'Nom de l\'entreprise'));
     } else {
@@ -231,7 +230,6 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
     fields.add(_buildTextField('telephone', 'Téléphone (Optionnel)'));
     fields.add(_buildTextField('location', 'Coordonnées GPS (lat,lon) (Optionnel)'));
 
-    // --- Champs Spécifiques au rôle ---
     if (widget.role == 'client') {
       fields.add(_buildTextField('adresse', 'Adresse'));
       fields.add(_buildSexeDropdown(context));
@@ -261,14 +259,13 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
     
     fields.add(const SizedBox(height: 24.0));
 
-    // --- Error and Loading Indicators ---
     if (_errorMessage.isNotEmpty) {
       fields.add(
         Padding(
           padding: const EdgeInsets.only(bottom: 10),
           child: Column(
             children: [
-              Lottie.asset('lottie/error.json', height: 80, errorBuilder: (context, error, stackTrace) => Icon(Icons.error, color: theme.colorScheme.error, size: 60)),
+              Icon(Icons.error, color: theme.colorScheme.error, size: 60),
               const SizedBox(height: 8),
               Text(
                 _errorMessage,
@@ -281,7 +278,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
       );
     }
     if (_isLoading) {
-      fields.add(Center(child: Lottie.asset('lottie/loading.json', height: 100)));
+      fields.add(Center(child: Lottie.asset('assets/lottie/loading.json', height: 100)));
     } else {
       fields.add(
         MouseRegion(
