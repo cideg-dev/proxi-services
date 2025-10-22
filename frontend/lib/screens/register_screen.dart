@@ -227,7 +227,12 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
     } else {
       fields.add(_buildTextField('nom_complet', 'Nom complet'));
     }
-    fields.add(_buildTextField('telephone', 'Téléphone (Optionnel)'));
+
+    final bool isCommercant = widget.role == 'commercant';
+    fields.add(_buildTextField(
+      'telephone',
+      isCommercant ? 'Téléphone' : 'Téléphone (Optionnel)',
+    ));
     fields.add(_buildTextField('location', 'Coordonnées GPS (lat,lon) (Optionnel)'));
 
     if (widget.role == 'client') {
@@ -278,7 +283,12 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
       );
     }
     if (_isLoading) {
-      fields.add(Center(child: Lottie.asset('assets/lottie/loading.json', height: 100)));
+      fields.add(const Center(
+        child: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: CircularProgressIndicator(),
+        ),
+      ));
     } else {
       fields.add(
         MouseRegion(
