@@ -2307,6 +2307,24 @@ app.put('/api/admin/users/:id/block', authenticateToken, authorizeRole(['admin']
 
 
 
+// =================================================================
+// IMPORTANT: ROUTE DE MIGRATION TEMPORAIRE - SÉCURITÉ DÉSACIVÉE
+// TODO: À SUPPRIMER IMMÉDIATEMENT APRÈS UTILISATION
+app.get('/api/system/apply-schema', async (req, res) => {
+  console.log('Tentative d\'application du schéma de base de données...');
+  try {
+    const schemaSql = fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8');
+    await pool.query(schemaSql);
+    console.log('Schéma de la base de données appliqué avec succès.');
+    res.status(200).json({ message: "Schéma de la base de données appliqué avec succès. N'oubliez pas de supprimer cette route temporaire !" });
+  } catch (error) {
+    console.error('Erreur lors de l'application du schéma de la base de données:', error);
+    res.status(500).json({ message: 'Erreur lors de l'application du schéma.', error: error.message });
+  }
+});
+// =================================================================
+
+
 // Dmarrage du serveur
 const PORT = process.env.PORT || 10000;
 server.listen(PORT, () => {
