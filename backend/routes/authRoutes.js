@@ -42,7 +42,7 @@ module.exports = function() {
         return res.status(400).json({ errors: errors.array() });
       }
 
-      const { email, password, role, profileData } = req.body;
+      const { email, password, role, profileData, referralCode } = req.body;
       console.log('Registering user with profile data:', profileData);
 
       const client = await pool.connect();
@@ -60,8 +60,8 @@ module.exports = function() {
         const hashedPassword = await bcrypt.hash(password, salt);
 
         const newUserResult = await client.query(
-          'INSERT INTO users (email, password, role) VALUES ($1, $2, $3) RETURNING id, email, role',
-          [email, hashedPassword, role]
+          'INSERT INTO users (email, password, role, referred_by) VALUES ($1, $2, $3, $4) RETURNING id, email, role',
+          [email, hashedPassword, role, referralCode || null]
         );
         const newUser = newUserResult.rows[0];
 

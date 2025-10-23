@@ -21,6 +21,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
   // Form controllers
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _referralCodeController = TextEditingController(); // For the new referral code field
   final Map<String, TextEditingController> _controllers = {};
 
   // State for special fields
@@ -113,7 +114,8 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
           _emailController.text.trim(),
           _passwordController.text,
           widget.role,
-          profileData
+          profileData,
+          referralCode: _referralCodeController.text.trim(),
         );
         if (mounted) {
           Navigator.of(context).pushAndRemoveUntil(
@@ -221,6 +223,14 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
       obscureText: !_isPasswordVisible,
       validator: (value) => (value == null || value.length < 6) ? 'Le mot de passe doit faire au moins 6 caractères' : null,
     ));
+    fields.add(const SizedBox(height: 16.0));
+
+    // Add the optional referral code field
+    fields.add(TextFormField(
+      controller: _referralCodeController,
+      decoration: const InputDecoration(labelText: 'Code de parrainage (Optionnel)'),
+    ));
+
     fields.add(const SizedBox(height: 24.0));
 
     if (widget.role == 'commercant') {

@@ -73,13 +73,18 @@ class AuthService {
     }
   }
 
-  Future<Map<String, dynamic>> register(String email, String password, String role, Map<String, dynamic> profileData) async {
+  Future<Map<String, dynamic>> register(String email, String password, String role, Map<String, dynamic> profileData, {String? referralCode}) async {
     final body = {
       'email': email,
       'password': password,
       'role': role,
       'profileData': profileData,
     };
+
+    // Add referral code to the body if it exists and is not empty
+    if (referralCode != null && referralCode.isNotEmpty) {
+      body['referralCode'] = referralCode;
+    }
 
     final response = await _postWithRetry(
       Uri.parse('${ApiConstants.baseUrl}/api/auth/register'),
