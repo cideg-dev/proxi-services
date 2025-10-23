@@ -1859,7 +1859,7 @@ app.put('/api/demandes/:id/status', authenticateToken, authorizeRole(['artisan']
 });
 
 // TEMPORARY ROUTE FOR DB MIGRATION - REMOVE AFTER USE
-app.get('/api/migrate-db', authenticateToken, authorizeRole(['admin']), async (req, res) => {
+app.get('/api/migrate-db', async (req, res) => {
   try {
     const schemaSql = fs.readFileSync(path.join(__dirname, 'update_schema.sql'), 'utf8');
     await pool.query(schemaSql);
