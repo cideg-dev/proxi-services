@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:frontend/services/auth_service.dart';
 import 'package:lottie/lottie.dart';
 import 'home_screen.dart';
@@ -242,7 +243,23 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
       fields.addAll([
         _buildTextField('specialite', 'Spécialité (Optionnel)'),
         _buildTextField('description', 'Description', maxLines: 3),
-        _buildTextField('annees_experience', 'Années d\'expérience', keyboardType: TextInputType.number),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: TextFormField(
+            controller: _controllers['annees_experience'] ?? TextEditingController(),
+            decoration: const InputDecoration(labelText: 'Années d\'expérience'),
+            keyboardType: TextInputType.number,
+            inputFormatters: <TextInputFormatter>[
+              FilteringTextInputFormatter.digitsOnly
+            ],
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Ce champ est requis';
+              }
+              return null;
+            },
+          ),
+        ),
         _buildTextField('horaires_ouverture', 'Horaires d\'ouverture'),
         _buildTextField('siret', 'Numéro SIRET (Optionnel)'),
         _buildTextField('site_web', 'Site Web (Optionnel)'),
