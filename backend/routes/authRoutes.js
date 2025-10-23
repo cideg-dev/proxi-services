@@ -27,13 +27,14 @@ module.exports = function() {
       body('profileData.specialite', 'La spécialité est requise').if(body('role').equals('artisan')).optional(),
       body('profileData.location', 'La localisation est requise').if(body('role').equals('artisan')).optional(),
       body('profileData.telephone', 'Le numéro de téléphone est requis').if(body('role').equals('artisan')).optional(),
-      body('profileData.annees_experience', 'Les années d\'expérience sont requises').if(body('role').equals('artisan')).optional().isInt(),
+      body('profileData.annees_experience', 'Les années d\'expérience sont requises').if(body('role').equals('artisan')).notEmpty().isInt(),
 
       body('profileData.nom_entreprise', 'Le nom de l\'entreprise est requis').if(body('role').equals('commercant')).notEmpty(),
       body('profileData.type_commerce', 'Le type de commerce est requis').if(body('role').equals('commercant')).optional(),
       body('profileData.adresse', 'L\'adresse est requise').if(body('role').equals('commercant')).notEmpty(),
       body('profileData.location', 'La localisation est requise').if(body('role').equals('commercant')).optional(),
       body('profileData.telephone', 'Le numéro de téléphone est requis').if(body('role').equals('commercant')).notEmpty(),
+      body('profileData.annees_experience', 'Les années d\'expérience sont requises').if(body('role').equals('commercant')).optional().isInt(),
     ],
     async (req, res) => {
       const errors = validationResult(req);
@@ -85,7 +86,15 @@ module.exports = function() {
 
         if (profileTable) {
             const filteredProfileData = Object.keys(profileData)
-                .filter(key => profileColumns.includes(key) && profileData[key] != null)
+                .filter(key => {
+                    if (!profileColumns.includes(key) || profileData[key] == null) {
+                        return false;
+                    }
+                    if (key === 'annees_experience' && profileData[key] === '') {
+                        return false;
+                    }
+                    return true;
+                })
                 .reduce((obj, key) => {
                     obj[key] = profileData[key];
                     return obj;

@@ -242,7 +242,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
       fields.addAll([
         _buildTextField('specialite', 'Spécialité (Optionnel)'),
         _buildTextField('description', 'Description', maxLines: 3),
-        _buildTextField('annees_experience', 'Années d\'expérience (Optionnel)', keyboardType: TextInputType.number),
+        _buildTextField('annees_experience', 'Années d\'expérience', keyboardType: TextInputType.number),
         _buildTextField('horaires_ouverture', 'Horaires d\'ouverture'),
         _buildTextField('siret', 'Numéro SIRET (Optionnel)'),
         _buildTextField('site_web', 'Site Web (Optionnel)'),
