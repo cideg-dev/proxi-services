@@ -3,11 +3,32 @@ import 'package:frontend/screens/change_password_screen.dart';
 import 'package:frontend/screens/login_screen.dart';
 import 'package:frontend/services/auth_service.dart';
 import 'package:frontend/services/theme_provider.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
+
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  String _appVersion = 'Chargement...';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadVersionInfo();
+  }
+
+  Future<void> _loadVersionInfo() async {
+    final packageInfo = await PackageInfo.fromPlatform();
+    setState(() {
+      _appVersion = '${packageInfo.version}+${packageInfo.buildNumber}';
+    });
+  }
 
   Future<void> _launchURL(BuildContext context, String url) async {
     final Uri uri = Uri.parse(url);
@@ -77,6 +98,24 @@ class SettingsScreen extends StatelessWidget {
             leading: const Icon(Icons.privacy_tip_outlined),
             title: const Text('Politique de confidentialité'),
             onTap: () => _launchURL(context, 'https://example.com/privacy'),
+          ),
+          const Divider(),
+          _buildSectionTitle(context, 'À propos'),
+          ListTile(
+            leading: const Icon(Icons.info_outline),
+            title: const Text('Version de l\'application'),
+            subtitle: Text(_appVersion),
+          ),
+          ListTile(
+            leading: const Icon(Icons.developer_mode_outlined),
+            title: const Text('Développé par'),
+            subtitle: const Text('cideg-dev'),
+          ),
+          ListTile(
+            leading: const Icon(Icons.email_outlined),
+            title: const Text('Contacter le support'),
+            subtitle: const Text('support@proxi-services.com'),
+            onTap: () => _launchURL(context, 'mailto:support@proxi-services.com'),
           ),
         ],
       ),
