@@ -100852,7 +100852,7 @@ e.push(p.iB("telephone",p.a.c==="commercant"?"T\xe9l\xe9phone":"T\xe9l\xe9phone 
 e.push(p.iB("location","Coordonn\xe9es GPS (lat,lon) (Optionnel)"))
 d=p.a.c
 if(d==="client"){e.push(p.iB("adresse","Adresse"))
-e.push(p.apL(a))}else if(d==="artisan")B.b.P(e,A.b([p.iB("specialite","Sp\xe9cialit\xe9 (Optionnel)"),p.X3(n,m,3),p.apM("annees_experience","Ann\xe9es d'exp\xe9rience (Optionnel)",B.mR),p.iB(l,k),p.iB("siret",j),p.iB(i,h),p.X2(a),p.X1(a)],f))
+e.push(p.apL(a))}else if(d==="artisan")B.b.P(e,A.b([p.iB("specialite","Sp\xe9cialit\xe9 (Optionnel)"),p.X3(n,m,3),p.apM("annees_experience","Ann\xe9es d'exp\xe9rience",B.mR),p.iB(l,k),p.iB("siret",j),p.iB(i,h),p.X2(a),p.X1(a)],f))
 else if(d==="commercant")B.b.P(e,A.b([p.iB("type_commerce","Type de commerce (Optionnel)"),p.X3(n,m,3),p.iB("adresse","Adresse"),p.iB(l,k),p.iB("siret",j),p.iB(i,h),p.X2(a),p.X1(a)],f))
 e.push(B.df)
 d=p.ax
