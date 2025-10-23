@@ -109,7 +109,20 @@ const deletePortfolioItem = async (req, res) => {
   }
 };
 
+const getPortfolioItems = async (req, res) => {
+  const professionalId = parseInt(req.params.artisanId);
+
+  try {
+    const result = await pool.query('SELECT * FROM portfolio_items WHERE artisan_id = $1', [professionalId]);
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Erreur du serveur');
+  }
+};
+
 module.exports = {
+  getPortfolioItems,
   addPortfolioItem,
   updatePortfolioItem,
   deletePortfolioItem,

@@ -1378,9 +1378,9 @@ app.get('/api/client/demandes', authenticateToken, authorizeRole(['client']), as
 
 
 
-// GET /api/artisan/demandes - Get all service requests made to the logged-in artisan
-app.get('/api/artisan/demandes', authenticateToken, authorizeRole(['artisan']), async (req, res) => {
-  const artisanId = req.user.user.id;
+// GET /api/professional/demandes - Get all service requests made to the logged-in professional (artisan or commercant)
+app.get('/api/professional/demandes', authenticateToken, authorizeRole(['artisan', 'commercant']), async (req, res) => {
+  const professionalId = req.user.user.id;
 
   try {
     const result = await pool.query(
@@ -1397,12 +1397,12 @@ app.get('/api/artisan/demandes', authenticateToken, authorizeRole(['artisan']), 
        FROM demandes d
        JOIN client_profiles cp ON d.client_id = cp.user_id
        WHERE d.artisan_id = $1`,
-      [artisanId]
+      [professionalId]
     );
     res.json(result.rows);
 
   } catch (error) {
-    console.error('Error fetching artisan demands:', error);
+    console.error('Error fetching professional demands:', error);
     res.status(500).json({ message: 'Erreur interne du serveur.' });
   }
 });
@@ -2093,6 +2093,7 @@ app.post('/api/users/:id/upload-document', authenticateToken, uploadDocument.sin
 const serviceController = require('./controllers/serviceController');
 
 // Service Management Endpoints
+app.get('/api/artisans/:artisanId/services', serviceController.getServices);
 app.post('/api/artisans/:artisanId/services', authenticateToken, authorizeRole(['artisan', 'commercant']), serviceController.addService);
 app.put('/api/artisans/:artisanId/services/:serviceId', authenticateToken, authorizeRole(['artisan', 'commercant']), serviceController.updateService);
 app.delete('/api/artisans/:artisanId/services/:serviceId', authenticateToken, authorizeRole(['artisan', 'commercant']), serviceController.deleteService);
@@ -2100,6 +2101,7 @@ app.delete('/api/artisans/:artisanId/services/:serviceId', authenticateToken, au
 const portfolioController = require('./controllers/portfolioController');
 
 // Portfolio Management Endpoints
+app.get('/api/artisans/:artisanId/portfolio', portfolioController.getPortfolioItems);
 app.post('/api/artisans/:artisanId/portfolio', authenticateToken, authorizeRole(['artisan', 'commercant']), upload.single('portfolioImage'), portfolioController.addPortfolioItem);
 app.put('/api/artisans/:artisanId/portfolio/:portfolioId', authenticateToken, authorizeRole(['artisan', 'commercant']), upload.single('portfolioImage'), portfolioController.updatePortfolioItem);
 app.delete('/api/artisans/:artisanId/portfolio/:portfolioId', authenticateToken, authorizeRole(['artisan', 'commercant']), portfolioController.deletePortfolioItem);

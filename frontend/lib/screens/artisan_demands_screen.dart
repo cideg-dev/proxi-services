@@ -41,7 +41,7 @@ class _ArtisanDemandsScreenState extends State<ArtisanDemandsScreen> {
     });
 
     // Only load demands if the user is an artisan
-    if (_userRole == 'artisan') {
+    if (_userRole == 'artisan' || _userRole == 'commercant') {
       _loadDemands();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _setupSocketListener();
@@ -66,7 +66,7 @@ class _ArtisanDemandsScreenState extends State<ArtisanDemandsScreen> {
       _error = null;
     });
     try {
-      final demands = await _demandService.getArtisanDemands();
+      final demands = await _demandService.getProfessionalDemands();
       if (!mounted) return;
       setState(() {
         _demands = demands;
@@ -83,7 +83,7 @@ class _ArtisanDemandsScreenState extends State<ArtisanDemandsScreen> {
 
   void _setupSocketListener() {
     // Ensure we only listen for sockets if the user is an artisan
-    if (_userRole != 'artisan' || !mounted) return;
+    if ((_userRole != 'artisan' && _userRole != 'commercant') || !mounted) return;
     
     final socketService = context.read<SocketService>();
     _demandUpdateSubscription = socketService.demandUpdates.listen((demandData) {
@@ -146,7 +146,7 @@ class _ArtisanDemandsScreenState extends State<ArtisanDemandsScreen> {
     }
 
     // If the user is not an artisan, show an access denied message
-    if (_userRole != 'artisan') {
+    if (_userRole != 'artisan' && _userRole != 'commercant') {
       return const Center(
         child: Padding(
           padding: EdgeInsets.all(16.0),

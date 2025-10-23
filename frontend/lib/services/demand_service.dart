@@ -60,11 +60,11 @@ class DemandService {
     return jsonDecode(response.body);
   }
 
-  // Fetch all demands for the currently logged-in artisan
-  Future<List<dynamic>> getArtisanDemands() async {
+  // Fetch all demands for the currently logged-in professional (artisan or commercant)
+  Future<List<dynamic>> getProfessionalDemands() async {
     final token = await _tokenManager.getToken();
     final response = await http.get(
-      Uri.parse('${ApiConstants.baseUrl}/api/artisan/demandes'),
+      Uri.parse('${ApiConstants.baseUrl}/api/professional/demandes'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -74,7 +74,7 @@ class DemandService {
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {
-      throw Exception('Failed to load artisan demands');
+      throw Exception('Failed to load professional demands');
     }
   }
 

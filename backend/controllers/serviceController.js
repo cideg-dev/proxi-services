@@ -68,7 +68,20 @@ const deleteService = async (req, res) => {
   }
 };
 
+const getServices = async (req, res) => {
+  const professionalId = parseInt(req.params.artisanId);
+
+  try {
+    const result = await pool.query('SELECT * FROM services WHERE artisan_id = $1', [professionalId]);
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Erreur du serveur');
+  }
+};
+
 module.exports = {
+  getServices,
   addService,
   updateService,
   deleteService,
