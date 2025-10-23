@@ -14,6 +14,7 @@ import 'package:frontend/services/api_constants.dart';
 import 'package:frontend/services/artisan_service.dart';
 import 'package:frontend/screens/profile_screen.dart';
 import 'package:frontend/screens/global_professionals_list_screen.dart';
+import 'package:frontend/screens/artisan_detail_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   final String userRole;
@@ -41,6 +42,105 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
   void dispose() {
     _animationController.dispose();
     super.dispose();
+  }
+
+  Widget _buildRecentPortfolioSection(BuildContext context) {
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Text(
+            'Dernières réalisations',
+            style: theme.textTheme.titleLarge?.copyWith(
+              color: theme.colorScheme.onSurface,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        const SizedBox(height: 16.0),
+        SizedBox(
+          height: 220, // Adjust height as needed
+          child: FutureBuilder<List<dynamic>>(
+            future: ArtisanService().getRecentPortfolioItems(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (snapshot.hasError) {
+                return Center(child: Text('Erreur: ${snapshot.error}'));
+              }
+              if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                return const Center(child: Text('Aucune réalisation récente.'));
+              }
+
+              final portfolioItems = snapshot.data!;
+
+              return ListView.builder(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                itemCount: portfolioItems.length,
+                itemBuilder: (context, index) {
+                  final item = portfolioItems[index];
+                  return GestureDetector(
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ArtisanDetailScreen(artisanId: item['artisan_id']),
+                      ),
+                    ),
+                    child: Card(
+                      clipBehavior: Clip.antiAlias,
+                      margin: const EdgeInsets.only(right: 16.0),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      child: SizedBox(
+                        width: 160,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Container(
+                                width: double.infinity,
+                                child: Image.network(
+                                  item['image_url'],
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) => const Icon(Icons.broken_image),
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    item['name'] ?? 'Réalisation',
+                                    style: theme.textTheme.titleSmall,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  Text(
+                                    item['professional_name'] ?? 'Anonyme',
+                                    style: theme.textTheme.bodySmall,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+        ),
+      ],
+    );
   }
 
   @override
@@ -149,7 +249,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                                                 CircleAvatar(
                                                   radius: 40,
                                                   backgroundImage: professional['photo_url'] != null
-                                                      ? NetworkImage('${ApiConstants.baseUrl}${professional['photo_url']}')
+                                                      ? NetworkImage(professional['photo_url']) // CORRECTED URL
                                                       : null,
                                                   child: professional['photo_url'] == null
                                                       ? Text(professional['name'] != null ? professional['name'][0].toUpperCase() : '')
@@ -178,6 +278,10 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                                 ),
                               ),
                             ),
+                            const SizedBox(height: 24.0),
+                            // Recent Portfolio Section
+                            _buildRecentPortfolioSection(context),
+                            const SizedBox(height: 24.0),
                           ],
                         ),
                       ),

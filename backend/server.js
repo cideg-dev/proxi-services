@@ -82,6 +82,7 @@ const pool = require('./db.config');
 const { authenticateToken, authorizeRole } = require('./middleware/authMiddleware');
 const authRoutes = require('./routes/authRoutes'); // Import auth routes
 const reviewRoutes = require('./routes/reviewRoutes'); // Import review routes
+const portfolioRoutes = require('./routes/portfolioRoutes'); // Import portfolio routes
 
 // Vérification des variables d environnement critiques
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -294,6 +295,7 @@ app.get('/api/system/version', (req, res) => {
 
 app.use('/api/auth', authRoutes()); // Use auth routes
 app.use('/api/reviews', reviewRoutes(io, connectedUsers)); // Use review routes
+app.use('/api/portfolio', portfolioRoutes); // Use portfolio routes
 
 const artisanController = require('./controllers/artisanController');
 

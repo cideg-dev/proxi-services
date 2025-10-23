@@ -8,6 +8,8 @@ import 'dart:ui'; // For BackdropFilter
 import 'package:frontend/widgets/glass_card.dart';
 import 'package:lottie/lottie.dart';
 import 'package:frontend/widgets/empty_state.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:frontend/screens/portfolio_item_detail_screen.dart';
 
 class ArtisanDetailScreen extends StatefulWidget {
   final int artisanId;
@@ -318,23 +320,64 @@ class _ArtisanDetailScreenState extends State<ArtisanDetailScreen> {
       title: 'Portfolio',
       content: _professionalPortfolio.isEmpty
           ? const EmptyState(message: 'Aucun élément de portfolio pour le moment.')
-          : GridView.builder(
+          : MasonryGridView.count(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 8.0,
-                mainAxisSpacing: 8.0,
-                childAspectRatio: 1.0,
-              ),
+              crossAxisCount: 2,
+              mainAxisSpacing: 8,
+              crossAxisSpacing: 8,
               itemCount: _professionalPortfolio.length,
               itemBuilder: (context, index) {
                 final item = _professionalPortfolio[index];
-                return ClipRRect(
-                  borderRadius: BorderRadius.circular(8.0),
-                  child: Image.network(
-                    '${ApiConstants.baseUrl}${item['image_url']}',
-                    fit: BoxFit.cover,
+                final heroTag = 'portfolio-image-${item['id']}';
+
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => PortfolioItemDetailScreen(item: item),
+                    ));
+                  },
+                  child: Hero(
+                    tag: heroTag,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12.0),
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          Image.network(
+                            // CORRECTED: Use the full URL directly from the backend
+                            item['image_url'],
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) => Container(
+                              color: Colors.grey[800],
+                              child: const Icon(Icons.broken_image, color: Colors.white70, size: 40),
+                            ),
+                          ),
+                          // Add a gradient overlay for text readability
+                          Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [Colors.transparent, Colors.black.withOpacity(0.8)],
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                              ),
+                            ),
+                          ),
+                          // Positioned text for the item name
+                          Positioned(
+                            bottom: 8,
+                            left: 8,
+                            right: 8,
+                            child: Text(
+                              item['name'] ?? '',
+                              style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 );
               },

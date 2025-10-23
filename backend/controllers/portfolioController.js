@@ -117,7 +117,7 @@ const getPortfolioItems = async (req, res) => {
   const professionalId = parseInt(req.params.artisanId);
 
   try {
-    const result = await pool.query('SELECT * FROM portfolio_items WHERE artisan_id = $1', [professionalId]);
+    const result = await pool.query('SELECT * FROM portfolio_items WHERE artisan_id = $1 ORDER BY id DESC', [professionalId]);
     res.json(result.rows);
   } catch (err) {
     console.error(err.message);
@@ -125,8 +125,30 @@ const getPortfolioItems = async (req, res) => {
   }
 };
 
+const getRecentPortfolioItems = async (req, res) => {
+  try {
+    // This query joins portfolio_items with user profiles to get professional's details
+    const result = await pool.query(`
+      SELECT 
+        p.id, p.artisan_id, p.image_url, p.name, p.description, p.price,
+        COALESCE(ap.nom_complet, cp.nom_entreprise) as professional_name,
+        COALESCE(ap.photo_url, cp.photo_url) as professional_photo_url
+      FROM portfolio_items p
+      LEFT JOIN artisan_profiles ap ON p.artisan_id = ap.user_id
+      LEFT JOIN commercant_profiles cp ON p.artisan_id = cp.user_id
+      ORDER BY p.id DESC
+      LIMIT 10
+    `);
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Error fetching recent portfolio items:', err.message);
+    res.status(500).send('Erreur du serveur');
+  }
+};
+
 module.exports = {
   getPortfolioItems,
+  getRecentPortfolioItems, // Export the new function
   addPortfolioItem,
   updatePortfolioItem,
   deletePortfolioItem,
