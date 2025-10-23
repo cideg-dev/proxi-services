@@ -1858,11 +1858,10 @@ app.put('/api/demandes/:id/status', authenticateToken, authorizeRole(['artisan']
   }
 });
 
-/*
 // TEMPORARY ROUTE FOR DB MIGRATION - REMOVE AFTER USE
 app.get('/api/migrate-db', authenticateToken, authorizeRole(['admin']), async (req, res) => {
   try {
-    const schemaSql = fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8');
+    const schemaSql = fs.readFileSync(path.join(__dirname, 'update_schema.sql'), 'utf8');
     await pool.query(schemaSql);
     res.status(200).json({ message: "Base de données migrée avec succès. N'oubliez pas de supprimer cette route temporaire !", success: true });
   } catch (error) {
@@ -1870,7 +1869,6 @@ app.get('/api/migrate-db', authenticateToken, authorizeRole(['admin']), async (r
     res.status(500).json({ message: 'Erreur lors de la migration temporaire de la base de données.', error: error.message });
   }
 });
-*/
 
 // DELETE /api/demandes/:id - Cancel a service request (by client)
 app.delete('/api/demandes/:id', authenticateToken, authorizeRole(['client']), async (req, res) => {

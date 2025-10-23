@@ -43,6 +43,7 @@ module.exports = function() {
       }
 
       const { email, password, role, profileData } = req.body;
+      console.log('Registering user with profile data:', profileData);
 
       const client = await pool.connect();
 
@@ -128,7 +129,7 @@ module.exports = function() {
         );
       } catch (err) {
         await client.query('ROLLBACK');
-        console.error(err.message);
+        console.error('Error during registration:', err);
         res.status(500).send('Erreur du serveur lors de l\'inscription.');
       } finally {
         client.release();
