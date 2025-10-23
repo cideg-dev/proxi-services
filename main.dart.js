@@ -51778,9 +51778,9 @@ $S:593}
 A.YZ.prototype={}
 A.YY.prototype={}
 A.aae.prototype={
-v3(a){return B.O},
+v2(a){return B.O},
 DA(a,b,c,d){return B.aJ},
-v2(a,b){return B.h}}
+v1(a,b){return B.h}}
 A.a5N.prototype={}
 A.PF.prototype={
 K(a){var s=null,r=A.c1(a,B.bR,t.w).w.r.b+8,q=this.c.a7(0,new A.h(8,r)),p=A.bR(this.d,B.B,B.v,B.aQ),o=A.b([2.574,-1.43,-0.144,0,0,-0.426,1.57,-0.144,0,0,-0.426,-1.43,2.856,0,0,0,0,0,1,0],t.n)
@@ -52204,7 +52204,7 @@ a.fJ(q,o)},
 eB(a){return!this.b.k(0,a.b)}}
 A.PJ.prototype={}
 A.aak.prototype={
-v3(a){return new A.F(12,a+12-1.5)},
+v2(a){return new A.F(12,a+12-1.5)},
 DA(a,b,c,d){var s,r,q,p=null,o=A.hB(p,p,p,new A.Z3(A.ws(a).goN(),p),B.O)
 switch(b.a){case 0:return A.uy(o,new A.F(12,c+12-1.5))
 case 1:s=c+12-1.5
@@ -52216,7 +52216,7 @@ q.zI(3.141592653589793)
 q.dz(-6,-s/2,0,1)
 return A.HL(p,r,p,q,!0)
 case 2:return A.uy(p,new A.F(12,c+12-1.5))}},
-v2(a,b){var s=b+12-1.5
+v1(a,b){var s=b+12-1.5
 switch(a.a){case 0:return new A.h(6,s)
 case 1:return new A.h(6,s-12+1.5)
 case 2:return new A.h(6,b+(s-b)/2)}}}
@@ -57324,9 +57324,9 @@ s=J.e(b.p4,r.p4)&&J.e(b.R8,r.R8)&&J.e(b.rx,r.rx)&&J.e(b.ry,r.ry)}return s}}
 A.Zf.prototype={}
 A.Zt.prototype={}
 A.aaS.prototype={
-v3(a){return B.O},
+v2(a){return B.O},
 DA(a,b,c,d){return B.aJ},
-v2(a,b){return B.h}}
+v1(a,b){return B.h}}
 A.a5O.prototype={}
 A.Q0.prototype={
 K(a){var s=null,r=A.c1(a,B.bR,t.w).w.r.b+8
@@ -65729,7 +65729,7 @@ aiI(){var s=this
 if(s.grH().a.a!==s.gx3())s.tK(s.grH().a.a)}}
 A.SC.prototype={}
 A.akP.prototype={
-v3(a){return B.VE},
+v2(a){return B.VE},
 DA(a,b,c,d){var s,r,q,p=null,o=A.M(a)
 a.a2(t.bZ)
 s=A.M(a)
@@ -65743,7 +65743,7 @@ break
 case 2:s=A.auh(0.7853981633974483,q)
 break
 default:s=p}return s},
-v2(a,b){var s
+v1(a,b){var s
 switch(a.a){case 2:s=B.RL
 break
 case 0:s=B.RO
@@ -70430,7 +70430,7 @@ if(s.bC===a)return
 s.bC=a
 s.ex=null
 s.b5()},
-v5(a){var s=this.aT,r=s.b.a.c.PF(a)
+v4(a){var s=this.aT,r=s.b.a.c.PF(a)
 if(this.bC)return A.cr(B.j,0,s.gl_().length,!1)
 return A.cr(B.j,r.a,r.b,!1)},
 atd(a){var s,r,q,p,o,n,m=this
@@ -74378,7 +74378,7 @@ m=new A.x(n.a,n.b,n.c,n.d).dA(b)
 l=p.cG()
 r.a.a.drawRect(A.cN(m),l)
 l.delete()}}},
-v5(a){var s=this.b.q.b.a.c.PF(a),r=this.a,q=r.a
+v4(a){var s=this.b.q.b.a.c.PF(a),r=this.a,q=r.a
 r=r.b
 return A.cr(B.j,B.e.dD(s.a,q,r),B.e.dD(s.b,q,r),!1)},
 $ia9:1}
@@ -79972,7 +79972,7 @@ if(s!==r.c)s=new A.cq(s,s+r.gO(0).length)
 else{q=p.fC(a)
 s=new A.cq(s,q==null?-1:q)}return s}}
 A.xh.prototype={
-vb(a){return this.a.v5(new A.aC(Math.max(a,0),B.j))}}
+vb(a){return this.a.v4(new A.aC(Math.max(a,0),B.j))}}
 A.po.prototype={
 fB(a){var s,r,q
 if(a<0||this.a.length===0)return null
@@ -84150,9 +84150,9 @@ if(r)return
 q=s.aT.dm().f
 p=h.a.a3.d
 r=h.Q
-if((r==null?null:r.c)!=null){o=r.c.v3(q).b
+if((r==null?null:r.c)!=null){o=r.c.v2(q).b
 n=Math.max(o,48)
-p=Math.max(o/2-h.Q.c.v2(B.cO,q).b+n/2,p)}m=h.a.a3.DQ(p)
+p=Math.max(o/2-h.Q.c.v1(B.cO,q).b+n/2,p)}m=h.a.a3.DQ(p)
 l=h.Up(s.kq(s.C.ge1()))
 k=h.a.c.a.b
 if(k.a===k.b)j=l.b
@@ -84511,10 +84511,10 @@ if(!r&&!k.f&&f){b.toString
 return A.mv(b,new A.k2(h,A.nS(B.j,a.a?s:i),B.av),t.gU)}q=g.ge1()
 if(a.d){i=a.a
 h=!1
-if(i){s=j.gav().v5(q).b
+if(i){s=j.gav().v4(q).b
 if(new A.aC(s,B.aA).k(0,q)){h=j.a.c.a.a
 h=s!==h.length&&h.charCodeAt(q.a)!==10}}if(h)q=new A.aC(q.a,B.j)
-else{if(!i){i=j.gav().v5(q).a
+else{if(!i){i=j.gav().v4(q).a
 i=new A.aC(i,B.j).k(0,q)&&i!==0&&j.a.c.a.a.charCodeAt(q.a-1)!==10}else i=!1
 if(i)q=new A.aC(q.a,B.aA)}}i=k.r
 if(i){h=g.c
@@ -96086,7 +96086,7 @@ q=p.x
 q.L$=r
 q.J$=0
 o.hN()},
-le(a,b,c){var s,r,q,p,o,n=c.v5(a),m=c.kq(new A.aC(n.c,B.j)),l=m.a,k=c.kq(new A.aC(n.d,B.aA)),j=k.a,i=A.u4(new A.h(l+(m.c-l)/2,m.b),new A.h(j+(k.c-j)/2,k.d))
+le(a,b,c){var s,r,q,p,o,n=c.v4(a),m=c.kq(new A.aC(n.c,B.j)),l=m.a,k=c.kq(new A.aC(n.d,B.aA)),j=k.a,i=A.u4(new A.h(l+(m.c-l)/2,m.b),new A.h(j+(k.c-j)/2,k.d))
 m=A.Sq(this.a,t.N1)
 s=t.Qv.a(m.c.ga0())
 r=c.aU(0,s)
@@ -96466,7 +96466,7 @@ s=r.d
 s===$&&A.a()
 s.l()
 r.abv()},
-K(a){var s,r,q,p,o,n,m,l,k,j,i,h=this,g=null,f=h.a,e=f.y,d=f.w.v3(e)
+K(a){var s,r,q,p,o,n,m,l,k,j,i,h=this,g=null,f=h.a,e=f.y,d=f.w.v2(e)
 e=0+d.a
 f=0+d.b
 s=new A.x(0,0,e,f)
@@ -96476,7 +96476,7 @@ e=Math.max((q-e)/2,0)
 p=r.d-r.b
 f=Math.max((p-f)/2,0)
 o=h.a
-n=o.w.v2(o.z,o.y)
+n=o.w.v1(o.z,o.y)
 o=h.a
 m=o.z===B.cO&&A.aW()===B.R
 o=o.c
@@ -98221,7 +98221,7 @@ p=4
 k=n.w
 j=n.y
 s=7
-return A.o(n.d.v_(n.z,n.Q,10,k,j),$async$wr)
+return A.o(n.d.uZ(n.z,n.Q,10,k,j),$async$wr)
 case 7:m=c
 if(n.c==null){s=1
 break}n.M(new A.avB(n,a,m))
@@ -98425,7 +98425,7 @@ s===$&&A.a()
 return A.kt(new A.avR(this),s,t.j)}}
 A.avS.prototype={
 $0(){var s=this.a
-s.e=s.d.v7()},
+s.e=s.d.v6()},
 $S:0}
 A.avR.prototype={
 $2(a,b){var s,r,q=null
@@ -98864,14 +98864,15 @@ a8(){return new A.Ig(new A.aaP(new A.cT()),new A.cT(),[])}}
 A.Ig.prototype={
 aj(){this.aC()
 this.BP()},
-BP(){var s=0,r=A.B(t.H),q,p=this,o
+BP(){var s=0,r=A.B(t.H),q,p=this,o,n
 var $async$BP=A.w(function(a,b){if(a===1)return A.y(b,r)
 while(true)switch(s){case 0:s=3
 return A.o(p.e.md(),$async$BP)
-case 3:o=b
+case 3:n=b
 if(p.c==null){s=1
-break}p.M(new A.awT(p,o))
-if(p.x==="artisan"){p.wp()
+break}p.M(new A.awT(p,n))
+o=p.x
+if(o==="artisan"||o==="commercant"){p.wp()
 $.ac.k4$.push(new A.awU(p))}else p.M(new A.awV(p))
 case 1:return A.z(q,r)}})
 return A.A($async$BP,r)},
@@ -98884,7 +98885,7 @@ s=p}while(true)switch(s){case 0:if(n.c==null){s=1
 break}n.M(new A.awW(n))
 p=4
 s=7
-return A.o(n.d.uX(),$async$wp)
+return A.o(n.d.v7(),$async$wp)
 case 7:m=b
 if(n.c==null){s=1
 break}n.M(new A.awX(n,m))
@@ -98903,12 +98904,12 @@ break
 case 6:case 1:return A.z(q,r)
 case 2:return A.y(o.at(-1),r)}})
 return A.A($async$wp,r)},
-arj(){var s,r=this
-if(r.x!=="artisan"||r.c==null)return
-s=r.c
-s.toString
-s=A.u1(s,!1,t.ZN).d
-r.y=new A.dq(s,A.n(s).i("dq<1>")).kW(new A.ax0(r))},
+arj(){var s=this,r=s.x
+if(r!=="artisan"&&r!=="commercant"||s.c==null)return
+r=s.c
+r.toString
+r=A.u1(r,!1,t.ZN).d
+s.y=new A.dq(r,A.n(r).i("dq<1>")).kW(new A.ax0(s))},
 wY(a,b){return this.asQ(a,b)},
 asQ(a,b){var s=0,r=A.B(t.H),q=1,p=[],o=this,n,m,l,k
 var $async$wY=A.w(function(c,d){if(c===1){p.push(d)
@@ -98936,7 +98937,7 @@ K(a){var s=null
 return A.eZ(A.f9(s,s,s,s,B.a15),this.ad3())},
 ad3(){var s=this,r=null,q="assets/lottie/loading.json",p=s.x
 if(p==null)return A.cy(A.xr(q,r,150,150),r,r)
-if(p!=="artisan")return B.Ga
+if(p!=="artisan"&&p!=="commercant")return B.Ga
 if(s.w)return A.cy(A.xr(q,r,150,150),r,r)
 p=s.r
 if(p!=null)return new A.iZ(p,r)
@@ -99051,7 +99052,7 @@ case 2:s=1
 break
 case 5:q=8
 s=11
-return A.o(o.d.uY(o.a.c),$async$pq)
+return A.o(o.d.uX(o.a.c),$async$pq)
 case 11:l=a0
 if(o.c!=null)o.M(new A.axe(o,l))
 q=1
@@ -99068,7 +99069,7 @@ case 7:s=1
 break
 case 10:q=13
 s=16
-return A.o(o.d.uZ(o.a.c),$async$pq)
+return A.o(o.d.uY(o.a.c),$async$pq)
 case 16:j=a0
 if(o.c!=null)o.M(new A.axg(o,j))
 q=1
@@ -99375,7 +99376,7 @@ return A.o(new A.cT().ip(),$async$w4)
 case 3:o=b
 if(o==null){q=[]
 s=1
-break}q=p.d.uY(o)
+break}q=p.d.uX(o)
 s=1
 break
 case 1:return A.z(q,r)}})
@@ -99506,7 +99507,7 @@ q===$&&A.a()
 return A.eZ(r,A.kt(new A.axF(this),q,t.j))}}
 A.axu.prototype={
 $0(){var s=this.a
-s.e=s.d.v6()},
+s.e=s.d.v5()},
 $S:0}
 A.axA.prototype={
 $1(a){var s=this,r=null,q=s.b,p=A.af(q==null?"Ajouter un service":"Modifier le service",r,r,r,r,r,r,r),o=s.c,n=s.d,m=s.e,l=s.f,k=t.p,j=A.wQ(A.bR(A.b([A.iy(n,B.LD,r,1,!1,r,new A.axv()),A.iy(m,B.Lw,r,1,!1,r,new A.axw()),A.iy(l,B.LE,B.mR,1,!1,r,new A.axx())],k),B.B,B.v,B.aQ),o)
@@ -99697,7 +99698,7 @@ q===$&&A.a()
 return A.eZ(r,A.kt(new A.az1(),q,t.j))}}
 A.ayY.prototype={
 $0(){var s=this.a
-s.f=s.d.v0()},
+s.f=s.d.v_()},
 $S:0}
 A.az1.prototype={
 $2(a,b){var s,r=null
@@ -99951,7 +99952,7 @@ q=A.uI(l,B.c5,!1,l,!0,B.n,l,A.AR(),l,l,l,l,l,l,2,A.lC(l,new A.fX(4,p,B.p),l,l,l,
 o=A.bS(B.LW,m.d,l)
 p=k.ok.r
 n=t.p
-return A.aOP(A.bR(A.b([new A.aM(B.aP,A.bR(A.b([i,B.de,new A.cW(new A.av(g,new A.aA(0,1,h),s),!1,q,l),B.df,new A.cW(new A.av(o,new A.aA(0,1,h),s),!1,A.af("Professionnels en vedette",l,l,l,l,p==null?l:p.xE(r.k3,B.aV),l,l),l),B.de,new A.cW(new A.av(A.bS(B.LP,m.d,l),new A.aA(0,1,h),s),!1,A.f_(A.kt(new A.aAB(k),new A.r2(new A.cT()).v1(),t.j),200,l),l)],n),B.as,B.v,B.z),l),A.aNV(B.W4,new A.aAC(m,j),j.length,B.aP,B.x3,!0)],n),B.B,B.v,B.z),l,B.a1,l,l,B.ab)},
+return A.aOP(A.bR(A.b([new A.aM(B.aP,A.bR(A.b([i,B.de,new A.cW(new A.av(g,new A.aA(0,1,h),s),!1,q,l),B.df,new A.cW(new A.av(o,new A.aA(0,1,h),s),!1,A.af("Professionnels en vedette",l,l,l,l,p==null?l:p.xE(r.k3,B.aV),l,l),l),B.de,new A.cW(new A.av(A.bS(B.LP,m.d,l),new A.aA(0,1,h),s),!1,A.f_(A.kt(new A.aAB(k),new A.r2(new A.cT()).v0(),t.j),200,l),l)],n),B.as,B.v,B.z),l),A.aNV(B.W4,new A.aAC(m,j),j.length,B.aP,B.x3,!0)],n),B.B,B.v,B.z),l,B.a1,l,l,B.ab)},
 adj(a){var s=null,r="Parcourir les artisans",q="Explorer les Utilisateurs",p="Mon Profil",o="Messages",n=t.gS,m=A.b([],n)
 switch(this.a.c){case"client":m=A.b([new A.fd(B.fk,r,new A.aAl(a),s),new A.fd(B.lh,q,new A.aAm(a),s),new A.fd(B.fj,p,new A.aAn(a),s),new A.fd(B.lf,o,new A.aAr(a),s)],n)
 break
@@ -101108,21 +101109,21 @@ A.aIq.prototype={
 $1(a){return B.is},
 $S:90}
 A.qV.prototype={
-v7(){var s=0,r=A.B(t.j),q,p=this,o,n,m
-var $async$v7=A.w(function(a,b){if(a===1)return A.y(b,r)
+v6(){var s=0,r=A.B(t.j),q,p=this,o,n,m
+var $async$v6=A.w(function(a,b){if(a===1)return A.y(b,r)
 while(true)switch(s){case 0:s=3
-return A.o(p.a.cU(),$async$v7)
+return A.o(p.a.cU(),$async$v6)
 case 3:m=b
 if(m==null)throw A.d(A.ag("Authentication token not found."))
 o=t.N
 s=4
-return A.o(A.fH(A.bC("https://proxi-services.onrender.com/api/admin/verifications",0,null),A.Z(["Content-Type","application/json","Authorization","Bearer "+m],o,o)),$async$v7)
+return A.o(A.fH(A.bC("https://proxi-services.onrender.com/api/admin/verifications",0,null),A.Z(["Content-Type","application/json","Authorization","Bearer "+m],o,o)),$async$v6)
 case 4:n=b
 if(n.b===200){q=B.y.cg(0,A.cl(A.ck(n.e)).b7(0,n.w),null)
 s=1
 break}else throw A.d(A.ag("Failed to load pending verifications"))
 case 1:return A.z(q,r)}})
-return A.A($async$v7,r)},
+return A.A($async$v6,r)},
 A1(a,b){return this.aEN(a,b)},
 aEN(a,b){var s=0,r=A.B(t.H),q=this,p,o,n,m,l,k
 var $async$A1=A.w(function(c,d){if(c===1)return A.y(d,r)
@@ -101254,11 +101255,11 @@ case 3:o=c
 if(o.b!==200){n=J.a4(B.y.cg(0,A.cl(A.ck(o.e)).b7(0,o.w),null),"message")
 throw A.d(A.ag(n==null?"Failed to delete report":n))}return A.z(null,r)}})
 return A.A($async$xY,r)},
-v_(a,b,c,d,e){return this.a5m(a,b,c,d,e)},
+uZ(a,b,c,d,e){return this.a5m(a,b,c,d,e)},
 a5m(a,b,c,d,e){var s=0,r=A.B(t.P),q,p=this,o,n,m,l
-var $async$v_=A.w(function(f,g){if(f===1)return A.y(g,r)
+var $async$uZ=A.w(function(f,g){if(f===1)return A.y(g,r)
 while(true)switch(s){case 0:s=3
-return A.o(p.a.cU(),$async$v_)
+return A.o(p.a.cU(),$async$uZ)
 case 3:l=g
 if(l==null)throw A.d(A.ag("Authentication token not found."))
 o=t.N
@@ -101266,13 +101267,13 @@ n=A.Z(["page",B.e.j(d),"limit",B.e.j(c),"search",e],o,o)
 if(a!=null)n.m(0,"actionType",a)
 if(b!=null)n.m(0,"entityType",b)
 s=4
-return A.o(A.fH(A.bC("https://proxi-services.onrender.com/api/admin/audit-logs",0,null).qS(0,n),A.Z(["Content-Type","application/json","Authorization","Bearer "+l],o,o)),$async$v_)
+return A.o(A.fH(A.bC("https://proxi-services.onrender.com/api/admin/audit-logs",0,null).qS(0,n),A.Z(["Content-Type","application/json","Authorization","Bearer "+l],o,o)),$async$uZ)
 case 4:m=g
 if(m.b===200){q=B.y.cg(0,A.cl(A.ck(m.e)).b7(0,m.w),null)
 s=1
 break}else throw A.d(A.ag("Failed to load audit logs"))
 case 1:return A.z(q,r)}})
-return A.A($async$v_,r)}}
+return A.A($async$uZ,r)}}
 A.r2.prototype={
 A8(){var s=0,r=A.B(t.j),q,p
 var $async$A8=A.w(function(a,b){if(a===1)return A.y(b,r)
@@ -101306,28 +101307,28 @@ s=1
 break}else throw A.d(A.ag("Failed to load reviews"))
 case 1:return A.z(q,r)}})
 return A.A($async$A7,r)},
-uY(a){return this.a5i(a)},
+uX(a){return this.a5i(a)},
 a5i(a){var s=0,r=A.B(t.j),q,p
-var $async$uY=A.w(function(b,c){if(b===1)return A.y(c,r)
+var $async$uX=A.w(function(b,c){if(b===1)return A.y(c,r)
 while(true)switch(s){case 0:s=3
-return A.o(A.fH(A.bC(u.E+a+"/portfolio",0,null),null),$async$uY)
+return A.o(A.fH(A.bC(u.E+a+"/portfolio",0,null),null),$async$uX)
 case 3:p=c
 if(p.b===200){q=B.y.cg(0,A.cl(A.ck(p.e)).b7(0,p.w),null)
 s=1
 break}else throw A.d(A.ag("Failed to load portfolio"))
 case 1:return A.z(q,r)}})
-return A.A($async$uY,r)},
-uZ(a){return this.a5k(a)},
+return A.A($async$uX,r)},
+uY(a){return this.a5k(a)},
 a5k(a){var s=0,r=A.B(t.j),q,p
-var $async$uZ=A.w(function(b,c){if(b===1)return A.y(c,r)
+var $async$uY=A.w(function(b,c){if(b===1)return A.y(c,r)
 while(true)switch(s){case 0:s=3
-return A.o(A.fH(A.bC(u.E+a+"/services",0,null),null),$async$uZ)
+return A.o(A.fH(A.bC(u.E+a+"/services",0,null),null),$async$uY)
 case 3:p=c
 if(p.b===200){q=B.y.cg(0,A.cl(A.ck(p.e)).b7(0,p.w),null)
 s=1
 break}else throw A.d(A.ag("Failed to load services"))
 case 1:return A.z(q,r)}})
-return A.A($async$uZ,r)},
+return A.A($async$uY,r)},
 xb(a,b,c){return this.aub(a,b,c)},
 aub(a,b,c){var s=0,r=A.B(t.H),q=this,p,o,n
 var $async$xb=A.w(function(d,e){if(d===1)return A.y(e,r)
@@ -101408,36 +101409,36 @@ k=A.ag(n)
 throw A.d(k)}catch(h){k=A.ag("Failed to remove favorite: "+J.qR(p))
 throw A.d(k)}return A.z(null,r)}})
 return A.A($async$uz,r)},
-v1(){var s=0,r=A.B(t.j),q,p=this,o,n,m
-var $async$v1=A.w(function(a,b){if(a===1)return A.y(b,r)
+v0(){var s=0,r=A.B(t.j),q,p=this,o,n,m
+var $async$v0=A.w(function(a,b){if(a===1)return A.y(b,r)
 while(true)switch(s){case 0:s=3
-return A.o(p.a.cU(),$async$v1)
+return A.o(p.a.cU(),$async$v0)
 case 3:m=b
 if(m==null)throw A.d(A.ag("Authentication token not found."))
 o=t.N
 s=4
-return A.o(A.fH(A.bC("https://proxi-services.onrender.com/api/professionals/featured",0,null),A.Z(["Content-Type","application/json","Authorization","Bearer "+m],o,o)),$async$v1)
+return A.o(A.fH(A.bC("https://proxi-services.onrender.com/api/professionals/featured",0,null),A.Z(["Content-Type","application/json","Authorization","Bearer "+m],o,o)),$async$v0)
 case 4:n=b
 if(n.b===200){q=B.y.cg(0,A.cl(A.ck(n.e)).b7(0,n.w),null)
 s=1
 break}else throw A.d(A.ag("Failed to load featured professionals: "+n.gnY(0)))
 case 1:return A.z(q,r)}})
-return A.A($async$v1,r)},
-v6(){var s=0,r=A.B(t.j),q,p=this,o,n,m
-var $async$v6=A.w(function(a,b){if(a===1)return A.y(b,r)
+return A.A($async$v0,r)},
+v5(){var s=0,r=A.B(t.j),q,p=this,o,n,m
+var $async$v5=A.w(function(a,b){if(a===1)return A.y(b,r)
 while(true)switch(s){case 0:o=p.a
 s=3
-return A.o(o.cU(),$async$v6)
+return A.o(o.cU(),$async$v5)
 case 3:n=b
 s=4
-return A.o(o.ip(),$async$v6)
+return A.o(o.ip(),$async$v5)
 case 4:m=b
 if(n==null||m==null)throw A.d(A.ag("User not authenticated"))
-q=p.uZ(m)
+q=p.uY(m)
 s=1
 break
 case 1:return A.z(q,r)}})
-return A.A($async$v6,r)},
+return A.A($async$v5,r)},
 th(a){return this.au0(a)},
 au0(a){var s=0,r=A.B(t.z),q,p=this,o,n,m,l,k
 var $async$th=A.w(function(b,c){if(b===1)return A.y(c,r)
@@ -101774,15 +101775,15 @@ case 3:o=c
 if(o.b!==200){n=J.a4(B.y.cg(0,A.cl(A.ck(o.e)).b7(0,o.w),null),"message")
 throw A.d(A.ag(n==null?"Failed to mark message as read":n))}return A.z(null,r)}})
 return A.A($async$ul,r)},
-v0(){var s=0,r=A.B(t.j),q,p=this,o,n,m,l,k,j
-var $async$v0=A.w(function(a,b){if(a===1)return A.y(b,r)
+v_(){var s=0,r=A.B(t.j),q,p=this,o,n,m,l,k,j
+var $async$v_=A.w(function(a,b){if(a===1)return A.y(b,r)
 while(true)switch(s){case 0:s=3
-return A.o(p.b.cU(),$async$v0)
+return A.o(p.b.cU(),$async$v_)
 case 3:j=b
 if(j==null)throw A.d(A.ag("Authentication token not found."))
 o=t.N
 s=4
-return A.o(A.fH(A.bC("https://proxi-services.onrender.com/api/conversations",0,null),A.Z(["Content-Type","application/json","Authorization","Bearer "+j],o,o)),$async$v0)
+return A.o(A.fH(A.bC("https://proxi-services.onrender.com/api/conversations",0,null),A.Z(["Content-Type","application/json","Authorization","Bearer "+j],o,o)),$async$v_)
 case 4:n=b
 o=n.b
 m=n.e
@@ -101791,7 +101792,7 @@ if(o===200){q=t.j.a(B.y.cg(0,A.cl(A.ck(m)).b7(0,l),null))
 s=1
 break}else{k=J.a4(B.y.cg(0,A.cl(A.ck(m)).b7(0,l),null),"message")
 throw A.d(A.ag(k==null?"Failed to load conversations":k))}case 1:return A.z(q,r)}})
-return A.A($async$v0,r)}}
+return A.A($async$v_,r)}}
 A.a9t.prototype={
 $1(a){this.a.$1(a)},
 $S:7}
@@ -101802,20 +101803,20 @@ A.a9s.prototype={
 $1(a){return A.Sh(t.f.a(a),t.N,t.z)},
 $S:597}
 A.aaP.prototype={
-uX(){var s=0,r=A.B(t.j),q,p=this,o,n,m
-var $async$uX=A.w(function(a,b){if(a===1)return A.y(b,r)
+v7(){var s=0,r=A.B(t.j),q,p=this,o,n,m
+var $async$v7=A.w(function(a,b){if(a===1)return A.y(b,r)
 while(true)switch(s){case 0:s=3
-return A.o(p.a.cU(),$async$uX)
+return A.o(p.a.cU(),$async$v7)
 case 3:o=b
 n=t.N
 s=4
-return A.o(A.fH(A.bC("https://proxi-services.onrender.com/api/artisan/demandes",0,null),A.Z(["Content-Type","application/json","Authorization","Bearer "+A.i(o)],n,n)),$async$uX)
+return A.o(A.fH(A.bC("https://proxi-services.onrender.com/api/professional/demandes",0,null),A.Z(["Content-Type","application/json","Authorization","Bearer "+A.i(o)],n,n)),$async$v7)
 case 4:m=b
 if(m.b===200){q=B.y.cg(0,A.cl(A.ck(m.e)).b7(0,m.w),null)
 s=1
-break}else throw A.d(A.ag("Failed to load artisan demands"))
+break}else throw A.d(A.ag("Failed to load professional demands"))
 case 1:return A.z(q,r)}})
-return A.A($async$uX,r)},
+return A.A($async$v7,r)},
 zY(a,b){return this.aEH(a,b)},
 aEH(a,b){var s=0,r=A.B(t.H),q=this,p,o,n,m,l,k
 var $async$zY=A.w(function(c,d){if(c===1)return A.y(d,r)
@@ -108354,7 +108355,7 @@ ac2(a,b){var s,r,q,p,o,n
 for(s=this.c,r=s.length,q=this.b,p=0;p<r;++p){o=s[p]
 if(o===13){n=p+1
 if(n>=r||s[n]!==10)o=10}if(o===10)q.push(p+1)}},
-v4(a){var s,r=this
+v3(a){var s,r=this
 if(a<0)throw A.d(A.eg("Offset may not be negative, was "+a+"."))
 else if(a>r.c.length)throw A.d(A.eg("Offset "+a+u.D+r.gt(0)+"."))
 s=r.b
@@ -108378,7 +108379,7 @@ else s=r+1}return p},
 GG(a){var s,r,q=this
 if(a<0)throw A.d(A.eg("Offset may not be negative, was "+a+"."))
 else if(a>q.c.length)throw A.d(A.eg("Offset "+a+" must be not be greater than the number of characters in the file, "+q.gt(0)+"."))
-s=q.v4(a)
+s=q.v3(a)
 r=q.b[s]
 if(r>a)throw A.d(A.eg("Line "+s+" comes after offset "+a+"."))
 return a-r},
@@ -108393,7 +108394,7 @@ if(s)throw A.d(A.eg("Line "+a+" doesn't have 0 columns."))
 return q}}
 A.QC.prototype={
 gdN(){return this.a.a},
-geh(a){return this.a.v4(this.b)},
+geh(a){return this.a.v3(this.b)},
 gf7(){return this.a.GG(this.b)},
 gcE(a){return this.b}}
 A.zB.prototype={
@@ -108402,9 +108403,9 @@ gt(a){return this.c-this.b},
 gbY(a){return A.aNK(this.a,this.b)},
 gbH(a){return A.aNK(this.a,this.c)},
 gdG(a){return A.fm(B.iw.cm(this.a.c,this.b,this.c),0,null)},
-ghH(a){var s=this,r=s.a,q=s.c,p=r.v4(q)
+ghH(a){var s=this,r=s.a,q=s.c,p=r.v3(q)
 if(r.GG(q)===0&&p!==0){if(q-s.b===0)return p===r.b.length-1?"":A.fm(B.iw.cm(r.c,r.oL(p),r.oL(p+1)),0,null)}else q=p===r.b.length-1?r.c.length:r.oL(p+1)
-return A.fm(B.iw.cm(r.c,r.oL(r.v4(s.b)),q),0,null)},
+return A.fm(B.iw.cm(r.c,r.oL(r.v3(s.b)),q),0,null)},
 bl(a,b){var s
 if(!(b instanceof A.zB))return this.a9r(0,b)
 s=B.e.bl(this.b,b.b)
@@ -108716,7 +108717,7 @@ s=s==null?null:s.gB(s)
 if(s==null)s=0
 return s+this.b},
 j(a){var s=A.v(this).j(0),r=this.b,q=this.a,p=q.a
-return"<"+s+": "+r+" "+(A.i(p==null?"unknown source":p)+":"+(q.v4(r)+1)+":"+(q.GG(r)+1))+">"},
+return"<"+s+": "+r+" "+(A.i(p==null?"unknown source":p)+":"+(q.v3(r)+1)+":"+(q.GG(r)+1))+">"},
 $icc:1,
 $ikL:1}
 A.Wa.prototype={
