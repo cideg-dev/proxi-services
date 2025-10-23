@@ -67,20 +67,29 @@ class ArtisanService {
     }
   }
 
-  Future<void> addPortfolioItem(int artisanId, File image, String caption) async {
+  Future<void> addPortfolioItem(int artisanId, File image, String name, String description, String? price) async {
     final token = await _tokenManager.getToken();
     var request = http.MultipartRequest(
       'POST',
       Uri.parse('${ApiConstants.baseUrl}/api/artisans/$artisanId/portfolio'),
     );
     request.headers['Authorization'] = 'Bearer $token';
-    request.fields['caption'] = caption;
+    
+    // Add the new text fields
+    request.fields['name'] = name;
+    request.fields['description'] = description;
+    if (price != null && price.isNotEmpty) {
+      request.fields['price'] = price;
+    }
+
+    // Add the image file
     request.files.add(await http.MultipartFile.fromPath('portfolioImage', image.path));
 
     var response = await request.send();
 
     if (response.statusCode != 201) {
-      throw Exception('Failed to add portfolio item');
+      final responseBody = await response.stream.bytesToString();
+      throw Exception('Failed to add portfolio item: $responseBody');
     }
   }
 

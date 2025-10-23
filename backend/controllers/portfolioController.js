@@ -13,7 +13,11 @@ const addPortfolioItem = async (req, res) => {
     return res.status(400).json({ message: 'Image requise.' });
   }
 
-  const { caption } = req.body;
+  const { name, description, price } = req.body;
+
+  if (!name || !description) {
+    return res.status(400).json({ message: 'Le nom et la description sont requis.' });
+  }
 
   try {
     // Generate a unique filename with .webp extension
@@ -22,15 +26,15 @@ const addPortfolioItem = async (req, res) => {
 
     // Process image with sharp: resize, convert to webp, and save
     await sharp(req.file.buffer)
-      .resize({ width: 600, withoutEnlargement: true })
-      .webp({ quality: 80 })
+      .resize({ width: 800, withoutEnlargement: true })
+      .webp({ quality: 85 })
       .toFile(outputPath);
 
     const imageUrl = `${req.protocol}://${req.get('host')}/uploads/${filename}`;
 
     const result = await pool.query(
-      'INSERT INTO portfolio_items (artisan_id, image_url, caption) VALUES ($1, $2, $3) RETURNING *',
-      [professionalId, imageUrl, caption]
+      'INSERT INTO portfolio_items (artisan_id, image_url, name, description, price) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+      [professionalId, imageUrl, name, description, price || null] // Use price or null if not provided
     );
     res.status(201).json(result.rows[0]);
   } catch (err) {
