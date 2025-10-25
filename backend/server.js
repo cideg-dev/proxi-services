@@ -83,6 +83,7 @@ const { authenticateToken, authorizeRole } = require('./middleware/authMiddlewar
 const authRoutes = require('./routes/authRoutes'); // Import auth routes
 const reviewRoutes = require('./routes/reviewRoutes'); // Import review routes
 const portfolioRoutes = require('./routes/portfolioRoutes'); // Import portfolio routes
+const demacheurRoutes = require('./routes/demacheurRoutes'); // Import demacheur routes
 
 // Vérification des variables d environnement critiques
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -296,6 +297,7 @@ app.get('/api/system/version', (req, res) => {
 app.use('/api/auth', authRoutes()); // Use auth routes
 app.use('/api/reviews', reviewRoutes(io, connectedUsers)); // Use review routes
 app.use('/api/portfolio', portfolioRoutes); // Use portfolio routes
+app.use('/api/demacheur', demacheurRoutes); // Use demacheur routes
 
 const artisanController = require('./controllers/artisanController');
 
@@ -883,11 +885,40 @@ app.post('/api/payments/kkiapay/webhook', express.raw({ type: 'application/json'
 
     const updatedPayment = result.rows[0];
 
-    // If payment is successful, trigger any post-payment actions (e.g., update user's profile boost)
+    // If payment is successful, trigger any post-payment actions
     if (updatedPayment.status === 'success') {
-      // Example: Update user's profile boost status
-      // await pool.query('UPDATE user_profiles SET profile_boost_expires = NOW() + INTERVAL \'30 days\' WHERE user_id = $1', [updatedPayment.user_id]);
       console.log(`Payment ${updatedPayment.kkiapay_transaction_id} for user ${updatedPayment.user_id} successful.`);
+
+      // Check if this is a demacheur subscription payment
+      if (updatedPayment.reason === 'Abonnement Démacheur Proxi-Services') {
+        const userId = updatedPayment.user_id;
+        const subscriptionDuration = 30; // 30 days
+
+        // Check if user has an existing subscription
+        const existingSubscription = await pool.query(
+          'SELECT * FROM demacheur_subscriptions WHERE user_id = $1',
+          [userId]
+        );
+
+        if (existingSubscription.rows.length > 0) {
+          // Extend existing subscription
+          const currentExpiresAt = new Date(existingSubscription.rows[0].expires_at);
+          const newExpiresAt = new Date(currentExpiresAt.getTime() + subscriptionDuration * 24 * 60 * 60 * 1000);
+          await pool.query(
+            'UPDATE demacheur_subscriptions SET expires_at = $1, status = \'active\', updated_at = NOW() WHERE user_id = $2',
+            [newExpiresAt, userId]
+          );
+          console.log(`Demacheur subscription for user ${userId} extended until ${newExpiresAt}.`);
+        } else {
+          // Create new subscription
+          const expiresAt = new Date(Date.now() + subscriptionDuration * 24 * 60 * 60 * 1000);
+          await pool.query(
+            'INSERT INTO demacheur_subscriptions (user_id, status, expires_at) VALUES ($1, \'active\', $2)',
+            [userId, expiresAt]
+          );
+          console.log(`New demacheur subscription for user ${userId} created. Expires at ${expiresAt}.`);
+        }
+      }
     }
 
     res.status(200).json({ message: 'Webhook received and processed.' });
