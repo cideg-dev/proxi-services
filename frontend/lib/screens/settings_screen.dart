@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/screens/change_password_screen.dart';
+import 'package:frontend/screens/demacheur_screen.dart';
 import 'package:frontend/screens/login_screen.dart';
 import 'package:frontend/services/auth_service.dart';
 import 'package:frontend/services/theme_provider.dart';
@@ -67,6 +68,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           const Divider(),
           _buildSectionTitle(context, 'Compte'),
+          ListTile(
+            leading: const Icon(Icons.group_add_outlined),
+            title: const Text('Devenir Démacheur'),
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => const DemacheurScreen()),
+              );
+            },
+          ),
           ListTile(
             leading: const Icon(Icons.lock_outline),
             title: const Text('Changer le mot de passe'),

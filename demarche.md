@@ -18,11 +18,11 @@ Ce document détaille les étapes nécessaires à la mise en place du système d
 
 *Objectif : Permettre à un utilisateur de devenir un "démacheur" via un abonnement.*
 
-- [ ] **Backend :** Créer une table `demacheur_subscriptions` (user_id, expires_at, status) pour gérer les abonnements des démacheurs.
-- [ ] **Backend :** Créer une route d'API pour s'abonner (ex: `/api/demacheur/subscribe`) qui intègre le système de paiement.
-- [ ] **Backend :** Créer une route d'API pour vérifier le statut de l'abonnement d'un utilisateur.
-- [ ] **Frontend :** Créer un nouvel écran "Devenir Démacheur" accessible depuis les paramètres.
-- [ ] **Frontend :** Sur cet écran, afficher le statut de l'abonnement et un bouton "S'abonner" / "Gérer l'abonnement".
+- [x] **Backend :** Créer une table `demacheur_subscriptions` (user_id, expires_at, status) pour gérer les abonnements des démacheurs.
+- [x] **Backend :** Créer une route d'API pour s'abonner (ex: `/api/demacheur/subscribe`) qui intègre le système de paiement.
+- [x] **Backend :** Créer une route d'API pour vérifier le statut de l'abonnement d'un utilisateur.
+- [x] **Frontend :** Créer un nouvel écran "Devenir Démacheur" accessible depuis les paramètres.
+- [x] **Frontend :** Sur cet écran, afficher le statut de l'abonnement et un bouton "S'abonner" / "Gérer l'abonnement".
 - [ ] **Frontend :** Intégrer le tunnel de paiement pour cet abonnement.
 
 ---
