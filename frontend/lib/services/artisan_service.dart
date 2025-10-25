@@ -1,17 +1,14 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'api_constants.dart';
-import 'token_manager.dart';
 import 'dart:io';
+import 'package:frontend/services/api_service.dart';
+import 'package:frontend/services/token_manager.dart'; // Still needed for getUserId
 
 class ArtisanService {
-  final TokenManager _tokenManager = TokenManager();
+  final ApiService _apiService = ApiService();
+  final TokenManager _tokenManager = TokenManager(); // Keep for getUserId
 
   Future<List<dynamic>> getArtisans() async {
-    final response = await http.get(
-      Uri.parse('${ApiConstants.baseUrl}/api/artisans'),
-    );
-
+    final response = await _apiService.getPublic('/api/artisans');
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {
@@ -20,10 +17,7 @@ class ArtisanService {
   }
 
   Future<Map<String, dynamic>> getArtisanById(int id) async {
-    final response = await http.get(
-      Uri.parse('${ApiConstants.baseUrl}/api/artisans/$id'),
-    );
-
+    final response = await _apiService.getPublic('/api/artisans/$id');
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {
@@ -32,10 +26,7 @@ class ArtisanService {
   }
 
   Future<List<dynamic>> getArtisanReviews(int artisanId) async {
-    final response = await http.get(
-      Uri.parse('${ApiConstants.baseUrl}/api/artisans/$artisanId/reviews'),
-    );
-
+    final response = await _apiService.getPublic('/api/artisans/$artisanId/reviews');
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {
@@ -44,10 +35,7 @@ class ArtisanService {
   }
 
   Future<List<dynamic>> getArtisanPortfolio(int artisanId) async {
-    final response = await http.get(
-      Uri.parse('${ApiConstants.baseUrl}/api/artisans/$artisanId/portfolio'),
-    );
-
+    final response = await _apiService.getPublic('/api/artisans/$artisanId/portfolio');
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {
@@ -55,11 +43,8 @@ class ArtisanService {
     }
   }
 
-    Future<List<dynamic>> getArtisanServices(int artisanId) async {
-    final response = await http.get(
-      Uri.parse('${ApiConstants.baseUrl}/api/artisans/$artisanId/services'),
-    );
-
+  Future<List<dynamic>> getArtisanServices(int artisanId) async {
+    final response = await _apiService.getPublic('/api/artisans/$artisanId/services');
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {
@@ -68,24 +53,20 @@ class ArtisanService {
   }
 
   Future<void> addPortfolioItem(int artisanId, File image, String name, String description, String? price) async {
-    final token = await _tokenManager.getToken();
-    var request = http.MultipartRequest(
-      'POST',
-      Uri.parse('${ApiConstants.baseUrl}/api/artisans/$artisanId/portfolio'),
-    );
-    request.headers['Authorization'] = 'Bearer $token';
-    
-    // Add the new text fields
-    request.fields['name'] = name;
-    request.fields['description'] = description;
+    final fields = {
+      'name': name,
+      'description': description,
+    };
     if (price != null && price.isNotEmpty) {
-      request.fields['price'] = price;
+      fields['price'] = price;
     }
 
-    // Add the image file
-    request.files.add(await http.MultipartFile.fromPath('portfolioImage', image.path));
-
-    var response = await request.send();
+    final response = await _apiService.multipartRequest(
+      'POST',
+      '/api/artisans/$artisanId/portfolio',
+      fields: fields,
+      files: {'portfolioImage': image},
+    );
 
     if (response.statusCode != 201) {
       final responseBody = await response.stream.bytesToString();
@@ -94,10 +75,7 @@ class ArtisanService {
   }
 
   Future<List<dynamic>> getRecentPortfolioItems() async {
-    final response = await http.get(
-      Uri.parse('${ApiConstants.baseUrl}/api/portfolio/recent'),
-    );
-
+    final response = await _apiService.getPublic('/api/portfolio/recent');
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {
@@ -105,30 +83,19 @@ class ArtisanService {
     }
   }
 
-  // NEW: Get favorite professionals for the logged-in user
   Future<List<dynamic>> getFavoriteArtisans({String? sortBy, double? latitude, double? longitude}) async {
-    final token = await _tokenManager.getToken();
-    final userId = await _tokenManager.getUserId(); // Assuming userId is available in TokenManager
-
-    if (token == null || userId == null) {
-      throw Exception('Authentication token or user ID not found.');
+    final userId = await _tokenManager.getUserId();
+    if (userId == null) {
+      throw Exception('User ID not found.');
     }
 
-    // Build query parameters
     final Map<String, String> queryParams = {};
     if (sortBy != null) queryParams['sortBy'] = sortBy;
     if (latitude != null) queryParams['latitude'] = latitude.toString();
     if (longitude != null) queryParams['longitude'] = longitude.toString();
 
-    final uri = Uri.parse('${ApiConstants.baseUrl}/api/artisans/$userId/favorites').replace(queryParameters: queryParams);
-
-    final response = await http.get(
-      uri,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-    );
+    final uri = Uri.parse('/api/artisans/$userId/favorites').replace(queryParameters: queryParams);
+    final response = await _apiService.get(uri.toString());
 
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
@@ -137,23 +104,13 @@ class ArtisanService {
     }
   }
 
-  // NEW: Add a professional to favorites
   Future<void> addFavorite(int professionalId) async {
-    final token = await _tokenManager.getToken();
     final userId = await _tokenManager.getUserId();
-
-    if (token == null || userId == null) {
-      throw Exception('Authentication token or user ID not found.');
+    if (userId == null) {
+      throw Exception('User ID not found.');
     }
 
-    final response = await http.post(
-      Uri.parse('${ApiConstants.baseUrl}/api/artisans/$userId/favorites/$professionalId'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-    );
-
+    final response = await _apiService.post('/api/artisans/$userId/favorites/$professionalId');
     if (response.statusCode != 200) {
       try {
         final errorBody = jsonDecode(response.body);
@@ -165,23 +122,13 @@ class ArtisanService {
     }
   }
 
-  // NEW: Remove a professional from favorites
   Future<void> removeFavorite(int professionalId) async {
-    final token = await _tokenManager.getToken();
     final userId = await _tokenManager.getUserId();
-
-    if (token == null || userId == null) {
-      throw Exception('Authentication token or user ID not found.');
+    if (userId == null) {
+      throw Exception('User ID not found.');
     }
 
-    final response = await http.delete(
-      Uri.parse('${ApiConstants.baseUrl}/api/artisans/$userId/favorites/$professionalId'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-    );
-
+    final response = await _apiService.delete('/api/artisans/$userId/favorites/$professionalId');
     if (response.statusCode != 200) {
       try {
         final errorBody = jsonDecode(response.body);
@@ -194,19 +141,7 @@ class ArtisanService {
   }
 
   Future<List<dynamic>> getFeaturedProfessionals() async {
-    final token = await _tokenManager.getToken();
-    if (token == null) {
-      throw Exception('Authentication token not found.');
-    }
-
-    final response = await http.get(
-      Uri.parse('${ApiConstants.baseUrl}/api/professionals/featured'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-    );
-
+    final response = await _apiService.getPublic('/api/professionals/featured');
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {
@@ -217,9 +152,8 @@ class ArtisanService {
   // --- Service Management ---
 
   Future<List<dynamic>> getMyArtisanServices() async {
-    final token = await _tokenManager.getToken();
     final userId = await _tokenManager.getUserId();
-    if (token == null || userId == null) {
+    if (userId == null) {
       throw Exception('User not authenticated');
     }
     // Re-use getArtisanServices, but with the logged-in user's ID
@@ -227,19 +161,14 @@ class ArtisanService {
   }
 
   Future<dynamic> addArtisanService(Map<String, dynamic> serviceData) async {
-    final token = await _tokenManager.getToken();
     final userId = await _tokenManager.getUserId();
-    if (token == null || userId == null) {
+    if (userId == null) {
       throw Exception('User not authenticated');
     }
 
-    final response = await http.post(
-      Uri.parse('${ApiConstants.baseUrl}/api/artisans/$userId/services'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-      body: jsonEncode(serviceData),
+    final response = await _apiService.post(
+      '/api/artisans/$userId/services',
+      body: serviceData,
     );
 
     if (response.statusCode == 201) {
@@ -250,18 +179,9 @@ class ArtisanService {
   }
 
   Future<dynamic> updateArtisanService(int serviceId, Map<String, dynamic> serviceData) async {
-    final token = await _tokenManager.getToken();
-    if (token == null) {
-      throw Exception('User not authenticated');
-    }
-
-    final response = await http.put(
-      Uri.parse('${ApiConstants.baseUrl}/api/services/$serviceId'), // Assuming a /api/services/:id endpoint
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-      body: jsonEncode(serviceData),
+    final response = await _apiService.put(
+      '/api/services/$serviceId', // Assuming a /api/services/:id endpoint
+      body: serviceData,
     );
 
     if (response.statusCode == 200) {
@@ -272,17 +192,7 @@ class ArtisanService {
   }
 
   Future<void> deleteArtisanService(int serviceId) async {
-    final token = await _tokenManager.getToken();
-    if (token == null) {
-      throw Exception('User not authenticated');
-    }
-
-    final response = await http.delete(
-      Uri.parse('${ApiConstants.baseUrl}/api/services/$serviceId'), // Assuming a /api/services/:id endpoint
-      headers: {
-        'Authorization': 'Bearer $token',
-      },
-    );
+    final response = await _apiService.delete('/api/services/$serviceId'); // Assuming a /api/services/:id endpoint
 
     if (response.statusCode != 204) {
       throw Exception('Failed to delete service: ${response.body}');

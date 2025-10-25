@@ -1,22 +1,12 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'api_constants.dart';
-import 'token_manager.dart';
+import 'package:frontend/services/api_service.dart';
 
 class DemandService {
-  final TokenManager _tokenManager = TokenManager();
+  final ApiService _apiService = ApiService();
 
   // Fetch all demands for the currently logged-in client
   Future<List<dynamic>> getClientDemands() async {
-    final token = await _tokenManager.getToken();
-    final response = await http.get(
-      Uri.parse('${ApiConstants.baseUrl}/api/client/demandes'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-    );
-
+    final response = await _apiService.get('/api/client/demandes');
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {
@@ -26,17 +16,8 @@ class DemandService {
 
   // Cancel a specific demand
   Future<void> cancelDemand(int demandId) async {
-    final token = await _tokenManager.getToken();
-    final response = await http.delete(
-      Uri.parse('${ApiConstants.baseUrl}/api/demandes/$demandId'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-    );
-
+    final response = await _apiService.delete('/api/demandes/$demandId');
     if (response.statusCode != 200) {
-      // Try to parse the error message from the server
       final errorBody = jsonDecode(response.body);
       final errorMessage = errorBody['message'] ?? 'Failed to cancel demand';
       throw Exception(errorMessage);
@@ -45,15 +26,7 @@ class DemandService {
 
   // Get details for a specific demand
   Future<Map<String, dynamic>> getDemandById(int demandId) async {
-    final token = await _tokenManager.getToken();
-    final response = await http.get(
-      Uri.parse('${ApiConstants.baseUrl}/api/demandes/$demandId'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-    );
-
+    final response = await _apiService.get('/api/demandes/$demandId');
     if (response.statusCode != 200) {
       throw Exception('Failed to load demand details');
     }
@@ -62,15 +35,7 @@ class DemandService {
 
   // Fetch all demands for the currently logged-in professional (artisan or commercant)
   Future<List<dynamic>> getProfessionalDemands() async {
-    final token = await _tokenManager.getToken();
-    final response = await http.get(
-      Uri.parse('${ApiConstants.baseUrl}/api/professional/demandes'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-    );
-
+    final response = await _apiService.get('/api/professional/demandes');
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {
@@ -80,16 +45,10 @@ class DemandService {
 
   // Update the status of a demand
   Future<void> updateDemandStatus(int demandId, String status) async {
-    final token = await _tokenManager.getToken();
-    final response = await http.put(
-      Uri.parse('${ApiConstants.baseUrl}/api/demandes/$demandId/status'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-      body: jsonEncode(<String, String>{'status': status}),
+    final response = await _apiService.put(
+      '/api/demandes/$demandId/status',
+      body: {'status': status},
     );
-
     if (response.statusCode != 200) {
       final errorBody = jsonDecode(response.body);
       final errorMessage = errorBody['message'] ?? 'Failed to update demand status';

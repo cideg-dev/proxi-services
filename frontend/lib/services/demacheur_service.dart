@@ -1,26 +1,17 @@
 import 'dart:convert';
-import 'package:frontend/services/api_constants.dart';
-import 'package:http/http.dart' as http;
-import 'package:frontend/services/token_manager.dart';
+import 'package:frontend/services/api_service.dart';
 
 class DemacheurService {
-  Future<Map<String, dynamic>> getSubscriptionStatus() async {
-    final token = await TokenManager().getToken();
-    if (token == null) {
-      throw Exception('No token found');
-    }
+  final ApiService _apiService = ApiService();
 
-    final response = await http.get(
-      Uri.parse('${ApiConstants.baseUrl}/demacheur/status'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-    );
+  Future<Map<String, dynamic>> getSubscriptionStatus() async {
+    final response = await _apiService.get('/api/demacheur/status');
 
     if (response.statusCode == 200) {
       return json.decode(response.body);
     } else {
+      // The ApiService will handle auth errors and throw an exception.
+      // We can throw a more specific error here if needed.
       throw Exception('Failed to load subscription status');
     }
   }

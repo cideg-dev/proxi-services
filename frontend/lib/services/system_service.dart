@@ -1,13 +1,13 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'api_constants.dart';
+import 'package:frontend/services/api_service.dart';
 
 class SystemService {
+  final ApiService _apiService = ApiService();
+
   Future<String?> getLatestVersion() async {
     try {
-      final response = await http.get(
-        Uri.parse('${ApiConstants.baseUrl}/api/system/version'),
-      ).timeout(const Duration(seconds: 5));
+      final response = await _apiService.getPublic('/api/system/version')
+          .timeout(const Duration(seconds: 5));
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
