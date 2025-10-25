@@ -2,8 +2,6 @@ const pool = require('../db.config');
 
 const addService = async (req, res) => {
   const professionalId = parseInt(req.params.artisanId);
-  console.log('req.user.user.id', req.user?.user?.id);
-  console.log('artisanId', artisanId);
   // Vérifie que l'utilisateur authentifié est bien l'artisan propriétaire
   if (req.user?.user?.id !== professionalId) {
     return res.status(403).json({ message: 'Action non autorisée.' });
