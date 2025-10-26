@@ -3,6 +3,7 @@ const router = express.Router();
 const pool = require('../db.config');
 const { check, validationResult, body } = require('express-validator');
 const { authenticateToken } = require('../middleware/authMiddleware');
+const { calculateProfileCompleteness } = require('../services/profileService');
 
 module.exports = function() {
   // GET /api/profile - Get logged-in user's profile and completeness
