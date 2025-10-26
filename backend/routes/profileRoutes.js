@@ -122,7 +122,7 @@ module.exports = function() {
       body('location', 'La localisation est requise').if(body('role').equals('artisan')).notEmpty(),
 
       // Commercant profile validation
-      body('nom_entreprise', 'Le nom de l'entreprise est requis').if(body('role').equals('commercant')).notEmpty(),
+      body('nom_entreprise', 'Le nom de l\'entreprise est requis').if(body('role').equals('commercant')).notEmpty(),
       body('adresse', 'L'adresse est requise').if(body('role').equals('commercant')).notEmpty(),
       body('location', 'La localisation est requise').if(body('role').equals('commercant')).notEmpty(),
     ],
