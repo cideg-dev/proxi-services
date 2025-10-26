@@ -214,7 +214,7 @@ module.exports = function() {
 
       // Commercant profile validation
       body('nom_entreprise', 'Le nom de l\'entreprise est requis').if(body('role').equals('commercant')).optional().notEmpty(),
-      body('adresse', 'L'adresse est requise').if(body('role').equals('commercant')).optional().notEmpty(),
+      body('adresse', 'L\'adresse est requise').if(body('role').equals('commercant')).optional().notEmpty(),
       body('location', 'La localisation est requise').if(body('role').equals('commercant')).optional().notEmpty(),
     ],
     async (req, res) => {
