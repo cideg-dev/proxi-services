@@ -1,9 +1,9 @@
 const pool = require('../db.config');
 
 const addService = async (req, res) => {
-  const professionalId = parseInt(req.params.artisanId);
+  const artisanId = parseInt(req.params.artisanId);
   // Vérifie que l'utilisateur authentifié est bien l'artisan propriétaire
-  if (req.user?.user?.id !== professionalId) {
+  if (req.user?.user?.id !== artisanId) {
     return res.status(403).json({ message: 'Action non autorisée.' });
   }
 
@@ -12,7 +12,7 @@ const addService = async (req, res) => {
   try {
     const result = await pool.query(
       'INSERT INTO services (artisan_id, name, description, price) VALUES ($1, $2, $3, $4) RETURNING *',
-      [professionalId, name, description, price]
+      [artisanId, name, description, price]
     );
     res.status(201).json({ message: 'Service ajouté avec succès.', service: result.rows[0] });
   } catch (err) {
@@ -22,8 +22,8 @@ const addService = async (req, res) => {
 };
 
 const updateService = async (req, res) => {
-  const { artisanId: professionalId, serviceId } = req.params;
-  if (req.user?.user?.id !== parseInt(professionalId)) {
+  const { artisanId, serviceId } = req.params;
+  if (req.user?.user?.id !== parseInt(artisanId)) {
     return res.status(403).json({ message: 'Action non autorisée.' });
   }
 
@@ -32,7 +32,7 @@ const updateService = async (req, res) => {
   try {
     const result = await pool.query(
       'UPDATE services SET name = $1, description = $2, price = $3 WHERE id = $4 AND artisan_id = $5 RETURNING *',
-      [name, description, price, serviceId, professionalId]
+      [name, description, price, serviceId, artisanId]
     );
 
     if (result.rows.length === 0) {
@@ -47,13 +47,13 @@ const updateService = async (req, res) => {
 };
 
 const deleteService = async (req, res) => {
-  const { artisanId: professionalId, serviceId } = req.params;
-  if (req.user?.user?.id !== parseInt(professionalId)) {
+  const { artisanId, serviceId } = req.params;
+  if (req.user?.user?.id !== parseInt(artisanId)) {
     return res.status(403).json({ message: 'Action non autorisée.' });
   }
 
   try {
-    const result = await pool.query('DELETE FROM services WHERE id = $1 AND artisan_id = $2', [serviceId, professionalId]);
+    const result = await pool.query('DELETE FROM services WHERE id = $1 AND artisan_id = $2', [serviceId, artisanId]);
 
     if (result.rowCount === 0) {
       return res.status(404).json({ message: 'Service non trouvé.' });
@@ -67,10 +67,10 @@ const deleteService = async (req, res) => {
 };
 
 const getServices = async (req, res) => {
-  const professionalId = parseInt(req.params.artisanId);
+  const artisanId = parseInt(req.params.artisanId);
 
   try {
-    const result = await pool.query('SELECT * FROM services WHERE artisan_id = $1', [professionalId]);
+    const result = await pool.query('SELECT * FROM services WHERE artisan_id = $1', [artisanId]);
     res.json(result.rows);
   } catch (err) {
     console.error(err.message);

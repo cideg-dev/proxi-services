@@ -179,8 +179,13 @@ class ArtisanService {
   }
 
   Future<dynamic> updateArtisanService(int serviceId, Map<String, dynamic> serviceData) async {
+    final userId = await _tokenManager.getUserId();
+    if (userId == null) {
+      throw Exception('User not authenticated');
+    }
+
     final response = await _apiService.put(
-      '/api/services/$serviceId', // Assuming a /api/services/:id endpoint
+      '/api/artisans/$userId/services/$serviceId',
       body: serviceData,
     );
 
@@ -192,9 +197,14 @@ class ArtisanService {
   }
 
   Future<void> deleteArtisanService(int serviceId) async {
-    final response = await _apiService.delete('/api/services/$serviceId'); // Assuming a /api/services/:id endpoint
+    final userId = await _tokenManager.getUserId();
+    if (userId == null) {
+      throw Exception('User not authenticated');
+    }
 
-    if (response.statusCode != 204) {
+    final response = await _apiService.delete('/api/artisans/$userId/services/$serviceId');
+
+    if (response.statusCode != 204 && response.statusCode != 200) {
       throw Exception('Failed to delete service: ${response.body}');
     }
   }

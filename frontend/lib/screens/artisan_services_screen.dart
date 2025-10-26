@@ -26,9 +26,9 @@ class _ArtisanServicesScreenState extends State<ArtisanServicesScreen> {
 
   void _showServiceDialog({Map<String, dynamic>? service}) {
     final _formKey = GlobalKey<FormState>();
-    final _nomController = TextEditingController(text: service?['nom']);
+    final _nameController = TextEditingController(text: service?['name']);
     final _descriptionController = TextEditingController(text: service?['description']);
-    final _tarifController = TextEditingController(text: service?['tarif']?.toString());
+    final _priceController = TextEditingController(text: service?['price']?.toString());
 
     showDialog(
       context: context,
@@ -41,7 +41,7 @@ class _ArtisanServicesScreenState extends State<ArtisanServicesScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextFormField(
-                  controller: _nomController,
+                  controller: _nameController,
                   decoration: const InputDecoration(labelText: 'Nom du service'),
                   validator: (value) => value!.isEmpty ? 'Champ requis' : null,
                 ),
@@ -51,7 +51,7 @@ class _ArtisanServicesScreenState extends State<ArtisanServicesScreen> {
                   validator: (value) => value!.isEmpty ? 'Champ requis' : null,
                 ),
                 TextFormField(
-                  controller: _tarifController,
+                  controller: _priceController,
                   decoration: const InputDecoration(labelText: 'Tarif'),
                   keyboardType: TextInputType.number,
                   validator: (value) => value!.isEmpty ? 'Champ requis' : null,
@@ -65,9 +65,9 @@ class _ArtisanServicesScreenState extends State<ArtisanServicesScreen> {
               onPressed: () async {
                 if (_formKey.currentState!.validate()) {
                   final serviceData = {
-                    'nom': _nomController.text,
+                    'name': _nameController.text,
                     'description': _descriptionController.text,
-                    'tarif': double.parse(_tarifController.text),
+                    'price': double.parse(_priceController.text),
                   };
 
                   try {
@@ -136,12 +136,12 @@ class _ArtisanServicesScreenState extends State<ArtisanServicesScreen> {
             itemBuilder: (context, index) {
               final service = services[index];
               return ListTile(
-                title: Text(service['nom'] ?? 'Sans nom'),
+                title: Text(service['name'] ?? 'Sans nom'),
                 subtitle: Text(service['description'] ?? ''),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text('${service['tarif']} €'),
+                    Text('${service['price'] ?? 'N/A'} €'),
                     IconButton(
                       icon: const Icon(Icons.edit),
                       onPressed: () => _showServiceDialog(service: service),

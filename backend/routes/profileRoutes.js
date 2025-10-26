@@ -1,4 +1,4 @@
-const express = require('express');
+"""const express = require('express');
 const router = express.Router();
 const pool = require('../db.config');
 const { check, validationResult, body } = require('express-validator');
@@ -123,8 +123,8 @@ module.exports = function() {
       body('location', 'La localisation est requise').if(body('role').equals('artisan')).notEmpty(),
 
       // Commercant profile validation
-      body('nom_entreprise', 'Le nom de l\'entreprise est requis').if(body('role').equals('commercant')).notEmpty(),
-      body('adresse', 'L\'adresse est requise').if(body('role').equals('commercant')).notEmpty(),
+      body('nom_entreprise', 'Le nom de l'entreprise est requis').if(body('role').equals('commercant')).notEmpty(),
+      body('adresse', 'L'adresse est requise').if(body('role').equals('commercant')).notEmpty(),
       body('location', 'La localisation est requise').if(body('role').equals('commercant')).notEmpty(),
     ],
     async (req, res) => {
@@ -214,8 +214,8 @@ module.exports = function() {
       body('location', 'La localisation est requise').if(body('role').equals('artisan')).optional().notEmpty(),
 
       // Commercant profile validation
-      body('nom_entreprise', 'Le nom de l\'entreprise est requis').if(body('role').equals('commercant')).optional().notEmpty(),
-      body('adresse', 'L\'adresse est requise').if(body('role').equals('commercant')).optional().notEmpty(),
+      body('nom_entreprise', 'Le nom de l'entreprise est requis').if(body('role').equals('commercant')).optional().notEmpty(),
+      body('adresse', 'L'adresse est requise').if(body('role').equals('commercant')).optional().notEmpty(),
       body('location', 'La localisation est requise').if(body('role').equals('commercant')).optional().notEmpty(),
     ],
     async (req, res) => {
@@ -265,10 +265,6 @@ module.exports = function() {
             const result = await client.query(profileUpdateQuery, values);
             updatedProfile = result.rows[0];
           }
-          // Recalculate completeness based on the updated profile data
-          const currentProfileResult = await client.query('SELECT * FROM client_profiles WHERE user_id = $1', [userId]);
-          profileCompletenessPercentage = calculateProfileCompleteness(currentProfileResult.rows[0], userRole);
-
         } else if (userRole === 'artisan') {
           if (profileData.nom_complet !== undefined) { updates.push(`nom_complet = $${paramIndex++}`); values.push(profileData.nom_complet); }
           if (profileData.sexe !== undefined) { updates.push(`sexe = $${paramIndex++}`); values.push(profileData.sexe); }
@@ -291,10 +287,6 @@ module.exports = function() {
             const result = await client.query(profileUpdateQuery, values);
             updatedProfile = result.rows[0];
           }
-          // Recalculate completeness based on the updated profile data
-          const currentProfileResult = await client.query('SELECT * FROM artisan_profiles WHERE user_id = $1', [userId]);
-          profileCompletenessPercentage = calculateProfileCompleteness(currentProfileResult.rows[0], userRole);
-
         } else if (userRole === 'commercant') {
           if (profileData.nom_entreprise !== undefined) { updates.push(`nom_entreprise = $${paramIndex++}`); values.push(profileData.nom_entreprise); }
           if (profileData.sexe_contact !== undefined) { updates.push(`sexe_contact = $${paramIndex++}`); values.push(profileData.sexe_contact); }
@@ -317,18 +309,37 @@ module.exports = function() {
             const result = await client.query(profileUpdateQuery, values);
             updatedProfile = result.rows[0];
           }
-          // Recalculate completeness based on the updated profile data
-          const currentProfileResult = await client.query('SELECT * FROM commercant_profiles WHERE user_id = $1', [userId]);
-          profileCompletenessPercentage = calculateProfileCompleteness(currentProfileResult.rows[0], userRole);
-
         } else {
           await client.query('ROLLBACK');
           return res.status(400).json({ message: 'Rôle utilisateur inconnu.' });
         }
 
+        // Refetch the full profile to include all changes
+        const userResult = await client.query('SELECT email, role FROM users WHERE id = $1', [userId]);
+        const userData = userResult.rows[0];
+
+        let newProfileData = null;
+        if (userRole === 'client') {
+          const profileResult = await client.query('SELECT * FROM client_profiles WHERE user_id = $1', [userId]);
+          if (profileResult.rows.length > 0) newProfileData = profileResult.rows[0];
+        } else if (userRole === 'artisan') {
+          const profileResult = await client.query('SELECT * FROM artisan_profiles WHERE user_id = $1', [userId]);
+          if (profileResult.rows.length > 0) newProfileData = profileResult.rows[0];
+        } else if (userRole === 'commercant') {
+          const profileResult = await client.query('SELECT * FROM commercant_profiles WHERE user_id = $1', [userId]);
+          if (profileResult.rows.length > 0) newProfileData = profileResult.rows[0];
+        }
+
+        const fullProfile = {
+          ...userData,
+          ...(newProfileData || {})
+        };
+        
+        profileCompletenessPercentage = calculateProfileCompleteness(fullProfile, userRole);
+
         await client.query('COMMIT');
 
-        res.json({ message: 'Profil mis à jour avec succès.', profile: updatedProfile, completeness: profileCompletenessPercentage });
+        res.json({ message: 'Profil mis à jour avec succès.', profile: fullProfile, completeness: profileCompletenessPercentage });
 
       } catch (error) {
         await client.query('ROLLBACK');
@@ -341,3 +352,4 @@ module.exports = function() {
 
   return router;
 };
+""
