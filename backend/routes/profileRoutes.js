@@ -1,4 +1,4 @@
-"""const express = require('express');
+const express = require('express');
 const router = express.Router();
 const pool = require('../db.config');
 const { check, validationResult, body } = require('express-validator');
@@ -352,4 +352,3 @@ module.exports = function() {
 
   return router;
 };
-""
