@@ -243,71 +243,54 @@ module.exports = function() {
           await client.query('UPDATE users SET email = $1 WHERE id = $2', [email, userId]);
         }
 
-        let updatedProfile;
-        let profileCompletenessPercentage = 0;
-
-        // Update profile table based on role
-        const updates = [];
-        const values = [];
-        let paramIndex = 1;
-
+        // Upsert logic based on role
         if (userRole === 'client') {
-          if (profileData.nom_complet !== undefined) { updates.push(`nom_complet = $${paramIndex++}`); values.push(profileData.nom_complet); }
-          if (profileData.sexe !== undefined) { updates.push(`sexe = $${paramIndex++}`); values.push(profileData.sexe); }
-          if (profileData.location !== undefined) { updates.push(`location = $${paramIndex++}`); values.push(profileData.location); }
-          if (profileData.telephone !== undefined) { updates.push(`telephone = $${paramIndex++}`); values.push(profileData.telephone); }
-          if (profileData.photo_url !== undefined) { updates.push(`photo_url = $${paramIndex++}`); values.push(profileData.photo_url); }
-          if (profileData.adresse !== undefined) { updates.push(`adresse = $${paramIndex++}`); values.push(profileData.adresse); }
-
-          if (updates.length > 0) {
+          const existingProfile = await client.query('SELECT * FROM client_profiles WHERE user_id = $1', [userId]);
+          if (existingProfile.rows.length > 0) {
+            // Update
+            const updates = Object.keys(profileData).map((key, i) => `${key} = $${i + 1}`).join(', ');
+            const values = Object.values(profileData);
             values.push(userId);
-            const profileUpdateQuery = `UPDATE client_profiles SET ${updates.join(', ')} WHERE user_id = $${paramIndex} RETURNING *`;
-            const result = await client.query(profileUpdateQuery, values);
-            updatedProfile = result.rows[0];
+            if(updates.length > 0) {
+                const profileUpdateQuery = `UPDATE client_profiles SET ${updates} WHERE user_id = $${values.length}`;
+                await client.query(profileUpdateQuery, values);
+            }
+          } else {
+            // Insert
+            const { nom_complet, sexe, location, telephone, photo_url, adresse } = profileData;
+            await client.query('INSERT INTO client_profiles (user_id, nom_complet, sexe, location, telephone, photo_url, adresse) VALUES ($1, $2, $3, $4, $5, $6, $7)', [userId, nom_complet, sexe, location, telephone, photo_url, adresse]);
           }
         } else if (userRole === 'artisan') {
-          if (profileData.nom_complet !== undefined) { updates.push(`nom_complet = $${paramIndex++}`); values.push(profileData.nom_complet); }
-          if (profileData.sexe !== undefined) { updates.push(`sexe = $${paramIndex++}`); values.push(profileData.sexe); }
-          if (profileData.specialite !== undefined) { updates.push(`specialite = $${paramIndex++}`); values.push(profileData.specialite); }
-          if (profileData.description !== undefined) { updates.push(`description = $${paramIndex++}`); values.push(profileData.description); }
-          if (profileData.location !== undefined) { updates.push(`location = $${paramIndex++}`); values.push(profileData.location); }
-          if (profileData.telephone !== undefined) { updates.push(`telephone = $${paramIndex++}`); values.push(profileData.telephone); }
-          if (profileData.annees_experience !== undefined) { updates.push(`annees_experience = $${paramIndex++}`); values.push(profileData.annees_experience); }
-          if (profileData.siret !== undefined) { updates.push(`siret = $${paramIndex++}`); values.push(profileData.siret); }
-          if (profileData.site_web !== undefined) { updates.push(`site_web = $${paramIndex++}`); values.push(profileData.site_web); }
-          if (profileData.photo_url !== undefined) { updates.push(`photo_url = $${paramIndex++}`); values.push(profileData.photo_url); }
-          if (profileData.document_verification_url !== undefined) { updates.push(`document_verification_url = $${paramIndex++}`); values.push(profileData.document_verification_url); }
-          if (profileData.horaires_ouverture !== undefined) { updates.push(`horaires_ouverture = $${paramIndex++}`); values.push(profileData.horaires_ouverture); }
-          if (profileData.langues_parlees !== undefined) { updates.push(`langues_parlees = $${paramIndex++}`); values.push(profileData.langues_parlees); }
-          if (profileData.assurance_professionnelle !== undefined) { updates.push(`assurance_professionnelle = $${paramIndex++}`); values.push(profileData.assurance_professionnelle); }
-
-          if (updates.length > 0) {
+          const existingProfile = await client.query('SELECT * FROM artisan_profiles WHERE user_id = $1', [userId]);
+          if (existingProfile.rows.length > 0) {
+            // Update
+            const updates = Object.keys(profileData).map((key, i) => `${key} = $${i + 1}`).join(', ');
+            const values = Object.values(profileData);
             values.push(userId);
-            const profileUpdateQuery = `UPDATE artisan_profiles SET ${updates.join(', ')} WHERE user_id = $${paramIndex} RETURNING *`;
-            const result = await client.query(profileUpdateQuery, values);
-            updatedProfile = result.rows[0];
+            if(updates.length > 0) {
+                const profileUpdateQuery = `UPDATE artisan_profiles SET ${updates} WHERE user_id = $${values.length}`;
+                await client.query(profileUpdateQuery, values);
+            }
+          } else {
+            // Insert
+            const { nom_complet, sexe, specialite, description, location, telephone, annees_experience, siret, site_web, photo_url, horaires_ouverture, langues_parlees, assurance_professionnelle } = profileData;
+            await client.query('INSERT INTO artisan_profiles (user_id, nom_complet, sexe, specialite, description, location, telephone, annees_experience, siret, site_web, photo_url, horaires_ouverture, langues_parlees, assurance_professionnelle) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)', [userId, nom_complet, sexe, specialite, description, location, telephone, annees_experience, siret, site_web, photo_url, horaires_ouverture, langues_parlees, assurance_professionnelle]);
           }
         } else if (userRole === 'commercant') {
-          if (profileData.nom_entreprise !== undefined) { updates.push(`nom_entreprise = $${paramIndex++}`); values.push(profileData.nom_entreprise); }
-          if (profileData.sexe_contact !== undefined) { updates.push(`sexe_contact = $${paramIndex++}`); values.push(profileData.sexe_contact); }
-          if (profileData.type_commerce !== undefined) { updates.push(`type_commerce = $${paramIndex++}`); values.push(profileData.type_commerce); }
-          if (profileData.description !== undefined) { updates.push(`description = $${paramIndex++}`); values.push(profileData.description); }
-          if (profileData.adresse !== undefined) { updates.push(`adresse = $${paramIndex++}`); values.push(profileData.adresse); }
-          if (profileData.location !== undefined) { updates.push(`location = $${paramIndex++}`); values.push(profileData.location); }
-          if (profileData.telephone !== undefined) { updates.push(`telephone = $${paramIndex++}`); values.push(profileData.telephone); }
-          if (profileData.siret !== undefined) { updates.push(`siret = $${paramIndex++}`); values.push(profileData.siret); }
-          if (profileData.site_web !== undefined) { updates.push(`site_web = $${paramIndex++}`); values.push(profileData.site_web); }
-          if (profileData.horaires_ouverture !== undefined) { updates.push(`horaires_ouverture = $${paramIndex++}`); values.push(profileData.horaires_ouverture); }
-          if (profileData.photo_url !== undefined) { updates.push(`photo_url = $${paramIndex++}`); values.push(profileData.photo_url); }
-          if (profileData.document_verification_url !== undefined) { updates.push(`document_verification_url = $${paramIndex++}`); values.push(profileData.document_verification_url); }
-          if (profileData.langues_parlees !== undefined) { updates.push(`langues_parlees = $${paramIndex++}`); values.push(profileData.langues_parlees); }
-          if (profileData.assurance_professionnelle !== undefined) { updates.push(`assurance_professionnelle = $${paramIndex++}`); values.push(profileData.assurance_professionnelle); }
-
-          if (updates.length > 0) {
+          const existingProfile = await client.query('SELECT * FROM commercant_profiles WHERE user_id = $1', [userId]);
+          if (existingProfile.rows.length > 0) {
+            // Update
+            const updates = Object.keys(profileData).map((key, i) => `${key} = $${i + 1}`).join(', ');
+            const values = Object.values(profileData);
             values.push(userId);
-            const profileUpdateQuery = `UPDATE commercant_profiles SET ${updates.join(', ')} WHERE user_id = $${paramIndex} RETURNING *`;
-            const result = await client.query(profileUpdateQuery, values);
-            updatedProfile = result.rows[0];
+            if(updates.length > 0) {
+                const profileUpdateQuery = `UPDATE commercant_profiles SET ${updates} WHERE user_id = $${values.length}`;
+                await client.query(profileUpdateQuery, values);
+            }
+          } else {
+            // Insert
+            const { nom_entreprise, sexe_contact, type_commerce, description, adresse, location, telephone, siret, site_web, horaires_ouverture, photo_url, langues_parlees, assurance_professionnelle } = profileData;
+            await client.query('INSERT INTO commercant_profiles (user_id, nom_entreprise, sexe_contact, type_commerce, description, adresse, location, telephone, siret, site_web, horaires_ouverture, photo_url, langues_parlees, assurance_professionnelle) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)', [userId, nom_entreprise, sexe_contact, type_commerce, description, adresse, location, telephone, siret, site_web, horaires_ouverture, photo_url, langues_parlees, assurance_professionnelle]);
           }
         } else {
           await client.query('ROLLBACK');
