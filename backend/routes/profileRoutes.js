@@ -57,12 +57,8 @@ module.exports = function() {
   router.get('/:userId', authenticateToken, async (req, res) => {
     const requestedUserId = parseInt(req.params.userId);
     const loggedInUserId = req.user.user.id;
-    const loggedInUserRole = req.user.user.role;
-
-
 
     try {
-      // The user's email and role are fundamental, let's get them directly.
       const userResult = await pool.query('SELECT id, email, role FROM users WHERE id = $1', [requestedUserId]);
       if (userResult.rows.length === 0) {
         return res.status(404).json({ message: 'Utilisateur non trouvé.' });
@@ -71,7 +67,6 @@ module.exports = function() {
       const userRole = userData.role;
 
       let profileData = null;
-      let profileCompleteness = 0;
       let profileQuery = '';
 
       if (userRole === 'client') {
@@ -86,15 +81,26 @@ module.exports = function() {
         const profileResult = await pool.query(profileQuery, [requestedUserId]);
         if (profileResult.rows.length > 0) {
           profileData = profileResult.rows[0];
-          profileCompleteness = calculateProfileCompleteness(profileData, userRole);
         }
       }
 
-      // Combine user data and profile data
-      const fullProfile = {
-        ...userData, // id, email, role
-        ...(profileData || {})
-      };
+      let fullProfile;
+      if (loggedInUserId === requestedUserId) {
+        // User is viewing their own profile, return everything
+        fullProfile = {
+          ...userData,
+          ...(profileData || {})
+        };
+      } else {
+        // User is viewing someone else's profile, return public data only
+        const { email, ...publicUserData } = userData; // Exclude email
+        fullProfile = {
+          ...publicUserData,
+          ...(profileData || {})
+        };
+      }
+
+      const profileCompleteness = calculateProfileCompleteness(fullProfile, userRole);
 
       res.json({ profile: fullProfile, completeness: profileCompleteness });
 
