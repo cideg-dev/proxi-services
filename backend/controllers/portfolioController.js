@@ -4,6 +4,8 @@ const fs = require('fs');
 const path = require('path');
 
 const addPortfolioItem = async (req, res) => {
+  console.log('addPortfolioItem request body:', req.body);
+  console.log('addPortfolioItem request file:', req.file);
   const professionalId = parseInt(req.params.artisanId);
   if (req.user.user.id !== professionalId) {
     return res.status(403).json({ message: 'Action non autorisée.' });
