@@ -163,6 +163,7 @@ io.on('connection', (socket) => {
 
   // When a user sends their ID
   socket.on('user connected', async ({ userId }) => {
+    console.log(`User ${userId} is attempting to connect.`);
     connectedUsers.set(userId.toString(), { socketId: socket.id, lastActive: Date.now() });
     socket.userId = userId; // store userId on the socket object
     socket.broadcast.emit('user-connected', { userId: userId });
@@ -177,7 +178,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('chat message', async (msg) => {
-    console.log('message: ' + msg.content);
+    console.log(`New message from ${msg.senderId} to ${msg.receiverId}: "${msg.content}"`);
 
     try {
       const result = await pool.query(
@@ -213,6 +214,7 @@ io.on('connection', (socket) => {
 
       const receiverUserData = connectedUsers.get(newMessage.receiver_id.toString());
       if (receiverUserData && receiverUserData.socketId !== socket.id) {
+        console.log(`Receiver ${newMessage.receiverId} is connected. Sending message and notification.`);
         io.to(receiverUserData.socketId).emit('chat message', newMessage);
         io.to(receiverUserData.socketId).emit('new-message-notification', {
           senderId: newMessage.sender_id,
@@ -223,6 +225,8 @@ io.on('connection', (socket) => {
         await pool.query('UPDATE messages SET status = $1 WHERE id = $2', ['delivered', newMessage.id]);
         newMessage.status = 'delivered'; // Update status in the object sent to receiver
         io.to(receiverUserData.socketId).emit('message-status-updated', newMessage); // Notify receiver of status change
+      } else {
+        console.log(`Receiver ${newMessage.receiverId} is not connected.`);
       }
     } catch (error) {
       console.error('Error handling chat message:', error);
@@ -242,7 +246,7 @@ io.on('connection', (socket) => {
         console.error('Failed to update lastSeen on disconnect:', error);
       }
     } else {
-      console.log('user disconnected');
+      console.log('A user disconnected (userId not set on socket).');
     }
   });
 });

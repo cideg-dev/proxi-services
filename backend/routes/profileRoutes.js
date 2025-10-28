@@ -59,10 +59,7 @@ module.exports = function() {
     const loggedInUserId = req.user.user.id;
     const loggedInUserRole = req.user.user.role;
 
-    // Authorization: Only the user themselves or an admin can view a specific profile
-    if (loggedInUserId !== requestedUserId && loggedInUserRole !== 'admin') {
-      return res.status(403).json({ message: 'Action non autorisée. Vous ne pouvez voir que votre propre profil ou être administrateur.' });
-    }
+
 
     try {
       // The user's email and role are fundamental, let's get them directly.
