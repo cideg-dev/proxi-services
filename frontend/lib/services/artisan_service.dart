@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:frontend/services/api_service.dart';
 import 'package:frontend/services/token_manager.dart';
 import 'package:http/http.dart' as http;
@@ -53,7 +52,7 @@ class ArtisanService {
     }
   }
 
-  // Updated to be cross-platform (web/native)
+  // Re-updated to be simpler and more robustly cross-platform.
   Future<void> addPortfolioItem(int artisanId, dynamic image, String name, String description, String? price) async {
     final fields = {
       'name': name,
@@ -63,23 +62,14 @@ class ArtisanService {
       fields['price'] = price;
     }
 
-    http.MultipartFile multipartFile;
-
-    if (kIsWeb) {
-      // Web implementation using image bytes
-      final imageBytes = await image.readAsBytes();
-      multipartFile = http.MultipartFile.fromBytes(
-        'portfolioImage', // Must match backend field name
-        imageBytes,
-        filename: image.name, // Pass the original filename
-      );
-    } else {
-      // Native implementation using file path
-      multipartFile = await http.MultipartFile.fromPath(
-        'portfolioImage', // Must match backend field name
-        image.path,
-      );
-    }
+    // Universal method: Read image as bytes and use MultipartFile.fromBytes.
+    // This works on both web and native platforms without conditional logic.
+    final imageBytes = await image.readAsBytes();
+    final multipartFile = http.MultipartFile.fromBytes(
+      'portfolioImage', // Must match backend field name
+      imageBytes,
+      filename: image.name, // Pass the original filename
+    );
 
     final response = await _apiService.multipartRequest(
       'POST',
