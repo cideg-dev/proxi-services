@@ -141,6 +141,7 @@ const getRecentPortfolioItems = async (req, res) => {
       ORDER BY p.id DESC
       LIMIT 10
     `);
+    console.log('Debug: Raw portfolio items from DB:', result.rows); // Temporary debug log
     res.json(result.rows);
   } catch (err) {
     console.error('Error fetching recent portfolio items:', err.message);
