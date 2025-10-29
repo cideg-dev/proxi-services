@@ -102970,7 +102970,7 @@ return A.w($async$xn,r)},
 Ax(){var s=0,r=A.x(t.j),q,p=this,o
 var $async$Ax=A.t(function(a,b){if(a===1)return A.u(b,r)
 while(true)switch(s){case 0:s=3
-return A.o(p.a.nu("/api/portfolio/recent"),$async$Ax)
+return A.o(p.a.nu("/api/artisans/portfolio/recent"),$async$Ax)
 case 3:o=b
 if(o.b===200){q=B.A.c0(0,A.c6(A.c5(o.e)).b3(0,o.w),null)
 s=1
