@@ -1,11 +1,12 @@
 import 'dart:convert';
-import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:frontend/services/api_service.dart';
-import 'package:frontend/services/token_manager.dart'; // Still needed for getUserId
+import 'package:frontend/services/token_manager.dart';
+import 'package:http/http.dart' as http;
 
 class ArtisanService {
   final ApiService _apiService = ApiService();
-  final TokenManager _tokenManager = TokenManager(); // Keep for getUserId
+  final TokenManager _tokenManager = TokenManager();
 
   Future<List<dynamic>> getArtisans() async {
     final response = await _apiService.getPublic('/api/artisans');
@@ -52,7 +53,8 @@ class ArtisanService {
     }
   }
 
-  Future<void> addPortfolioItem(int artisanId, File image, String name, String description, String? price) async {
+  // Updated to be cross-platform (web/native)
+  Future<void> addPortfolioItem(int artisanId, dynamic image, String name, String description, String? price) async {
     final fields = {
       'name': name,
       'description': description,
@@ -61,11 +63,29 @@ class ArtisanService {
       fields['price'] = price;
     }
 
+    http.MultipartFile multipartFile;
+
+    if (kIsWeb) {
+      // Web implementation using image bytes
+      final imageBytes = await image.readAsBytes();
+      multipartFile = http.MultipartFile.fromBytes(
+        'portfolioImage', // Must match backend field name
+        imageBytes,
+        filename: image.name, // Pass the original filename
+      );
+    } else {
+      // Native implementation using file path
+      multipartFile = await http.MultipartFile.fromPath(
+        'portfolioImage', // Must match backend field name
+        image.path,
+      );
+    }
+
     final response = await _apiService.multipartRequest(
       'POST',
       '/api/artisans/$artisanId/portfolio',
       fields: fields,
-      files: {'portfolioImage': image},
+      files: [multipartFile], // Pass as a list of MultipartFile
     );
 
     if (response.statusCode != 201) {

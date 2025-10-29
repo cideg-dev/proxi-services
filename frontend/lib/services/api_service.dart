@@ -1,6 +1,6 @@
 
 import 'dart:convert';
-import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:frontend/navigation_service.dart';
 import 'package:frontend/screens/login_screen.dart';
@@ -76,8 +76,8 @@ class ApiService {
     ));
   }
 
-  // New method for authenticated multipart requests
-  Future<http.StreamedResponse> multipartRequest(String method, String endpoint, {Map<String, String>? fields, Map<String, File>? files}) async {
+  // New method for authenticated multipart requests, now platform-agnostic
+  Future<http.StreamedResponse> multipartRequest(String method, String endpoint, {Map<String, String>? fields, List<http.MultipartFile>? files}) async {
     final token = await _tokenManager.getToken();
     final headers = {
       'Authorization': 'Bearer $token',
@@ -90,14 +90,10 @@ class ApiService {
       request.fields.addAll(fields);
     }
     if (files != null) {
-      for (var entry in files.entries) {
-        request.files.add(await http.MultipartFile.fromPath(entry.key, entry.value.path));
-      }
+      request.files.addAll(files);
     }
 
     return request.send();
-    // Note: We cannot easily check the status code for auth errors here before returning the StreamedResponse.
-    // The caller will have to handle the response status code.
   }
 
 
