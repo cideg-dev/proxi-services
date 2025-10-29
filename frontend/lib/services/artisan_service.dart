@@ -75,7 +75,7 @@ class ArtisanService {
   }
 
   Future<List<dynamic>> getRecentPortfolioItems() async {
-    final response = await _apiService.getPublic('/api/portfolio/recent');
+    final response = await _apiService.getPublic('/api/artisans/portfolio/recent');
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {

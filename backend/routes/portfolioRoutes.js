@@ -11,7 +11,7 @@ const upload = multer({ storage: storage });
 // @route   GET /api/portfolio/recent
 // @desc    Get 10 most recent portfolio items
 // @access  Public
-router.get('/recent', portfolioController.getRecentPortfolioItems);
+router.get('/portfolio/recent', portfolioController.getRecentPortfolioItems);
 
 // @route   GET /api/artisans/:artisanId/portfolio
 // @desc    Get all portfolio items for an artisan
