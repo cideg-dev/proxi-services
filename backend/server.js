@@ -13,6 +13,8 @@ const axios = require('axios'); // Added for Kkiapay API calls
 
 const { check, validationResult, body } = require('express-validator');
 const { sendNotificationEmail } = require('./services/emailService');
+const { handleValidationErrors } = require('./middleware/validationMiddleware');
+const logger = require('./services/loggerService');
 
 const sharp = require('sharp'); // Added for image optimization
 // const { sendPasswordResetEmail } = require('./services/emailService.js'); // Not used in this file
@@ -42,7 +44,7 @@ async function logAuditAction(userId, actionType, entityType, entityId, details)
       [userId, actionType, entityType, entityId, details]
     );
   } catch (error) {
-    console.error('Error logging audit action:', error);
+    logger.error('Error logging audit action:', { error: error.message });
   }
 }
 
@@ -58,7 +60,7 @@ const profileRoutes = require('./routes/profileRoutes'); // Import profile route
 // Vérification des variables d environnement critiques
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) {
-  console.error('JWT_SECRET must be defined in environment variables');
+  logger.error('JWT_SECRET must be defined in environment variables');
   process.exit(1);
 }
 
@@ -110,7 +112,7 @@ app.use(express.json());
 // Temporary logging middleware
 app.use((req, res, next) => {
   const log = `${new Date().toISOString()} - ${req.method} ${req.path}`;
-  console.log(log);
+  logger.info(log);
   next();
 });
 
@@ -131,7 +133,7 @@ app.use((req, res, next) => {
     const body = Buffer.concat(chunks).toString('utf8');
 
     const log = `${new Date().toISOString()} - ${req.method} ${req.originalUrl} ${res.statusCode} ${body}`;
-    console.log(log);
+    logger.info(log);
     oldEnd.apply(res, restArgs);
   };
 
@@ -173,7 +175,7 @@ io.on('connection', (socket) => {
     try {
       await pool.query('UPDATE users SET last_seen = NOW() WHERE id = $1', [userId]);
     } catch (error) {
-      console.error('Failed to update lastSeen on connect:', error);
+      logger.error('Failed to update lastSeen on connect:', { error: error.message });
     }
   });
 
@@ -229,7 +231,7 @@ io.on('connection', (socket) => {
         console.log(`Receiver ${newMessage.receiverId} is not connected.`);
       }
     } catch (error) {
-      console.error('Error handling chat message:', error);
+      logger.error('Error handling chat message:', { error: error.message });
     }
   });
 
@@ -243,10 +245,10 @@ io.on('connection', (socket) => {
       try {
         await pool.query('UPDATE users SET last_seen = NOW() WHERE id = $1', [socket.userId]);
       } catch (error) {
-        console.error('Failed to update lastSeen on disconnect:', error);
+        logger.error('Failed to update lastSeen on disconnect:', { error: error.message });
       }
     } else {
-      console.log('A user disconnected (userId not set on socket).');
+      logger.info('A user disconnected (userId not set on socket).');
     }
   });
 });
@@ -277,12 +279,15 @@ app.use('/api/profile', profileRoutes()); // Use profile routes
 const artisanController = require('./controllers/artisanController');
 
 // Artisan Routes
-app.get('/api/artisans', (req, res) => artisanController.getArtisans(req, res, connectedUsers));
+app.get('/api/artisans', authenticateToken, (req, res) => artisanController.getArtisans(req, res, connectedUsers));
 app.get('/api/artisans/:id', (req, res) => artisanController.getArtisan(req, res, connectedUsers));
 
 
 // GET /api/messages/:user1Id/:user2Id - Get historical messages between two users
-app.get('/api/messages/:user1Id/:user2Id', authenticateToken, async (req, res) => {
+app.get('/api/messages/:user1Id/:user2Id', authenticateToken, [
+  check('user1Id', 'L\'ID utilisateur est requis et doit être un entier').isInt().toInt(),
+  check('user2Id', 'L\'ID utilisateur est requis et doit être un entier').isInt().toInt(),
+], handleValidationErrors, async (req, res) => {
   const { user1Id, user2Id } = req.params;
   const loggedInUserId = req.user.user.id.toString();
 
@@ -299,7 +304,7 @@ app.get('/api/messages/:user1Id/:user2Id', authenticateToken, async (req, res) =
     res.json(result.rows);
 
   } catch (error) {
-    console.error('Error fetching historical messages:', error);
+    logger.error('Error fetching historical messages:', { error: error.message });
     res.status(500).json({ message: 'Erreur interne du serveur.' });
   }
 });
@@ -363,13 +368,16 @@ app.get('/api/conversations', authenticateToken, async (req, res) => {
     res.json(sortedConversations);
 
   } catch (error) {
-    console.error('Error fetching conversations:', error);
+    logger.error('Error fetching conversations:', { error: error.message });
     res.status(500).json({ message: 'Erreur interne du serveur.' });
   }
 });
 
 // DELETE /api/messages/:user1Id/:user2Id - Delete all messages between two users
-app.delete('/api/messages/:user1Id/:user2Id', authenticateToken, async (req, res) => {
+app.delete('/api/messages/:user1Id/:user2Id', authenticateToken, [
+  check('user1Id', 'L\'ID utilisateur est requis et doit être un entier').isInt().toInt(),
+  check('user2Id', 'L\'ID utilisateur est requis et doit être un entier').isInt().toInt(),
+], handleValidationErrors, async (req, res) => {
   const { user1Id, user2Id } = req.params;
   const loggedInUserId = req.user.user.id.toString();
 
@@ -391,13 +399,15 @@ app.delete('/api/messages/:user1Id/:user2Id', authenticateToken, async (req, res
     res.status(200).json({ message: 'Historique de la conversation effacé avec succès.' });
 
   } catch (error) {
-    console.error('Error deleting messages:', error);
+    logger.error('Error deleting messages:', { error: error.message });
     res.status(500).json({ message: 'Erreur interne du serveur.' });
   }
 });
 
 // PUT /api/messages/:messageId/read - Mark a message as read
-app.put('/api/messages/:messageId/read', authenticateToken, async (req, res) => {
+app.put('/api/messages/:messageId/read', authenticateToken, [
+  check('messageId', 'L\'ID du message est requis et doit être un entier').isInt().toInt(),
+], handleValidationErrors, async (req, res) => {
   const messageId = parseInt(req.params.messageId);
   const userId = req.user.user.id; // The user who is marking the message as read
 
@@ -438,7 +448,7 @@ app.put('/api/messages/:messageId/read', authenticateToken, async (req, res) => 
     res.status(200).json({ message: 'Message déjà marqué comme lu.' });
 
   } catch (error) {
-    console.error('Error marking message as read:', error);
+    logger.error('Error marking message as read:', { error: error.message });
     res.status(500).json({ message: 'Erreur interne du serveur.' });
   }
 });
@@ -502,7 +512,7 @@ app.post('/api/demandes', authenticateToken, authorizeRole(['client']),
       res.status(201).json({ message: 'Demande de service créée avec succès.', demande: newDemande });
 
     } catch (error) {
-      console.error('Error creating demand:', error);
+      logger.error('Error creating demand:', { error: error.message });
       res.status(500).json({ message: 'Erreur interne du serveur.' });
     }
   });
@@ -541,14 +551,22 @@ app.post('/api/reports', authenticateToken,
       res.status(201).json({ message: 'Signalement soumis avec succès.', report: newReport });
 
     } catch (error) {
-      console.error('Error submitting report:', error);
+      logger.error('Error submitting report:', { error: error.message });
       res.status(500).json({ message: 'Erreur interne du serveur.' });
     }
   });
 
 // GET /api/admin/reports - Get all reports (for admin panel)
-app.get('/api/admin/reports', authenticateToken, authorizeRole(['admin']), async (req, res) => {
-  const { page = 1, limit = 10, status, report_type, search = '' } = req.query;
+app.get('/api/admin/reports', authenticateToken, authorizeRole(['admin']), [
+  check('page').optional().isInt({ min: 1 }).withMessage('Page doit être un entier positif').toInt(),
+  check('limit').optional().isInt({ min: 1, max: 100 }).withMessage('Limite doit être un entier entre 1 et 100').toInt(),
+  check('status').optional().isIn(['pending', 'resolved', 'rejected']).withMessage('Statut invalide'),
+  check('report_type').optional().isString().withMessage('Type de rapport doit être une chaîne'),
+  check('search').optional().isString().withMessage('Recherche doit être une chaîne').trim().escape(),
+], handleValidationErrors, async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const { status, report_type, search = '' } = req.query;
   const offset = (page - 1) * limit;
 
   try {
@@ -631,7 +649,7 @@ app.get('/api/admin/reports', authenticateToken, authorizeRole(['admin']), async
     });
 
   } catch (error) {
-    console.error('Error fetching reports for admin panel:', error);
+    logger.error('Error fetching reports for admin panel:', { error: error.message });
     res.status(500).json({ message: 'Erreur interne du serveur.' });
   }
 });
@@ -659,7 +677,7 @@ app.put('/api/admin/reports/:id/resolve', authenticateToken, authorizeRole(['adm
     res.status(200).json({ message: `Signalement marqué comme ${status} avec succès.`, report: result.rows[0] });
 
   } catch (error) {
-    console.error('Error resolving report:', error);
+    logger.error('Error resolving report:', { error: error.message });
     res.status(500).json({ message: 'Erreur interne du serveur.' });
   }
 });
@@ -678,7 +696,7 @@ app.delete('/api/admin/reports/:id', authenticateToken, authorizeRole(['admin'])
     res.status(200).json({ message: 'Signalement supprimé avec succès.' });
 
   } catch (error) {
-    console.error('Error deleting report:', error);
+    logger.error('Error deleting report:', { error: error.message });
     res.status(500).json({ message: 'Erreur interne du serveur.' });
   }
 });
@@ -690,14 +708,23 @@ app.post('/api/audit-logs', authenticateToken, authorizeRole(['admin']), async (
     await logAuditAction(userId, actionType, entityType, entityId, details);
     res.status(200).json({ message: 'Audit action logged successfully.' });
   } catch (error) {
-    console.error('Error logging audit action via API:', error);
+    logger.error('Error logging audit action via API:', { error: error.message });
     res.status(500).json({ message: 'Erreur interne du serveur.' });
   }
 });
 
 // GET /api/admin/audit-logs - Get all audit logs (for admin panel)
-app.get('/api/admin/audit-logs', authenticateToken, authorizeRole(['admin']), async (req, res) => {
-  const { page = 1, limit = 10, userId, actionType, entityType, search = '' } = req.query;
+app.get('/api/admin/audit-logs', authenticateToken, authorizeRole(['admin']), [
+  check('page').optional().isInt({ min: 1 }).withMessage('Page doit être un entier positif').toInt(),
+  check('limit').optional().isInt({ min: 1, max: 100 }).withMessage('Limite doit être un entier entre 1 et 100').toInt(),
+  check('userId').optional().isInt({ min: 1 }).withMessage('userId doit être un entier positif').toInt(),
+  check('actionType').optional().isString().withMessage('actionType doit être une chaîne'),
+  check('entityType').optional().isString().withMessage('entityType doit être une chaîne'),
+  check('search').optional().isString().withMessage('Recherche doit être une chaîne').trim().escape(),
+], handleValidationErrors, async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const { userId, actionType, entityType, search = '' } = req.query;
   const offset = (page - 1) * limit;
 
   try {
@@ -772,7 +799,7 @@ app.get('/api/admin/audit-logs', authenticateToken, authorizeRole(['admin']), as
     });
 
   } catch (error) {
-    console.error('Error fetching audit logs for admin panel:', error);
+    logger.error('Error fetching audit logs for admin panel:', { error: error.message });
     res.status(500).json({ message: 'Erreur interne du serveur.' });
   }
 });
@@ -817,7 +844,7 @@ app.post('/api/payments/kkiapay/initiate', authenticateToken, async (req, res) =
     res.status(200).json({ message: 'Paiement initié.', paymentUrl: kkiapayPaymentUrl, ourTransactionId: ourTransactionId });
 
   } catch (error) {
-    console.error('Error initiating Kkiapay payment:', error);
+    logger.error('Error initiating Kkiapay payment:', { error: error.message });
     res.status(500).json({ message: 'Erreur interne du serveur lors de l initiation du paiement.' });
   }
 });
@@ -832,7 +859,7 @@ app.post('/api/payments/kkiapay/webhook', express.raw({ type: 'application/json'
                                   .digest('hex');
 
   if (signature !== expectedSignature) {
-    console.error('Kkiapay webhook: Invalid signature.');
+    logger.error('Kkiapay webhook: Invalid signature.');
     return res.status(403).json({ message: 'Invalid webhook signature.' });
   }
 
@@ -842,7 +869,7 @@ app.post('/api/payments/kkiapay/webhook', express.raw({ type: 'application/json'
   const ourTransactionId = event.metadata?.ourTransactionId; // Assuming we pass this in metadata
 
   if (!ourTransactionId || !kkiapayTransactionId || !kkiapayStatus) {
-    console.error('Kkiapay webhook: Missing essential transaction data in payload.', event);
+    logger.error('Kkiapay webhook: Missing essential transaction data in payload.', { event });
     return res.status(400).json({ message: 'Missing essential transaction data in payload.' });
   }
 
@@ -854,7 +881,7 @@ app.post('/api/payments/kkiapay/webhook', express.raw({ type: 'application/json'
     );
 
     if (result.rows.length === 0) {
-      console.error('Kkiapay webhook: Our transaction ID not found:', ourTransactionId);
+      logger.error('Kkiapay webhook: Our transaction ID not found:', { ourTransactionId });
       return res.status(404).json({ message: 'Our transaction ID not found.' });
     }
 
@@ -899,7 +926,7 @@ app.post('/api/payments/kkiapay/webhook', express.raw({ type: 'application/json'
     res.status(200).json({ message: 'Webhook received and processed.' });
 
   } catch (error) {
-    console.error('Error processing Kkiapay webhook:', error);
+    logger.error('Error processing Kkiapay webhook:', { error: error.message });
     res.status(500).json({ message: 'Erreur interne du serveur lors du traitement du webhook.' });
   }
 });
@@ -922,7 +949,7 @@ app.get('/api/payments/kkiapay/verify/:ourTransactionId', authenticateToken, asy
     res.status(200).json({ message: 'Statut de paiement récupéré avec succès.', payment: result.rows[0] });
 
   } catch (error) {
-    console.error('Error verifying Kkiapay payment:', error);
+    logger.error('Error verifying Kkiapay payment:', { error: error.message });
     res.status(500).json({ message: 'Erreur interne du serveur lors de la vérification du paiement.' });
   }
 });
@@ -939,7 +966,7 @@ app.get('/api/subscriptions', authenticateToken, async (req, res) => {
     res.status(200).json({ subscriptions: result.rows });
 
   } catch (error) {
-    console.error('Error fetching user subscriptions:', error);
+    logger.error('Error fetching user subscriptions:', { error: error.message });
     res.status(500).json({ message: 'Erreur interne du serveur.' });
   }
 });
@@ -997,7 +1024,7 @@ app.post('/api/subscriptions/subscribe', authenticateToken, async (req, res) => 
     res.status(201).json({ message: 'Abonnement créé avec succès.', subscription: newSubscription });
 
   } catch (error) {
-    console.error('Error creating subscription:', error);
+    logger.error('Error creating subscription:', { error: error.message });
     res.status(500).json({ message: 'Erreur interne du serveur.' });
   }
 });
@@ -1031,7 +1058,7 @@ app.post('/api/subscriptions/cancel', authenticateToken, async (req, res) => {
     res.status(200).json({ message: 'Abonnement annulé avec succès.', subscription: canceledSubscription });
 
   } catch (error) {
-    console.error('Error canceling subscription:', error);
+    logger.error('Error canceling subscription:', { error: error.message });
     res.status(500).json({ message: 'Erreur interne du serveur.' });
   }
 });
@@ -1048,53 +1075,8 @@ app.get('/api/invoices', authenticateToken, async (req, res) => {
     res.status(200).json({ invoices: result.rows });
 
   } catch (error) {
-    console.error('Error fetching user invoices:', error);
+    logger.error('Error fetching user invoices:', { error: error.message });
     res.status(500).json({ message: 'Erreur interne du serveur.' });
-  }
-});
-
-// POST /api/payments/kkiapay/initiate - Initiate a Kkiapay payment
-app.post('/api/payments/kkiapay/initiate', authenticateToken, async (req, res) => {
-  const userId = req.user.user.id;
-  const { amount, reason } = req.body;
-
-  if (!amount || amount <= 0 || !reason) {
-    return res.status(400).json({ message: 'Montant et raison du paiement requis.' });
-  }
-
-  try {
-    // Generate a unique transaction ID for our system
-    const ourTransactionId = `kkiapay-${userId}-${Date.now()}`;
-
-    // Store the transaction in our database with 'pending' status
-    await pool.query(
-      `INSERT INTO payments (user_id, amount, reason, kkiapay_transaction_id, status)
-       VALUES ($1, $2, $3, $4, 'pending')`,
-      [userId, amount, reason, ourTransactionId]
-    );
-
-    // Call Kkiapay API to initiate payment
-    // You would typically make an HTTP POST request to Kkiapay's initiation endpoint.
-    const kkiapayResponse = await axios.post('https://api.kkiapay.me/v1/initiate', {
-      amount: amount,
-      reason: reason,
-      transactionId: ourTransactionId, // Ensure this is passed if Kkiapay requires it
-      callBackUrl: `${process.env.FRONTEND_URL}/payment-callback`, // URL Kkiapay redirects to
-      // Add other Kkiapay specific parameters like phone, email, etc.
-    }, {
-      headers: {
-        'X-API-KEY': process.env.KKIAPAY_PUBLIC_KEY, // Or Secret Key depending on Kkiapay API
-        'X-SECRET-KEY': process.env.KKIAPAY_SECRET_KEY,
-        'Content-Type': 'application/json'
-      }
-    });
-    const kkiapayPaymentUrl = kkiapayResponse.data.paymentUrl;
-
-    res.status(200).json({ message: 'Paiement initié.', paymentUrl: kkiapayPaymentUrl, ourTransactionId: ourTransactionId });
-
-  } catch (error) {
-    console.error('Error initiating Kkiapay payment:', error);
-    res.status(500).json({ message: 'Erreur interne du serveur lors de l initiation du paiement.' });
   }
 });
 
@@ -1114,7 +1096,7 @@ app.post('/api/payments/kkiapay/initiate', authenticateToken, async (req, res) =
 
 
 // GET /api/clients/featured - Get a few clients for the homepage
-app.get('/api/clients/featured', async (req, res) => {
+app.get('/api/clients/featured', authenticateToken, async (req, res) => {
   try {
     const result = await pool.query(
       `
@@ -1130,7 +1112,7 @@ app.get('/api/clients/featured', async (req, res) => {
     res.json(featuredClients);
 
   } catch (error) {
-    console.error('Error fetching featured clients:', error);
+    logger.error('Error fetching featured clients:', { error: error.message });
     res.status(500).json({ message: 'Erreur interne du serveur.' });
   }
 });
@@ -1183,7 +1165,7 @@ app.post('/api/artisans/:artisanId/favorites/:favoriteArtisanId', authenticateTo
       res.status(200).json({ message: 'Artisan ajouté aux favoris avec succès !' });
 
     } catch (error) {
-      console.error('Error adding favorite:', error);
+      logger.error('Error adding favorite:', { error: error.message });
       res.status(500).json({ message: 'Erreur interne du serveur.' });
     }
   });
@@ -1227,7 +1209,7 @@ app.delete('/api/artisans/:artisanId/favorites/:favoriteArtisanId', authenticate
       res.status(200).json({ message: 'Artisan supprimé des favoris avec succès !' });
 
     } catch (error) {
-      console.error('Error deleting favorite:', error);
+      logger.error('Error deleting favorite:', { error: error.message });
       res.status(500).json({ message: 'Erreur interne du serveur.' });
     }
   });
@@ -1307,7 +1289,7 @@ app.get('/api/artisans/:artisanId/favorites', authenticateToken,
       res.json(favorites);
 
     } catch (error) {
-      console.error('Error fetching favorites:', error);
+      logger.error('Error fetching favorites:', { error: error.message });
       res.status(500).json({ message: 'Erreur interne du serveur.' });
     }
   });
@@ -1349,7 +1331,7 @@ app.get('/api/clients', authenticateToken, authorizeRole(['artisan']), async (re
     res.json(clients);
 
   } catch (error) {
-    console.error('Error fetching clients:', error);
+    logger.error('Error fetching clients:', { error: error.message });
     res.status(500).json({ message: 'Erreur interne du serveur.' });
   }
 });
@@ -1379,7 +1361,7 @@ app.get('/api/client/demandes', authenticateToken, authorizeRole(['client']), as
     res.json(result.rows);
 
   } catch (error) {
-    console.error('Error fetching client demands:', error);
+    logger.error('Error fetching client demands:', { error: error.message });
     res.status(500).json({ message: 'Erreur interne du serveur.' });
   }
 });
@@ -1410,7 +1392,7 @@ app.get('/api/professional/demandes', authenticateToken, authorizeRole(['artisan
     res.json(result.rows);
 
   } catch (error) {
-    console.error('Error fetching professional demands:', error);
+    logger.error('Error fetching professional demands:', { error: error.message });
     res.status(500).json({ message: 'Erreur interne du serveur.' });
   }
 });
@@ -1423,7 +1405,7 @@ app.get('/api/professional/demandes', authenticateToken, authorizeRole(['artisan
 
 
 // GET /api/professionals/featured - Get a few featured artisans and commercants
-app.get('/api/professionals/featured', async (req, res) => {
+app.get('/api/professionals/featured', authenticateToken, async (req, res) => {
   try {
     // Fetch a few random artisans
     const artisansResult = await pool.query(
@@ -1452,13 +1434,16 @@ app.get('/api/professionals/featured', async (req, res) => {
     res.json(featuredProfessionals);
 
   } catch (error) {
-    console.error('Error fetching featured professionals:', error);
+    logger.error('Error fetching featured professionals:', { error: error.message });
     res.status(500).json({ message: 'Erreur interne du serveur lors de la récupération des professionnels en vedette.' });
   }
 });
 
 // GET /api/users/all - Get all users with their profiles, with optional role filter and search
-app.get('/api/users/all', authenticateToken, async (req, res) => {
+app.get('/api/users/all', authenticateToken, [
+  check('role').optional().isIn(['client', 'artisan', 'commercant', 'admin']).withMessage('Rôle invalide'),
+  check('search').optional().isString().withMessage('Recherche doit être une chaîne').trim().escape(),
+], handleValidationErrors, async (req, res) => {
   const { role, search } = req.query;
 
   try {
@@ -1499,7 +1484,7 @@ app.get('/api/users/all', authenticateToken, async (req, res) => {
     res.json(result.rows);
 
   } catch (error) {
-    console.error('Error fetching all users:', error);
+    logger.error('Error fetching all users:', { error: error.message });
     res.status(500).json({ message: 'Erreur interne du serveur lors de la récupération des utilisateurs.' });
   }
 });
@@ -1531,7 +1516,7 @@ app.put('/api/demandes/:id/status', authenticateToken, authorizeRole(['artisan']
     res.json({ message: 'Statut de la demande mis à jour avec succès.', demande: updatedDemande });
 
   } catch (error) {
-    console.error('Error updating demand status:', error);
+    logger.error('Error updating demand status:', { error: error.message });
     res.status(500).json({ message: 'Erreur interne du serveur.' });
   }
 });
@@ -1544,7 +1529,7 @@ app.get('/api/migrate-db', authenticateToken, authorizeRole(['admin']), async (r
     await pool.query(schemaSql);
     res.status(200).json({ message: "Base de données migrée avec succès. N'oubliez pas de supprimer cette route temporaire !", success: true });
   } catch (error) {
-    console.error('Error during temporary DB migration:', error);
+    logger.error('Error during temporary DB migration:', { error: error.message });
     res.status(500).json({ message: 'Erreur lors de la migration temporaire de la base de données.', error: error.message });
   }
 });
@@ -1581,13 +1566,15 @@ app.delete('/api/demandes/:id', authenticateToken, authorizeRole(['client']), as
     res.status(200).json({ message: 'Demande annulée avec succès.' });
 
   } catch (error) {
-    console.error('Error cancelling demand:', error);
+    logger.error('Error cancelling demand:', { error: error.message });
     res.status(500).json({ message: 'Erreur interne du serveur.' });
   }
 });
 
 // GET /api/demandes/:id - Get details of a specific service request
-app.get('/api/demandes/:id', authenticateToken, async (req, res) => {
+app.get('/api/demandes/:id', authenticateToken, [
+  check('id', 'L\'ID de la demande est requis et doit être un entier').isInt().toInt(),
+], handleValidationErrors, async (req, res) => {
   const demandeId = parseInt(req.params.id);
   const userId = req.user.user.id;
 
@@ -1617,7 +1604,7 @@ app.get('/api/demandes/:id', authenticateToken, async (req, res) => {
     res.json(demand);
 
   } catch (error) {
-    console.error('Error fetching demand details:', error);
+    logger.error('Error fetching demand details:', { error: error.message });
     res.status(500).json({ message: 'Erreur interne du serveur.' });
   }
 });
@@ -1626,7 +1613,14 @@ app.get('/api/demandes/:id', authenticateToken, async (req, res) => {
 
 
 // POST /api/users/:id/upload-photo
-app.post('/api/users/:id/upload-photo', authenticateToken, upload.single('profileImage'), async (req, res) => {
+app.post('/api/users/:id/upload-photo', authenticateToken, [
+  check('id', 'L\'ID utilisateur est requis et doit être un entier').isInt().toInt(),
+], upload.single('profileImage'), async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+  
   const userId = parseInt(req.params.id);
   const userRole = req.user.user.role;
 
@@ -1639,6 +1633,17 @@ app.post('/api/users/:id/upload-photo', authenticateToken, upload.single('profil
   }
 
   try {
+    // Verify file type to prevent malicious uploads
+    const allowedMimeTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+    if (!allowedMimeTypes.includes(req.file.mimetype)) {
+      return res.status(400).json({ message: 'Type de fichier non autorisé. Seuls les images sont autorisées.' });
+    }
+    
+    // Limit file size (e.g., 5MB)
+    if (req.file.size > 5 * 1024 * 1024) {
+      return res.status(400).json({ message: 'Fichier trop volumineux. La taille maximale est de 5MB.' });
+    }
+
     // Generate a unique filename with .webp extension
     const filename = `profile-${userId}-${Date.now()}.webp`;
     const outputPath = path.join(__dirname, 'uploads', filename);
@@ -1674,7 +1679,7 @@ app.post('/api/users/:id/upload-photo', authenticateToken, upload.single('profil
     res.json({ message: 'Image téléversée avec succès !', profile: result.rows[0] });
 
   } catch (error) {
-    console.error('Error uploading profile image:', error);
+    logger.error('Error uploading profile image:', { error: error.message });
     res.status(500).json({ message: 'Erreur interne du serveur.' });
   }
 });
@@ -1686,7 +1691,14 @@ const documentStorage = multer.memoryStorage(); // Store in memory for Sharp pro
 const uploadDocument = multer({ storage: documentStorage });
 
 // POST /api/users/:id/upload-document
-app.post('/api/users/:id/upload-document', authenticateToken, uploadDocument.single('verificationDocument'), async (req, res) => {
+app.post('/api/users/:id/upload-document', authenticateToken, [
+  check('id', 'L\'ID utilisateur est requis et doit être un entier').isInt().toInt(),
+], uploadDocument.single('verificationDocument'), async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+  
   const userId = parseInt(req.params.id);
   const userRole = req.user.user.role;
 
@@ -1699,6 +1711,17 @@ app.post('/api/users/:id/upload-document', authenticateToken, uploadDocument.sin
   }
 
   try {
+    // Verify file type to prevent malicious uploads
+    const allowedMimeTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'application/pdf'];
+    if (!allowedMimeTypes.includes(req.file.mimetype)) {
+      return res.status(400).json({ message: 'Type de fichier non autorisé. Seuls les images et PDF sont autorisés.' });
+    }
+    
+    // Limit file size (e.g., 10MB)
+    if (req.file.size > 10 * 1024 * 1024) {
+      return res.status(400).json({ message: 'Fichier trop volumineux. La taille maximale est de 10MB.' });
+    }
+
     // Generate a unique filename with .webp extension
     const filename = `document-${userId}-${Date.now()}.webp`;
     const outputPath = path.join(__dirname, 'uploads', filename);
@@ -1752,13 +1775,13 @@ app.post('/api/users/:id/upload-document', authenticateToken, uploadDocument.sin
             });
         }
     } catch (emailError) {
-        console.error('Failed to send KYC submission notification email:', emailError);
+        logger.error('Failed to send KYC submission notification email:', { emailError: emailError.message });
     }
 
     res.json({ message: 'Document téléversé avec succès !', profile: updatedProfile });
 
   } catch (error) {
-    console.error('Error uploading verification document:', error);
+    logger.error('Error uploading verification document:', { error: error.message });
     res.status(500).json({ message: 'Erreur interne du serveur.' });
   }
 });
@@ -1800,7 +1823,7 @@ app.get('/api/admin/verifications', authenticateToken, authorizeRole(['admin']),
     res.json([...artisans.rows, ...commercants.rows]);
 
   } catch (error) {
-    console.error('Error fetching pending verifications:', error);
+    logger.error('Error fetching pending verifications:', { error: error.message });
     res.status(500).json({ message: 'Erreur interne du serveur.' });
   }
 });
@@ -1832,12 +1855,51 @@ app.put('/api/admin/verifications/:userId', authenticateToken, authorizeRole(['a
 
     await pool.query(updateQuery, [status, userId]);
 
-    // TODO: Send an email notification to the user
+    // Send an email notification to the user
+    try {
+      const userResult = await pool.query(`
+        SELECT u.email, u.role, COALESCE(ap.nom_complet, cp.nom_complet, comp.nom_entreprise) as name
+        FROM users u
+        LEFT JOIN artisan_profiles ap ON u.id = ap.user_id
+        LEFT JOIN client_profiles cp ON u.id = cp.user_id
+        LEFT JOIN commercant_profiles comp ON u.id = comp.user_id
+        WHERE u.id = $1
+      `, [userId]);
+      
+      if (userResult.rows.length > 0) {
+        const userData = userResult.rows[0];
+        const subject = status === 'verified' 
+          ? 'Votre compte a été vérifié' 
+          : 'Votre demande de vérification a été rejetée';
+        
+        const html = status === 'verified'
+          ? `
+              <p>Bonjour ${userData.name || 'Utilisateur'},</p>
+              <p>Votre compte a été vérifié avec succès. Vous pouvez maintenant profiter de toutes les fonctionnalités de Proxi-Services.</p>
+              <p>Merci,</p>
+              <p>Le système Proxi-Services</p>
+            `
+          : `
+              <p>Bonjour ${userData.name || 'Utilisateur'},</p>
+              <p>Votre demande de vérification a été rejetée. Veuillez contacter le support pour plus d'informations.</p>
+              <p>Merci,</p>
+              <p>Le système Proxi-Services</p>
+            `;
+        
+        sendNotificationEmail({
+          to: userData.email,
+          subject: subject,
+          html: html,
+        });
+      }
+    } catch (emailError) {
+      console.error('Failed to send verification status notification email:', emailError);
+    }
 
     res.status(200).json({ message: `Le statut de l utilisateur ${userId} a été mis à jour à "${status}".` });
 
   } catch (error) {
-    console.error('Error updating verification status:', error);
+    logger.error('Error updating verification status:', { error: error.message });
     res.status(500).json({ message: 'Erreur interne du serveur.' });
   }
 });
@@ -1891,7 +1953,7 @@ app.get('/api/admin/users', authenticateToken, authorizeRole(['admin']), async (
     });
 
   } catch (error) {
-    console.error('Error fetching users for admin panel:', error);
+    logger.error('Error fetching users for admin panel:', { error: error.message });
     res.status(500).json({ message: 'Erreur interne du serveur.' });
   }
 });
@@ -1911,7 +1973,7 @@ app.get('/api/admin/users/:id', authenticateToken, authorizeRole(['admin']), asy
     res.json({ id: user.id, email: user.email, role: user.role, last_seen: user.last_seen });
 
   } catch (error) {
-    console.error('Error fetching user details for admin panel:', error);
+    logger.error('Error fetching user details for admin panel:', { error: error.message });
     res.status(500).json({ message: 'Erreur interne du serveur.' });
   }
 });
@@ -1933,7 +1995,7 @@ app.put('/api/admin/users/:id', authenticateToken, authorizeRole(['admin']), asy
     res.json({ message: 'Utilisateur mis à jour avec succès.', user: userResult.rows[0] });
 
   } catch (error) {
-    console.error('Error updating user details from admin panel:', error);
+    logger.error('Error updating user details from admin panel:', { error: error.message });
     res.status(500).json({ message: 'Erreur interne du serveur.' });
   }
 });
@@ -1953,7 +2015,7 @@ app.delete('/api/admin/users/:id', authenticateToken, authorizeRole(['admin']), 
   res.status(200).json({ message: 'Utilisateur supprimé avec succès.' });
 
   } catch (error) {
-    console.error('Error deleting user from admin panel:', error);
+    logger.error('Error deleting user from admin panel:', { error: error.message });
     res.status(500).json({ message: 'Erreur interne du serveur.' });
   }
 });
@@ -1972,7 +2034,7 @@ app.put('/api/admin/users/:id/block', authenticateToken, authorizeRole(['admin']
 
     res.status(200).json({ user: updateResult.rows[0] });
   } catch (error) {
-    console.error('Error updating user block status:', error);
+    logger.error('Error updating user block status:', { error: error.message });
     res.status(500).json({ message: 'Erreur interne du serveur.' });
   }
 });
@@ -1982,7 +2044,7 @@ app.put('/api/admin/users/:id/block', authenticateToken, authorizeRole(['admin']
 
 
 
-// Dmarrage du serveur
+// Démarrage du serveur
 const PORT = process.env.PORT || 10000;
 server.listen(PORT, () => {
   console.log(`Le serveur écoute sur le port ${PORT}`);
