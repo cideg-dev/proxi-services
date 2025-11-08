@@ -23,9 +23,6 @@ exports.up = (pgm) => {
   
   // Index sur la table des services pour les recherches par artisan_id
   pgm.createIndex('services', 'artisan_id');
-  
-  // Index sur la table des tokens de rafraîchissement pour les recherches par user_id
-  pgm.createIndex('refresh_tokens', 'user_id');
 };
 
 exports.down = (pgm) => {
@@ -41,5 +38,4 @@ exports.down = (pgm) => {
   pgm.dropIndex('avis', 'artisan_id');
   pgm.dropIndex('avis', 'created_at');
   pgm.dropIndex('services', 'artisan_id');
-  pgm.dropIndex('refresh_tokens', 'user_id');
 };
