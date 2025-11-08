@@ -1,5 +1,5 @@
 const express = require('express');
-const pool = require('../db.config');
+const pool = require('../../db.config');
 const { authenticateToken, authorizeRole } = require('../middleware/authMiddleware');
 const { check, validationResult } = require('express-validator');
 
