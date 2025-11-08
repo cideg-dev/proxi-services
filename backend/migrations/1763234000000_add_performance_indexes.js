@@ -17,9 +17,9 @@ exports.up = (pgm) => {
   pgm.createIndex('demandes', ['client_id', 'artisan_id']);
   pgm.createIndex('demandes', 'created_at');
   
-  // Index sur la table des avis pour les recherches par artisan_id
-  pgm.createIndex('avis', 'artisan_id');
-  pgm.createIndex('avis', 'created_at');
+  // Index sur la table des reviews pour les recherches par artisan_id
+  pgm.createIndex('reviews', 'artisan_id');
+  pgm.createIndex('reviews', 'created_at');
   
   // Index sur la table des services pour les recherches par artisan_id
   pgm.createIndex('services', 'artisan_id');
@@ -35,7 +35,7 @@ exports.down = (pgm) => {
   pgm.dropIndex('messages', 'created_at');
   pgm.dropIndex('demandes', ['client_id', 'artisan_id']);
   pgm.dropIndex('demandes', 'created_at');
-  pgm.dropIndex('avis', 'artisan_id');
-  pgm.dropIndex('avis', 'created_at');
+  pgm.dropIndex('reviews', 'artisan_id');
+  pgm.dropIndex('reviews', 'created_at');
   pgm.dropIndex('services', 'artisan_id');
 };
