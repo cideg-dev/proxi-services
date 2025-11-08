@@ -256,4 +256,7 @@ app.use('/api/reports', authenticateToken, reportRoutes);
 // Routes admin
 app.use('/api/admin', authenticateToken, authorizeRole(['admin']), require('./routes/adminRoutes'));
 
+// Routes fonctionnalités générales
+app.use('/api', require('./routes/generalFeaturesRoutes'));
+
 module.exports = app;

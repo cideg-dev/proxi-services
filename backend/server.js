@@ -25,6 +25,9 @@ app.use(limiter);
 app.use(helmet());
 app.use(express.json());
 
+// Trust proxy pour Render
+app.set('trust proxy', true);
+
 // Démarrage du serveur
 const PORT = process.env.PORT || 3000;
 const server = http.createServer(app);
