@@ -1,9 +1,10 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const pool = require('../db.config');
+const pool = require('../../db.config');
 const { check, validationResult, body } = require('express-validator');
 const { authenticateToken } = require('../middleware/authMiddleware');
+const { refreshToken, logout } = require('../controllers/authController');
 
 const router = express.Router();
 
@@ -229,6 +230,12 @@ module.exports = function() {
       }
     }
   );
+
+  // Rafraîchir le token
+  router.post('/refresh-token', refreshToken);
+
+  // Déconnexion
+  router.post('/logout', logout);
 
   return router;
 };
