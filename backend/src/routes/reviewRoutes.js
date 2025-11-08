@@ -1,7 +1,11 @@
 const express = require('express');
-const pool = require('../../db.config');
+const path = require('path');
 const { authenticateToken, authorizeRole } = require('../middleware/authMiddleware');
 const { check, validationResult } = require('express-validator');
+
+// Utilisation d'un chemin relatif plus explicite pour éviter les problèmes de module
+const dbConfigPath = path.join(__dirname, '..', '..', 'db.config');
+const pool = require(dbConfigPath);
 
 const router = express.Router();
 

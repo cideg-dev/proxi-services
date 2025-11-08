@@ -2,7 +2,10 @@
 
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
-const pool = require('../../db.config');
+const path = require('path');
+// Utilisation d'un chemin relatif plus explicite pour éviter les problèmes de module
+const dbConfigPath = path.join(__dirname, '..', '..', 'db.config');
+const pool = require(dbConfigPath);
 const logger = require('../utils/logger');
 
 // Générer un token JWT

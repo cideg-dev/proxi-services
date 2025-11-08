@@ -24,7 +24,10 @@ const { sendNotificationEmail } = require('./services/emailService');
 const { handleValidationErrors } = require('./middleware/validationMiddleware');
 
 // Importation de la base de données
-const pool = require('../db.config');
+const path = require('path');
+// Utilisation d'un chemin relatif plus explicite pour éviter les problèmes de module
+const dbConfigPath = path.join(__dirname, '..', 'db.config');
+const pool = require(dbConfigPath);
 const { authenticateToken, authorizeRole } = require('./middleware/authMiddleware');
 const { calculateProfileCompleteness } = require('./services/profileService');
 
