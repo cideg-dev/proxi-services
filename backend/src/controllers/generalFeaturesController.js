@@ -50,8 +50,6 @@ const getFeaturedProfessionals = async (req, res) => {
         GROUP BY artisan_id
       ) avg_reviews ON u.id = avg_reviews.artisan_id
       WHERE u.role IN ('artisan', 'commercant')
-      AND (ap.afficher_public IS NULL OR ap.afficher_public = true)  -- Supposons qu'il y ait un champ pour montrer publiquement
-      AND (comm.afficher_public IS NULL OR comm.afficher_public = true)
       ORDER BY avg_reviews.avg_rating DESC NULLS LAST  -- Classer par note moyenne, nulls en dernier
       LIMIT 10
     `);
