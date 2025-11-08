@@ -10,7 +10,7 @@ const pool = require(dbConfigPath);
 
 const { authenticateToken, authorizeRole } = require('../middleware/authMiddleware');
 const { 
-  getArtisanServices,
+  getServices,
   addService,
   updateService,
   deleteService
@@ -21,7 +21,7 @@ const {
 // @access  Public
 router.get('/artisans/:artisanId/services', (req, res) => {
   // On appelle la fonction sans authentification car c'est accessible publiquement
-  getArtisanServices(req, res);
+  getServices(req, res);
 });
 
 // @route   POST /api/artisans/:artisanId/services

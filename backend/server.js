@@ -25,8 +25,8 @@ app.use(limiter);
 app.use(helmet());
 app.use(express.json());
 
-// Trust proxy pour Render
-app.set('trust proxy', true);
+// Trust proxy pour Render - Configuration sécurisée
+app.set('trust proxy', 1); // Seulement le premier proxy (le load balancer de Render)
 
 // Démarrage du serveur
 const PORT = process.env.PORT || 3000;

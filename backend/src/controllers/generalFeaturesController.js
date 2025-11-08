@@ -10,14 +10,13 @@ const getAllUsers = async (req, res) => {
         u.id,
         u.email,
         u.role,
-        u.created_at,
         u.last_seen,
         COALESCE(ap.nom_complet, cp.nom_complet, comm.nom_entreprise) AS nom
       FROM users u
       LEFT JOIN artisan_profiles ap ON u.id = ap.user_id
       LEFT JOIN client_profiles cp ON u.id = cp.user_id
       LEFT JOIN commercant_profiles comm ON u.id = comm.user_id
-      ORDER BY u.created_at DESC
+      ORDER BY u.id DESC
     `);
     res.json(result.rows);
   } catch (error) {
@@ -39,14 +38,21 @@ const getFeaturedProfessionals = async (req, res) => {
         COALESCE(ap.description, comm.description) AS description,
         COALESCE(ap.photo_url, comm.photo_url) AS photo_url,
         COALESCE(ap.location, comm.location) AS location,
-        ap.avis_moyen AS rating
+        COALESCE(avg_reviews.avg_rating, 0) AS rating
       FROM users u
       LEFT JOIN artisan_profiles ap ON u.id = ap.user_id AND u.role = 'artisan'
       LEFT JOIN commercant_profiles comm ON u.id = comm.user_id AND u.role = 'commercant'
+      LEFT JOIN (
+        SELECT 
+          artisan_id, 
+          AVG(rating) as avg_rating 
+        FROM reviews 
+        GROUP BY artisan_id
+      ) avg_reviews ON u.id = avg_reviews.artisan_id
       WHERE u.role IN ('artisan', 'commercant')
       AND (ap.afficher_public IS NULL OR ap.afficher_public = true)  -- Supposons qu'il y ait un champ pour montrer publiquement
       AND (comm.afficher_public IS NULL OR comm.afficher_public = true)
-      ORDER BY ap.avis_moyen DESC NULLS LAST  -- Classer par note moyenne, nulls en dernier
+      ORDER BY avg_reviews.avg_rating DESC NULLS LAST  -- Classer par note moyenne, nulls en dernier
       LIMIT 10
     `);
     res.json(result.rows);
