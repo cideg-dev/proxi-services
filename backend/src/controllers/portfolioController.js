@@ -1,7 +1,9 @@
 const sharp = require('sharp');
-const pool = require('../db.config');
-const fs = require('fs');
 const path = require('path');
+// Utilisation d'un chemin relatif plus explicite pour éviter les problèmes de module
+const dbConfigPath = path.join(__dirname, '..', '..', 'db.config');
+const pool = require(dbConfigPath);
+const fs = require('fs');
 
 const addPortfolioItem = async (req, res) => {
   console.log('addPortfolioItem request body:', req.body);

@@ -1,4 +1,7 @@
-const pool = require('../db.config');
+const path = require('path');
+// Utilisation d'un chemin relatif plus explicite pour éviter les problèmes de module
+const dbConfigPath = path.join(__dirname, '..', '..', 'db.config');
+const pool = require(dbConfigPath);
 
 const addService = async (req, res) => {
   const artisanId = parseInt(req.params.artisanId);
