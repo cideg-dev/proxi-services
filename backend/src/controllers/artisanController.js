@@ -99,7 +99,7 @@ const getArtisanPortfolio = async (req, res) => {
 
 const getArtisanServices = async (req, res) => {
   try {
-    const artisanId = parseInt(req.params.id);
+    const artisanId = parseInt(req.params.artisanId || req.params.id);
     const result = await pool.query('SELECT * FROM services WHERE artisan_id = $1', [artisanId]);
     res.json(result.rows);
   } catch (err) {

@@ -259,4 +259,7 @@ app.use('/api/admin', authenticateToken, authorizeRole(['admin']), require('./ro
 // Routes fonctionnalités générales
 app.use('/api', require('./routes/generalFeaturesRoutes'));
 
+// Routes des services professionnels
+app.use('/api', require('./routes/professionalServicesRoutes'));
+
 module.exports = app;
