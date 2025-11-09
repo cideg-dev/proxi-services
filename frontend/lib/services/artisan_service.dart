@@ -34,6 +34,17 @@ class ArtisanService {
     }
   }
 
+  // NEW: Get average rating for an artisan
+  Future<double> getArtisanAverageRating(int artisanId) async {
+    final response = await _apiService.getPublic('/api/artisans/$artisanId/rating');
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return (data['average_rating'] as num?)?.toDouble() ?? 0.0;
+    } else {
+      throw Exception('Failed to load average rating');
+    }
+  }
+
   Future<List<dynamic>> getArtisanPortfolio(int artisanId) async {
     final response = await _apiService.getPublic('/api/artisans/$artisanId/portfolio');
     if (response.statusCode == 200) {
@@ -159,6 +170,56 @@ class ArtisanService {
     }
   }
 
+  // NEW: Method to get artisans with location data
+  Future<List<dynamic>> getArtisansWithLocation() async {
+    final response = await _apiService.getPublic('/api/artisans/with-location');
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Failed to load artisans with location: ${response.body}');
+    }
+  }
+
+  // NEW: Method to get artisans by coordinates
+  Future<List<dynamic>> getArtisansByCoordinates(double latitude, double longitude, {double radius = 10.0}) async {
+    final response = await _apiService.getPublic(
+      '/api/artisans/nearby?lat=$latitude&lng=$longitude&radius=${radius.toString()}'
+    );
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Failed to load artisans by coordinates: ${response.body}');
+    }
+  }
+
+  // NEW: Method to get all artisans and merchants with their portfolios
+  Future<List<dynamic>> getAllArtisansWithPortfolio() async {
+    try {
+      final artisans = await getArtisans();
+      final List<dynamic> result = [];
+      
+      for (var artisan in artisans) {
+        final portfolio = await getArtisanPortfolio(artisan['id']);
+        artisan['portfolio'] = portfolio;
+        result.add(artisan);
+      }
+      
+      return result;
+    } catch (e) {
+      throw Exception('Failed to load artisans with portfolio: $e');
+    }
+  }
+
+  // NEW: Method to get popular services
+  Future<List<dynamic>> getPopularServices() async {
+    final response = await _apiService.getPublic('/api/services/popular');
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Failed to load popular services: ${response.body}');
+    }
+  }
+  
   // --- Service Management ---
 
   Future<List<dynamic>> getMyArtisanServices() async {

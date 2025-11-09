@@ -1,12 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/navigation_service.dart';
 import 'package:frontend/providers/notification_ui_provider.dart';
+import 'package:frontend/screens/advanced_search_screen.dart';
+import 'package:frontend/screens/appointment_booking_screen.dart';
+import 'package:frontend/screens/chat_screen.dart';
+import 'package:frontend/screens/client_home_screen.dart';
+import 'package:frontend/screens/conversations_list_screen.dart';
+import 'package:frontend/screens/integration_test_screen.dart';
 import 'package:frontend/screens/login_screen.dart';
+import 'package:frontend/screens/merchants_screen.dart';
+import 'package:frontend/screens/nearby_artisans_screen.dart';
+import 'package:frontend/screens/payment_screen.dart';
+import 'package:frontend/screens/public_home_screen.dart';
 import 'package:frontend/screens/splash_screen.dart';
 import 'package:frontend/screens/reset_password_screen.dart';
 import 'package:provider/provider.dart';
+import 'package:frontend/services/analytics_service.dart';
+import 'package:frontend/services/ai_service.dart';
+import 'package:frontend/services/auth_navigation_service.dart';
+import 'package:frontend/services/badge_service.dart';
+import 'package:frontend/services/content_service.dart';
+import 'package:frontend/services/identity_verification_service.dart';
+import 'package:frontend/services/localization_service.dart';
+import 'package:frontend/services/loyalty_service.dart';
+import 'package:frontend/services/moderation_service.dart';
+import 'package:frontend/services/offline_mode_service.dart';
+import 'package:frontend/services/performance_service.dart';
+import 'package:frontend/services/profile_service.dart';
+import 'package:frontend/services/predictive_analysis_service.dart';
+import 'package:frontend/services/recommendation_service.dart';
+import 'package:frontend/services/referral_service.dart';
+import 'package:frontend/services/review_service.dart';
+import 'package:frontend/services/security_service.dart';
+import 'package:frontend/services/social_sharing_service.dart';
 import 'package:frontend/services/socket_service.dart';
 import 'package:frontend/services/theme_provider.dart';
+import 'package:frontend/services/localization_service.dart';
 import 'package:frontend/screens/my_groups_screen.dart';
 import 'package:frontend/screens/create_group_screen.dart';
 import 'package:frontend/widgets/in_app_notification.dart';
@@ -177,7 +206,7 @@ class _MyAppState extends State<MyApp> {
           home: const Scaffold(
             body: Stack(
               children: [
-                SplashScreen(),
+                AuthNavigationService(),
                 InAppNotification(),
               ],
             ),

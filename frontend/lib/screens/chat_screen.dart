@@ -1,18 +1,18 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:frontend/services/chat_service.dart';
-import 'package:frontend/services/socket_service.dart'; // New import
-import 'package:frontend/services/token_manager.dart';
-import 'package:provider/provider.dart'; // New import
+import 'package:frontend/widgets/message_bubble.dart';
+import 'package:intl/intl.dart';
 
 class ChatScreen extends StatefulWidget {
-  final int receiverId;
-  final String receiverName;
+  final int conversationId;
+  final int partnerId;
+  final String partnerName;
 
   const ChatScreen({
     super.key,
-    required this.receiverId,
-    required this.receiverName,
+    required this.conversationId,
+    required this.partnerId,
+    required this.partnerName,
   });
 
   @override
@@ -20,246 +20,255 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  final TextEditingController _controller = TextEditingController();
   final ChatService _chatService = ChatService();
+  final TextEditingController _messageController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
   final TokenManager _tokenManager = TokenManager();
-  final ScrollController _scrollController = ScrollController(); // For pagination
-  List<Map<String, dynamic>> _messages = [];
-  int? _senderId;
-  bool _isLoadingMessages = false;
+  
+  List<dynamic> _messages = [];
+  bool _isLoading = true;
+  bool _isLoadingMore = false;
+  String _errorMessage = '';
   bool _hasMoreMessages = true;
-  StreamSubscription? _messageStatusUpdateSubscription;
+  int _currentPage = 1;
+  int? _currentUserId;
 
   @override
   void initState() {
     super.initState();
-    _loadSenderId();
-    _chatService.init(context); // Initialize ChatService with context
-    _chatService.onMessageReceived(_handleMessage);
-    _loadMessages(isInitialLoad: true); // Load initial messages
-
-    _scrollController.addListener(() {
-      if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent && _hasMoreMessages && !_isLoadingMessages) {
-        _loadMessages(isInitialLoad: false); // Load more messages
-      }
-    });
-
-    // Set up listener for message status updates
+    _loadUserId();
+    _loadMessages();
+    _setupMessageListener();
+    
+    // Marquer la conversation comme lue
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final socketService = context.read<SocketService>();
-      _messageStatusUpdateSubscription = socketService.messageStatusUpdates.listen((updatedMessage) {
-        if (!mounted) return;
-        _handleMessageStatusUpdate(updatedMessage);
-      });
+      _chatService.markConversationAsRead(widget.conversationId);
     });
+  }
+
+  Future<void> _loadUserId() async {
+    try {
+      final userId = await _tokenManager.getUserId();
+      if (mounted) {
+        setState(() {
+          _currentUserId = userId;
+        });
+      }
+    } catch (e) {
+      print('Erreur lors du chargement de l\'ID utilisateur: $e');
+    }
   }
 
   @override
   void dispose() {
+    _messageController.dispose();
     _scrollController.dispose();
-    _messageStatusUpdateSubscription?.cancel();
     super.dispose();
   }
 
-  void _loadSenderId() async {
-    _senderId = await _tokenManager.getUserId();
-    // After senderId is loaded, mark messages as read
-    if (_senderId != null) {
-      _markAllMessagesAsRead();
+  void _setupMessageListener() {
+    _chatService.onMessageReceived((messageData) {
+      if (mounted) {
+        setState(() {
+          _messages.insert(0, messageData);
+        });
+        _scrollToBottom();
+      }
+    });
+  }
+
+  Future<void> _loadMessages() async {
+    try {
+      final messages = await _chatService.getMessagesFromConversation(widget.conversationId);
+      
+      setState(() {
+        _messages = messages;
+        _isLoading = false;
+        _hasMoreMessages = messages.length >= 20; // Supposition que 20 = page complète
+      });
+      
+      // Défilement vers le bas après le chargement
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _scrollToBottom();
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Erreur lors du chargement des messages: $e';
+        _isLoading = false;
+      });
     }
   }
 
-  Future<void> _loadMessages({bool isInitialLoad = true}) async {
-    if (_isLoadingMessages || !_hasMoreMessages) return;
-
+  Future<void> _loadMoreMessages() async {
+    if (_isLoadingMore || !_hasMoreMessages) return;
+    
     setState(() {
-      _isLoadingMessages = true;
+      _isLoadingMore = true;
     });
 
     try {
-      final int? beforeId = _messages.isNotEmpty && !isInitialLoad ? _messages.first['id'] : null;
-      final rawMessages = await _chatService.getMessages(widget.receiverId, beforeId: beforeId);
-
-      if (!mounted) return;
-
-      // Ensure we have a strongly typed list of Map<String, dynamic>
-      final List<Map<String, dynamic>> newMessages = rawMessages
-          .map<Map<String, dynamic>>((e) => Map<String, dynamic>.from(e as Map))
-          .toList();
-
-      setState(() {
-        _messages.insertAll(0, newMessages.reversed.toList()); // Prepend new messages
-        _hasMoreMessages = newMessages.length == 20; // Assuming limit is 20
-        _isLoadingMessages = false;
-      });
-
-      if (isInitialLoad) {
-        // Scroll to bottom for initial load
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          _scrollController.jumpTo(_scrollController.position.minScrollExtent);
-        });
+      // Calculer l'ID du message le plus ancien pour la pagination
+      int? beforeId;
+      if (_messages.isNotEmpty) {
+        beforeId = _messages.last['id'];
       }
-    } catch (e) {
-      print('Error loading messages: $e');
-      if (!mounted) return;
+      
+      final moreMessages = await _chatService.getMessagesFromConversation(
+        widget.conversationId,
+        beforeId: beforeId,
+      );
+      
       setState(() {
-        _isLoadingMessages = false;
+        _messages.addAll(moreMessages);
+        _isLoadingMore = false;
+        _hasMoreMessages = moreMessages.length >= 20;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoadingMore = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur de chargement des messages: $e'), backgroundColor: Colors.red),
+        SnackBar(content: Text('Erreur lors du chargement des anciens messages: $e')),
       );
     }
   }
 
-  void _handleMessage(Map<String, dynamic> message) {
-    if (!mounted) return;
-    setState(() {
-      _messages.add(message);
-    });
-    // Scroll to bottom when a new message arrives
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+  void _scrollToBottom() {
+    if (_scrollController.hasClients) {
       _scrollController.animateTo(
         _scrollController.position.minScrollExtent,
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeOut,
       );
-    });
-    // If the message is from the other user, mark it as read
-    if (message['sender_id'] == widget.receiverId) {
-      _chatService.markMessageAsRead(message['id']);
     }
   }
 
-  void _handleMessageStatusUpdate(Map<String, dynamic> updatedMessage) {
-    if (!mounted) return;
-    setState(() {
-      final index = _messages.indexWhere((msg) => msg['id'] == updatedMessage['id']);
-      if (index != -1) {
-        _messages[index]['status'] = updatedMessage['status'];
-      }
-    });
-  }
+  Future<void> _sendMessage() async {
+    final message = _messageController.text.trim();
+    if (message.isEmpty) return;
 
-  void _markAllMessagesAsRead() async {
-    if (_senderId == null) return;
-    for (var message in _messages) {
-      if (message['sender_id'] == widget.receiverId && message['status'] != 'read') {
-        await _chatService.markMessageAsRead(message['id']);
-      }
-    }
-  }
+    _messageController.clear();
 
-  void _sendMessage() {
-    if (_controller.text.isNotEmpty && _senderId != null) {
-      _chatService.sendMessage(
-        _controller.text,
-        widget.receiverId,
-        _senderId!,
-      );
-      _controller.clear();
-    }
-  }
-
-  String _formatTimestamp(String? timestamp) {
-    if (timestamp == null) return '';
     try {
-      final dateTime = DateTime.parse(timestamp).toLocal();
-      final hour = dateTime.hour.toString().padLeft(2, '0');
-      final minute = dateTime.minute.toString().padLeft(2, '0');
-      return '$hour:$minute';
+      // Envoyer le message via le service
+      await _chatService.sendMessageToConversation(widget.conversationId, message);
     } catch (e) {
-      print('Error parsing timestamp: $e');
-      return '';
-    }
-  }
-
-  Icon _getMessageStatusIcon(String status, bool isMe) {
-    switch (status) {
-      case 'sent':
-        return Icon(Icons.done, size: 16, color: isMe ? Colors.white70 : Colors.grey);
-      case 'delivered':
-        return Icon(Icons.done_all, size: 16, color: isMe ? Colors.white70 : Colors.grey);
-      case 'read':
-        return Icon(Icons.done_all, size: 16, color: isMe ? Colors.blueAccent : Colors.blue);
-      default:
-        return const Icon(Icons.hourglass_empty, size: 16, color: Colors.grey);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erreur lors de l\'envoi du message: $e')),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.receiverName),
+        title: Text(widget.partnerName),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
       ),
       body: Column(
         children: [
+          // Zone de messages
           Expanded(
-            child: ListView.builder(
-              controller: _scrollController,
-              reverse: true, // Show latest messages at bottom
-              itemCount: _messages.length + (_hasMoreMessages ? 1 : 0), // Add 1 for loading indicator
-              itemBuilder: (context, index) {
-                if (index == _messages.length && _hasMoreMessages) {
-                  return const Center(child: CircularProgressIndicator()); // Loading indicator
-                }
-                final message = _messages[index];
-                final bool isMe = message['sender_id'] == _senderId;
-                final String status = message['status'] ?? 'sent'; // Default status
-
-                return Align(
-                  alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: isMe ? Theme.of(context).primaryColor : Colors.grey[700],
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          message['content'],
-                          style: const TextStyle(color: Colors.white),
-                        ),
-                        const SizedBox(height: 4),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : _errorMessage.isNotEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
+                            const Icon(Icons.error_outline, size: 60, color: Colors.grey),
+                            const SizedBox(height: 16),
                             Text(
-                              _formatTimestamp(message['timestamp'] as String?),
-                              style: const TextStyle(color: Colors.white70, fontSize: 10),
+                              _errorMessage,
+                              style: const TextStyle(fontSize: 16),
+                              textAlign: TextAlign.center,
                             ),
-                            if (isMe) ...[
-                              const SizedBox(width: 4),
-                              _getMessageStatusIcon(status, isMe),
-                            ],
+                            const SizedBox(height: 16),
+                            ElevatedButton(
+                              onPressed: _loadMessages,
+                              child: const Text('Réessayer'),
+                            ),
                           ],
                         ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
+                      )
+                    : _messages.isEmpty
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(Icons.message_outlined, size: 60, color: Colors.grey),
+                                const SizedBox(height: 16),
+                                Text(
+                                  'Commencez la conversation avec ${widget.partnerName}',
+                                  style: theme.textTheme.bodyLarge,
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ),
+                          )
+                        : Scrollbar(
+                            child: ListView.builder(
+                              controller: _scrollController,
+                              reverse: true, // Nouveaux messages en haut
+                              itemCount: _messages.length + (_isLoadingMore ? 1 : 0),
+                              itemBuilder: (context, index) {
+                                if (index == _messages.length) {
+                                  // Indicateur de chargement pour les anciens messages
+                                  return _isLoadingMore
+                                      ? const Padding(
+                                          padding: EdgeInsets.all(8.0),
+                                          child: Center(child: CircularProgressIndicator()),
+                                        )
+                                      : Container();
+                                }
+
+                                final message = _messages[index];
+                                final isMe = message['senderId'] == _currentUserId;
+                                final timestamp = message['timestamp'] != null
+                                    ? DateTime.parse(message['timestamp'])
+                                    : DateTime.now();
+
+                                return MessageBubble(
+                                  message: message['content'],
+                                  isMe: isMe,
+                                  timestamp: timestamp,
+                                  isRead: message['isRead'] ?? false,
+                                );
+                              },
+                            ),
+                          ),
           ),
-          Padding(
+          
+          // Zone d'entrée du message
+          Container(
             padding: const EdgeInsets.all(8.0),
             child: Row(
               children: [
                 Expanded(
                   child: TextField(
-                    controller: _controller,
-                    decoration: const InputDecoration(
-                      hintText: 'Entrez votre message...',
-                      border: OutlineInputBorder(),
+                    controller: _messageController,
+                    decoration: InputDecoration(
+                      hintText: 'Tapez votre message...',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(24.0),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16.0,
+                        vertical: 8.0,
+                      ),
                     ),
+                    onSubmitted: (value) => _sendMessage(),
                   ),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.send),
+                const SizedBox(width: 8),
+                FloatingActionButton(
                   onPressed: _sendMessage,
+                  mini: true,
+                  child: const Icon(Icons.send),
                 ),
               ],
             ),
