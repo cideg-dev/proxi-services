@@ -732,10 +732,6 @@
 
   <!-- Conteneur pour l'application Flutter -->
   <div id="flutter-app" style="display: none;">
-    <script>
-      window.flutterWebRenderer = "html";
-    </script>
-    <script src="flutter_bootstrap.js" async></script>
   </div>
 
   <!-- Bootstrap JS -->
@@ -765,6 +761,17 @@
     function showFlutterApp() {
       document.getElementById('landing-page').style.display = 'none';
       document.getElementById('flutter-app').style.display = 'block';
+      loadFlutterApp();
+    }
+
+    // Fonction pour charger l'application Flutter
+    function loadFlutterApp() {
+      // Charger les scripts Flutter dynamiquement
+      const script = document.createElement('script');
+      script.src = 'flutter_bootstrap.js';
+      script.async = true;
+      window.flutterWebRenderer = "html";
+      document.getElementById('flutter-app').appendChild(script);
     }
 
     // Activation des ancres pour la navigation fluide (uniquement pour la page d'accueil)
