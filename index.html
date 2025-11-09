@@ -752,21 +752,23 @@
       if (link) {
         link.addEventListener('click', function (e) {
           e.preventDefault();
-          showFlutterApp();
+          redirectToApp(link.getAttribute('href') || '#home');
         });
       }
     });
 
-    // Fonction pour afficher l'application Flutter
-    function showFlutterApp() {
+    // Fonction pour afficher l'application Flutter et rediriger vers la destination appropriée
+    function redirectToApp(target) {
+      // Sauvegarder la destination cible dans le stockage local pour y accéder après connexion
+      localStorage.setItem('redirectAfterLogin', target);
+      
+      // Masquer la page d'accueil
       document.getElementById('landing-page').style.display = 'none';
+      
+      // Afficher le conteneur de l'application Flutter
       document.getElementById('flutter-app').style.display = 'block';
-      loadFlutterApp();
-    }
-
-    // Fonction pour charger l'application Flutter
-    function loadFlutterApp() {
-      // Charger les scripts Flutter dynamiquement
+      
+      // Charger dynamiquement l'application Flutter
       const script = document.createElement('script');
       script.src = 'flutter_bootstrap.js';
       script.async = true;
