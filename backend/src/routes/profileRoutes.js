@@ -256,12 +256,18 @@ module.exports = function() {
           const existingProfile = await client.query('SELECT * FROM client_profiles WHERE user_id = $1', [userId]);
           if (existingProfile.rows.length > 0) {
             // Update
-            const updates = Object.keys(profileData).map((key, i) => `${key} = $${i + 1}`).join(', ');
-            const values = Object.values(profileData);
-            values.push(userId);
-            if(updates.length > 0) {
-                const profileUpdateQuery = `UPDATE client_profiles SET ${updates} WHERE user_id = $${values.length}`;
-                await client.query(profileUpdateQuery, values);
+            const allowedFields = ['nom_complet', 'sexe', 'location', 'telephone', 'photo_url', 'adresse'];
+            const filteredUpdates = Object.keys(profileData).filter(key => 
+              allowedFields.includes(key) && profileData[key] !== undefined
+            );
+            
+            if (filteredUpdates.length > 0) {
+              const updates = filteredUpdates.map((key, i) => `${key} = $${i + 1}`).join(', ');
+              const values = filteredUpdates.map(key => profileData[key]);
+              values.push(userId);
+              
+              const profileUpdateQuery = `UPDATE client_profiles SET ${updates} WHERE user_id = $${values.length}`;
+              await client.query(profileUpdateQuery, values);
             }
           } else {
             // Insert
@@ -272,12 +278,18 @@ module.exports = function() {
           const existingProfile = await client.query('SELECT * FROM artisan_profiles WHERE user_id = $1', [userId]);
           if (existingProfile.rows.length > 0) {
             // Update
-            const updates = Object.keys(profileData).map((key, i) => `${key} = $${i + 1}`).join(', ');
-            const values = Object.values(profileData);
-            values.push(userId);
-            if(updates.length > 0) {
-                const profileUpdateQuery = `UPDATE artisan_profiles SET ${updates} WHERE user_id = $${values.length}`;
-                await client.query(profileUpdateQuery, values);
+            const allowedFields = ['nom_complet', 'sexe', 'specialite', 'description', 'location', 'telephone', 'annees_experience', 'siret', 'site_web', 'photo_url', 'horaires_ouverture', 'langues_parlees', 'assurance_professionnelle'];
+            const filteredUpdates = Object.keys(profileData).filter(key => 
+              allowedFields.includes(key) && profileData[key] !== undefined
+            );
+            
+            if (filteredUpdates.length > 0) {
+              const updates = filteredUpdates.map((key, i) => `${key} = $${i + 1}`).join(', ');
+              const values = filteredUpdates.map(key => profileData[key]);
+              values.push(userId);
+              
+              const profileUpdateQuery = `UPDATE artisan_profiles SET ${updates} WHERE user_id = $${values.length}`;
+              await client.query(profileUpdateQuery, values);
             }
           } else {
             // Insert
@@ -288,12 +300,18 @@ module.exports = function() {
           const existingProfile = await client.query('SELECT * FROM commercant_profiles WHERE user_id = $1', [userId]);
           if (existingProfile.rows.length > 0) {
             // Update
-            const updates = Object.keys(profileData).map((key, i) => `${key} = $${i + 1}`).join(', ');
-            const values = Object.values(profileData);
-            values.push(userId);
-            if(updates.length > 0) {
-                const profileUpdateQuery = `UPDATE commercant_profiles SET ${updates} WHERE user_id = $${values.length}`;
-                await client.query(profileUpdateQuery, values);
+            const allowedFields = ['nom_entreprise', 'sexe_contact', 'type_commerce', 'description', 'adresse', 'location', 'telephone', 'siret', 'site_web', 'horaires_ouverture', 'photo_url', 'langues_parlees', 'assurance_professionnelle'];
+            const filteredUpdates = Object.keys(profileData).filter(key => 
+              allowedFields.includes(key) && profileData[key] !== undefined
+            );
+            
+            if (filteredUpdates.length > 0) {
+              const updates = filteredUpdates.map((key, i) => `${key} = $${i + 1}`).join(', ');
+              const values = filteredUpdates.map(key => profileData[key]);
+              values.push(userId);
+              
+              const profileUpdateQuery = `UPDATE commercant_profiles SET ${updates} WHERE user_id = $${values.length}`;
+              await client.query(profileUpdateQuery, values);
             }
           } else {
             // Insert
@@ -326,7 +344,7 @@ module.exports = function() {
           ...(newProfileData || {})
         };
         
-        profileCompletenessPercentage = calculateProfileCompleteness(fullProfile, userRole);
+        const profileCompletenessPercentage = calculateProfileCompleteness(fullProfile, userRole);
 
         await client.query('COMMIT');
 

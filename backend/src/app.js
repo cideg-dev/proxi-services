@@ -173,7 +173,7 @@ io.on('connection', (socket) => {
 
       const receiverUserData = connectedUsers.get(newMessage.receiver_id.toString());
       if (receiverUserData && receiverUserData.socketId !== socket.id) {
-        console.log(`Le destinataire ${newMessage.receiverId} est connecté. Envoi du message et de la notification.`);
+        console.log(`Le destinataire ${newMessage.receiver_id} est connecté. Envoi du message et de la notification.`);
         io.to(receiverUserData.socketId).emit('chat message', newMessage);
         io.to(receiverUserData.socketId).emit('new-message-notification', {
           senderId: newMessage.sender_id,
@@ -183,9 +183,11 @@ io.on('connection', (socket) => {
         // Mise à jour du statut du message à 'delivered' dans la base
         await pool.query('UPDATE messages SET status = $1 WHERE id = $2', ['delivered', newMessage.id]);
         newMessage.status = 'delivered'; // Mise à jour du statut dans l'objet envoyé au destinataire
-        io.to(receiverUserData.socketId).emit('message-status-updated', newMessage); // Notifier le destinataire du changement de statut
+        if (receiverUserData && receiverUserData.socketId) {
+          io.to(receiverUserData.socketId).emit('message-status-updated', newMessage); // Notifier le destinataire du changement de statut
+        }
       } else {
-        console.log(`Le destinataire ${newMessage.receiverId} n'est pas connecté.`);
+        console.log(`Le destinataire ${newMessage.receiver_id} n'est pas connecté.`);
       }
     } catch (error) {
       logger.error('Erreur lors de la gestion du message de chat :', { error: error.message });

@@ -23,10 +23,15 @@ router.get('/reports', [
     return res.status(400).json({ errors: errors.array() });
   }
 
-  const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 10;
-  const { status, report_type, search = '' } = req.query;
+  // Validation et sécurisation des paramètres de requête
+  const page = Math.max(1, parseInt(req.query.page) || 1);
+  const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 10));
   const offset = (page - 1) * limit;
+  
+  // Validation des paramètres optionnels avec nettoyage
+  const statusParam = req.query.status ? String(req.query.status).substring(0, 20) : null; // Limite à 20 caractères
+  const reportTypeParam = req.query.report_type ? String(req.query.report_type).substring(0, 50) : null; // Limite à 50 caractères
+  const searchParam = req.query.search ? String(req.query.search).substring(0, 100) : null; // Limite à 100 caractères
 
   try {
     let query = `
@@ -75,25 +80,26 @@ router.get('/reports', [
     const params = [];
     const countParams = [];
 
-    if (status) {
+    if (statusParam) {
       query += ` AND r.status = $${params.length + 1}`;
       countQuery += ` AND r.status = $${countParams.length + 1}`;
-      params.push(status);
-      countParams.push(status);
+      params.push(statusParam);
+      countParams.push(statusParam);
     }
 
-    if (report_type) {
+    if (reportTypeParam) {
       query += ` AND r.report_type = $${params.length + 1}`;
       countQuery += ` AND r.report_type = $${countParams.length + 1}`;
-      params.push(report_type);
-      countParams.push(report_type);
+      params.push(reportTypeParam);
+      countParams.push(reportTypeParam);
     }
 
-    if (search) {
+    if (searchParam) {
       query += ` AND (r.reason ILIKE $${params.length + 1} OR reporter.email ILIKE $${params.length + 2} OR reported_user.email ILIKE $${params.length + 3})`;
       countQuery += ` AND (r.reason ILIKE $${countParams.length + 1} OR reporter.email ILIKE $${countParams.length + 2} OR reported_user.email ILIKE $${countParams.length + 3})`;
-      params.push(`%${search}%`, `%${search}%`, `%${search}%`);
-      countParams.push(`%${search}%`, `%${search}%`, `%${search}%`);
+      const searchPattern = `%${searchParam}%`;
+      params.push(searchPattern, searchPattern, searchPattern);
+      countParams.push(searchPattern, searchPattern, searchPattern);
     }
 
     query += ' ORDER BY r.created_at DESC LIMIT $' + (params.length + 1) + ' OFFSET $' + (params.length + 2);

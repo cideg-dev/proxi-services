@@ -70,47 +70,50 @@ module.exports = function() {
         const newUser = newUserResult.rows[0];
 
         // Create profile based on role
-        let profileTable;
-        let profileColumns;
-
-        switch (role) {
-          case 'client':
-            profileTable = 'client_profiles';
-            profileColumns = ['nom_complet', 'sexe', 'location', 'telephone'];
-            break;
-          case 'artisan':
-            profileTable = 'artisan_profiles';
-            profileColumns = ['nom_complet', 'specialite', 'description', 'location', 'telephone', 'annees_experience', 'siret', 'site_web', 'horaires_ouverture', 'langues_parlees', 'assurance_professionnelle'];
-            break;
-          case 'commercant':
-            profileTable = 'commercant_profiles';
-            // Note: commercant_profiles has nom_entreprise, not nom_complet. Assuming it's passed in profileData.
-            profileColumns = ['nom_entreprise', 'type_commerce', 'description', 'adresse', 'location', 'telephone', 'siret', 'site_web', 'horaires_ouverture', 'langues_parlees', 'assurance_professionnelle'];
-            break;
-        }
-
-        if (profileTable) {
-            const filteredProfileData = Object.keys(profileData)
-                .filter(key => {
-                    if (!profileColumns.includes(key) || profileData[key] == null) {
-                        return false;
-                    }
-                    if (key === 'annees_experience' && profileData[key] === '') {
-                        return false;
-                    }
-                    return true;
-                })
-                .reduce((obj, key) => {
-                    obj[key] = profileData[key];
-                    return obj;
-                }, {});
-
-            const columns = ['user_id', ...Object.keys(filteredProfileData)];
-            const values = [newUser.id, ...Object.values(filteredProfileData)];
-            const valuePlaceholders = values.map((_, i) => `$${i + 1}`).join(', ');
-
-            const profileInsertQuery = `INSERT INTO ${profileTable} (${columns.join(', ')}) VALUES (${valuePlaceholders})`;
-            await client.query(profileInsertQuery, values);
+        if (profileData) {
+            switch(role) {
+                case 'client':
+                    await client.query('INSERT INTO client_profiles (user_id, nom_complet, sexe, location, telephone) VALUES ($1, $2, $3, $4, $5)', [
+                        newUser.id,
+                        profileData.nom_complet || null,
+                        profileData.sexe || null,
+                        profileData.location || null,
+                        profileData.telephone || null
+                    ]);
+                    break;
+                case 'artisan':
+                    await client.query('INSERT INTO artisan_profiles (user_id, nom_complet, specialite, description, location, telephone, annees_experience, siret, site_web, horaires_ouverture, langues_parlees, assurance_professionnelle) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)', [
+                        newUser.id,
+                        profileData.nom_complet || null,
+                        profileData.specialite || null,
+                        profileData.description || null,
+                        profileData.location || null,
+                        profileData.telephone || null,
+                        profileData.annees_experience || null,
+                        profileData.siret || null,
+                        profileData.site_web || null,
+                        profileData.horaires_ouverture || null,
+                        profileData.langues_parlees || null,
+                        profileData.assurance_professionnelle || null
+                    ]);
+                    break;
+                case 'commercant':
+                    await client.query('INSERT INTO commercant_profiles (user_id, nom_entreprise, type_commerce, description, adresse, location, telephone, siret, site_web, horaires_ouverture, langues_parlees, assurance_professionnelle) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)', [
+                        newUser.id,
+                        profileData.nom_entreprise || null,
+                        profileData.type_commerce || null,
+                        profileData.description || null,
+                        profileData.adresse || null,
+                        profileData.location || null,
+                        profileData.telephone || null,
+                        profileData.siret || null,
+                        profileData.site_web || null,
+                        profileData.horaires_ouverture || null,
+                        profileData.langues_parlees || null,
+                        profileData.assurance_professionnelle || null
+                    ]);
+                    break;
+            }
         }
 
         await client.query('COMMIT');
