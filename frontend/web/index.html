@@ -752,26 +752,18 @@
       if (link) {
         link.addEventListener('click', function (e) {
           e.preventDefault();
-          showFlutterApp();
+          redirectToApp(link.getAttribute('href') || '#home');
         });
       }
     });
 
-    // Fonction pour afficher l'application Flutter
-    function showFlutterApp() {
-      document.getElementById('landing-page').style.display = 'none';
-      document.getElementById('flutter-app').style.display = 'block';
-      loadFlutterApp();
-    }
-
-    // Fonction pour charger l'application Flutter
-    function loadFlutterApp() {
-      // Charger les scripts Flutter dynamiquement
-      const script = document.createElement('script');
-      script.src = 'flutter_bootstrap.js';
-      script.async = true;
-      window.flutterWebRenderer = "html";
-      document.getElementById('flutter-app').appendChild(script);
+    // Fonction pour rediriger vers l'application Flutter
+    function redirectToApp(target) {
+      // Sauvegarder la destination cible dans le stockage local pour y accéder après connexion
+      localStorage.setItem('redirectAfterLogin', target);
+      
+      // Redirection vers l'application Flutter (écran de connexion)
+      window.location.href = 'index.html#/login';
     }
 
     // Activation des ancres pour la navigation fluide (uniquement pour la page d'accueil)
