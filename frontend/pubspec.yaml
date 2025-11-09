@@ -46,6 +46,7 @@ flutter:
 
   assets:
     - assets/lottie/
+    - assets/lottie/loading.json
     - assets/icon.png
 
 flutter_launcher_icons:
