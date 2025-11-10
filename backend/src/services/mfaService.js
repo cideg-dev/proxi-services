@@ -1,9 +1,7 @@
 // Service pour la gestion de l'authentification multifactorielle (MFA)
 const speakeasy = require('speakeasy');
 const QRCode = require('qrcode');
-const path = require('path');
-const dbConfigPath = path.join(__dirname, '..', 'db.config');
-const pool = require(dbConfigPath);
+const pool = require('../../db.config');
 const logger = require('../utils/logger');
 
 /**

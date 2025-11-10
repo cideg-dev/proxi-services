@@ -1,8 +1,7 @@
 // Service pour la gestion de la confidentialité et des données personnelles
 
 const path = require('path');
-const dbConfigPath = path.join(__dirname, '..', 'db.config');
-const pool = require(dbConfigPath);
+const pool = require('../../db.config');
 const logger = require('../utils/logger');
 
 /**

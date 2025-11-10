@@ -1,8 +1,6 @@
 // Service pour la gestion des logs d'audit et de surveillance de sécurité
 
-const path = require('path');
-const dbConfigPath = path.join(__dirname, '..', 'db.config');
-const pool = require(dbConfigPath);
+const pool = require('../../db.config');
 const logger = require('../utils/logger');
 
 /**
