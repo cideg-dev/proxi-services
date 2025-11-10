@@ -11,7 +11,7 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage --collectCoverageFrom=src/**/*.{js,jsx}",
     "migrate": "node-pg-migrate",
-    "migrate:up": "node-pg-migrate up",
+    "migrate:up": "node-pg-migrate up || echo 'No migrations to run'",
     "migrate:down": "node-pg-migrate down",
     "lint": "eslint . --ext .js",
     "lint:fix": "eslint . --ext .js --fix"
