@@ -1,20 +1,12 @@
 const { Pool } = require('pg');
 require('dotenv').config();
 
-// Validation des variables d'environnement critiques
-const requiredEnvVars = ['DATABASE_URL', 'DB_USER', 'DB_HOST', 'DB_NAME', 'DB_PASSWORD', 'DB_PORT'];
-const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
-
-if (missingEnvVars.length > 0) {
-  console.error(`Variables d'environnement manquantes: ${missingEnvVars.join(', ')}`);
-  process.exit(1);
-}
-
 let config;
 
 // Render and other platforms use a single DATABASE_URL.
 // This is the preferred way for production.
 if (process.env.DATABASE_URL) {
+  // Si DATABASE_URL est définie, l'utiliser directement
   config = {
     connectionString: process.env.DATABASE_URL,
     ssl: {
@@ -32,6 +24,15 @@ if (process.env.DATABASE_URL) {
     connectionTimeoutMillis: 2000, // timeout après 2 secondes
   };
 } else {
+  // Vérifier les variables critiques seulement si DATABASE_URL n'est pas définie
+  const requiredEnvVars = ['DB_USER', 'DB_HOST', 'DB_NAME', 'DB_PASSWORD', 'DB_PORT'];
+  const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
+
+  if (missingEnvVars.length > 0) {
+    console.error(`Variables d'environnement critiques manquantes: ${missingEnvVars.join(', ')}`);
+    process.exit(1);
+  }
+
   // Fallback for local development using separate variables
   config = {
     user: process.env.DB_USER,

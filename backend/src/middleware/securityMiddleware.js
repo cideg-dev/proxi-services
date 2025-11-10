@@ -18,11 +18,6 @@ const limiter = rateLimit({
   skip: (req, res) => {
     // Vous pouvez ajouter des exceptions ici
     return req.path === '/health';
-  },
-  // Suivi des requêtes par IP
-  keyGenerator: (req) => {
-    return req.ip || req.connection.remoteAddress || req.socket.remoteAddress || 
-           (req.connection.socket ? req.connection.socket.remoteAddress : null);
   }
 });
 
