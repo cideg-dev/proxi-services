@@ -51,16 +51,18 @@ const profileRoutes = require('./routes/profileRoutes');
 
 // Vérification des variables d'environnement critiques
 const JWT_SECRET = process.env.JWT_SECRET;
-const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
 
 if (!JWT_SECRET) {
   logger.error('JWT_SECRET must be defined in environment variables');
   process.exit(1);
 }
 
-if (!JWT_REFRESH_SECRET) {
-  logger.error('JWT_REFRESH_SECRET must be defined in environment variables');
-  process.exit(1);
+// Le refresh token est optionnel dans certains environnements
+const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'fallback_refresh_secret_for_dev';
+
+// Avertir si le secret par défaut est utilisé en production
+if (!process.env.JWT_REFRESH_SECRET && process.env.NODE_ENV === 'production') {
+  logger.warn('Utilisation du secret de refresh token par défaut - RECOMMANDÉ DE CONFIGURER UNE VARIABLE D\'ENVIRONNEMENT PROPRE');
 }
 
 // Initialisation de l'application Express
