@@ -1,26 +1,82 @@
-// Utilitaire pour la journalisation des événements
+const winston = require('winston');
+require('winston-daily-rotate-file');
+require('dotenv').config();
 
-const fs = require('fs');
-const path = require('path');
+// Création d'un transport pour les fichiers de log quotidiens
+const dailyRotateFileTransport = new winston.transports.DailyRotateFile({
+  filename: 'logs/application-%DATE%.log',
+  datePattern: 'YYYY-MM-DD',
+  zippedArchive: true,
+  maxSize: '20m',
+  maxFiles: '14d',
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.errors({ stack: true }),
+    winston.format.splat(),
+    winston.format.json()
+  )
+});
 
-const logStream = fs.createWriteStream(path.join(__dirname, '../../request_log.txt'), { flags: 'a' });
+// Création d'un logger
+const logger = winston.createLogger({
+  level: process.env.LOG_LEVEL || 'info',
+  format: winston.format.combine(
+    winston.format.timestamp({
+      format: 'YYYY-MM-DD HH:mm:ss'
+    }),
+    winston.format.errors({ stack: true }),
+    winston.format.splat(),
+    winston.format.json()
+  ),
+  defaultMeta: { service: 'proxi-services-api' },
+  transports: [
+    dailyRotateFileTransport,
+    new winston.transports.Console({
+      format: winston.format.combine(
+        winston.format.colorize(),
+        winston.format.simple()
+      )
+    })
+  ]
+});
 
-const logger = {
-  info: (message) => {
-    const log = `${new Date().toISOString()} - ${message}`;
-    console.log(log);
-    logStream.write(log + '\n');
-  },
-  error: (message) => {
-    const log = `${new Date().toISOString()} - ERROR - ${message}`;
-    console.error(log);
-    logStream.write(log + '\n');
-  },
-  warn: (message) => {
-    const log = `${new Date().toISOString()} - WARN - ${message}`;
-    console.warn(log);
-    logStream.write(log + '\n');
-  }
+// Fonction pour logger des événements d'audit
+const logAuditAction = (userId, action, resource, details = {}) => {
+  logger.info('AUDIT_EVENT', {
+    userId,
+    action,
+    resource,
+    details,
+    timestamp: new Date().toISOString()
+  });
 };
 
-module.exports = logger;
+// Fonction pour logger les erreurs de manière structurée
+const logError = (error, req = null, context = {}) => {
+  const errorLog = {
+    message: error.message,
+    stack: error.stack,
+    context,
+    timestamp: new Date().toISOString()
+  };
+  
+  if (req) {
+    errorLog.request = {
+      method: req.method,
+      url: req.url,
+      headers: req.headers,
+      body: req.body,
+      params: req.params,
+      query: req.query,
+      ip: req.ip || req.connection.remoteAddress
+    };
+  }
+  
+  logger.error('APPLICATION_ERROR', errorLog);
+};
+
+module.exports = {
+  logger,
+  logAuditAction,
+  logError
+};

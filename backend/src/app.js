@@ -1,13 +1,11 @@
-// Application Express principale - Refactorisée
+// Application Express principale - Refactorisée avec améliorations de sécurité
 
 require('dotenv').config();
 const express = require('express');
-const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const axios = require('axios');
-const { check, validationResult, body } = require('express-validator');
 
 // Importation des contrôleurs
 const { healthCheck, getVersion } = require('./controllers/generalController');
@@ -15,19 +13,33 @@ const { healthCheck, getVersion } = require('./controllers/generalController');
 // Importation des services
 const { haversineDistance, logAuditAction } = require('./services/generalService');
 
-// Importation des utilitaires
-const logger = require('./utils/logger');
+// Importation des utilitaires avec journalisation structurée
+const { logger, logError } = require('./utils/logger');
 
 const sharp = require('sharp');
 const multer = require('multer');
 const { sendNotificationEmail } = require('./services/emailService');
-const { handleValidationErrors } = require('./middleware/validationMiddleware');
+
+// Importation des middlewares de validation
+const { 
+  handleValidationErrors,
+  userProfileValidator,
+  artisanServiceValidator,
+  reviewValidator,
+  demandeValidator
+} = require('./middleware/validationMiddleware');
 
 // Importation de la base de données
-// Utilisation d'un chemin relatif plus explicite pour éviter les problèmes de module
-const dbConfigPath = path.join(__dirname, '..', 'db.config');
-const pool = require(dbConfigPath);
-const { authenticateToken, authorizeRole } = require('./middleware/authMiddleware');
+const pool = require('../db.config');
+
+// Importation des middlewares d'authentification améliorés
+const { 
+  authenticateToken, 
+  authorizeRole, 
+  checkResourceOwnership, 
+  sensitiveRouteProtection 
+} = require('./middleware/authMiddleware');
+
 const { calculateProfileCompleteness } = require('./services/profileService');
 
 // Importation des routes
@@ -39,8 +51,15 @@ const profileRoutes = require('./routes/profileRoutes');
 
 // Vérification des variables d'environnement critiques
 const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
+
 if (!JWT_SECRET) {
   logger.error('JWT_SECRET must be defined in environment variables');
+  process.exit(1);
+}
+
+if (!JWT_REFRESH_SECRET) {
+  logger.error('JWT_REFRESH_SECRET must be defined in environment variables');
   process.exit(1);
 }
 
@@ -348,5 +367,21 @@ app.use((error, req, res, next) => {
   console.error('Erreur non gérée:', error);
   res.status(500).json({ message: 'Une erreur inattendue est survenue.' });
 });
+
+// Middleware pour Swagger UI - documentation API
+if (process.env.NODE_ENV !== 'production') {
+  const swaggerUi = require('swagger-ui-express');
+  const swaggerSpecs = require('./utils/swagger');
+  
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs, {
+    explorer: true,
+    customCss: '.swagger-ui .topbar { display: none }',
+    customSiteTitle: 'Proxi-Services API Documentation'
+  }));
+}
+
+// Gestion des erreurs globales avec le middleware centralisé
+const { errorHandler } = require('./middleware/errorHandler');
+app.use(errorHandler);
 
 module.exports = app;
