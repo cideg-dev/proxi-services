@@ -17,7 +17,8 @@ class _NearbyArtisansMapState extends State<NearbyArtisansMap> {
   
   List<dynamic> _artisans = [];
   bool _isLoading = true;
-  Position? _userPosition;
+  double? _userLatitude;
+  double? _userLongitude;
   String _errorMessage = '';
 
   @override
@@ -37,9 +38,10 @@ class _NearbyArtisansMapState extends State<NearbyArtisansMap> {
         return;
       }
 
-      Position userPosition = await _locationService.getCurrentLocation();
+      final userPosition = await _locationService.getCurrentLocation();
       setState(() {
-        _userPosition = userPosition;
+        _userLatitude = userPosition.latitude;
+        _userLongitude = userPosition.longitude;
         _isLoading = false;
       });
 
@@ -97,7 +99,7 @@ class _NearbyArtisansMapState extends State<NearbyArtisansMap> {
 
     return FlutterMap(
       options: MapOptions(
-        center: LatLng(_userPosition!.latitude, _userPosition!.longitude),
+        center: LatLng(_userLatitude!, _userLongitude!),
         zoom: 13.0,
       ),
       children: [
@@ -109,10 +111,8 @@ class _NearbyArtisansMapState extends State<NearbyArtisansMap> {
         MarkerLayer(
           markers: [
             Marker(
-              width: 45.0,
-              height: 45.0,
-              point: LatLng(_userPosition!.latitude, _userPosition!.longitude),
-              builder: (ctx) => const Icon(
+              point: LatLng(_userLatitude!, _userLongitude!),
+              child: const Icon(
                 Icons.location_on,
                 color: Colors.red,
                 size: 45,
@@ -120,13 +120,11 @@ class _NearbyArtisansMapState extends State<NearbyArtisansMap> {
             ),
             // Marqueurs pour les artisans à proximité
             ..._artisans.map((artisan) => Marker(
-              width: 40.0,
-              height: 40.0,
               point: LatLng(
                 artisan['latitude']?.toDouble() ?? 0.0,
                 artisan['longitude']?.toDouble() ?? 0.0,
               ),
-              builder: (ctx) => Container(
+              child: Container(
                 decoration: BoxDecoration(
                   color: Colors.blue,
                   borderRadius: BorderRadius.circular(20),

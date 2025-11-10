@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:frontend/services/api_service.dart';
 import 'package:frontend/services/token_manager.dart';
+import 'package:frontend/services/api_constants.dart';
 import 'package:http/http.dart' as http;
 
 class IdentityVerificationService {
@@ -45,7 +46,7 @@ class IdentityVerificationService {
 
     final request = http.MultipartRequest(
       'POST',
-      Uri.parse('${ApiService.baseUrl}/api/verifications/$verificationRequestId/documents'),
+      Uri.parse('${ApiConstants.baseUrl}/api/verifications/$verificationRequestId/documents'),
     );
     
     request.headers['Authorization'] = 'Bearer $token';
@@ -152,7 +153,7 @@ class IdentityVerificationService {
 
     // Cette fonctionnalité dépendra de l'implémentation côté serveur
     // Pour l'instant, nous retournons une URL de téléchargement
-    return '${ApiService.baseUrl}/api/verifications/$verificationId/document';
+    return '${ApiConstants.baseUrl}/api/verifications/$verificationId/document';
   }
 
   // Vérification de numéro de téléphone

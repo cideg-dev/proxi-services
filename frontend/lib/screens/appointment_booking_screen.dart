@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/services/appointment_service.dart';
-import 'package:frontend/widgets\date_selector.dart';
-import 'package:frontend\widgets\time_slot_selector.dart';
+import 'package:frontend/widgets/date_selector.dart';
+import 'package:frontend/widgets/time_slot_selector.dart';
 
 class AppointmentBookingScreen extends StatefulWidget {
   final int professionalId;

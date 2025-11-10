@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:frontend/services/api_service.dart';
 import 'package:frontend/services/token_manager.dart';
+import 'package:frontend/services/api_constants.dart';
 import 'package:http/http.dart' as http;
 
 class ProfileService {
@@ -118,7 +119,7 @@ class ProfileService {
     final imageBytes = await http.MultipartFile.fromPath('image', imagePath);
     final request = http.MultipartRequest(
       'POST',
-      Uri.parse('${ApiService.baseUrl}/api/users/$userId/profile-image'),
+      Uri.parse('${ApiConstants.baseUrl}/api/users/$userId/profile-image'),
     );
     
     request.files.add(imageBytes);
@@ -145,7 +146,7 @@ class ProfileService {
     final imageBytes = await http.MultipartFile.fromPath('image', imagePath);
     final request = http.MultipartRequest(
       'POST',
-      Uri.parse('${ApiService.baseUrl}/api/users/$userId/cover-image'),
+      Uri.parse('${ApiConstants.baseUrl}/api/users/$userId/cover-image'),
     );
     
     request.files.add(imageBytes);
