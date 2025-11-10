@@ -32,8 +32,11 @@ app.use(hppProtection); // Protection contre la pollution de paramètres
 // Trust proxy pour Render - Configuration sécurisée
 app.set('trust proxy', 1); // Seulement le premier proxy (le load balancer de Render)
 
-// Connexion au service de cache Redis
-connectRedis();
+// Connexion au service de cache Redis (géré de manière asynchrone)
+connectRedis().catch(err => {
+  console.error('Erreur lors de la connexion à Redis:', err.message);
+  console.log('L\'application continuera à fonctionner sans cache Redis');
+});
 
 // Démarrage du serveur
 const PORT = process.env.PORT || 3000;
