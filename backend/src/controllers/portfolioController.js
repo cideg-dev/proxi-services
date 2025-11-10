@@ -30,7 +30,6 @@ const addPortfolioItem = async (req, res) => {
       return res.status(400).json({ message: 'Le nom et la description sont requis.' });
     }
 
-  try {
     // Generate a unique filename with .webp extension
     const filename = `portfolio-${professionalId}-${Date.now()}.webp`;
     const outputPath = path.join(__dirname, '..', 'uploads', filename);
