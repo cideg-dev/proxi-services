@@ -105832,7 +105832,7 @@ att(a){var s=0,r=A.y(t.H),q=this,p
 var $async$xI=A.u(function(b,c){if(b===1)return A.v(c,r)
 while(true)switch(s){case 0:s=a!=null?2:3
 break
-case 2:p=A.dt("http://localhost:10000/api"+a,0,null)
+case 2:p=A.dt("https://proxi-services.onrender.com/api"+a,0,null)
 s=7
 return A.o(A.aSR(p),$async$xI)
 case 7:s=c?4:6
@@ -105855,7 +105855,7 @@ case 6:n=b
 if(n==null){j=A.aB("Token d'authentification manquant.")
 throw A.c(j)}j=t.N
 s=7
-return A.o(A.aY6(A.dt("http://localhost:10000/api/api/migrate-db",0,null),A.aj(["Authorization","Bearer "+n],j,j)),$async$xS)
+return A.o(A.aY6(A.dt("https://proxi-services.onrender.com/api/api/migrate-db",0,null),A.aj(["Authorization","Bearer "+n],j,j)),$async$xS)
 case 7:m=b
 if(m.b===200)o.c.ab(h).f.dt(B.ZV)
 else{j=m
@@ -106294,7 +106294,7 @@ s=J.a9(g.e,b)
 r=J.a7(s)
 q=r.h(s,"is_blocked")
 if(q==null)q=!1
-p=r.h(s,i)!=null?new A.o8("http://localhost:10000/api"+A.i(r.h(s,i)),1,j,B.kc):j
+p=r.h(s,i)!=null?new A.o8("https://proxi-services.onrender.com/api"+A.i(r.h(s,i)),1,j,B.kc):j
 p=A.DO(j,p,r.h(s,i)==null?A.dL(g.am7(r.h(s,"role")),j,j,j):j,j,j)
 o=r.h(s,"name")
 o=A.a8(o==null?r.h(s,"email"):o,j,j,j,j,j,j,j)
@@ -106769,7 +106769,7 @@ l=e.h(a,"photo_url")
 if(l==null)l=""
 d=A.i(e.h(a,"id"))
 k=l.length===0
-j=!k?new A.o8("http://localhost:10000/api"+l,1,g,B.kc):g
+j=!k?new A.o8("https://proxi-services.onrender.com/api"+l,1,g,B.kc):g
 if(k)k=A.dL(b?B.m7:B.dQ,g,g,40)
 else k=g
 d=A.FI(A.DO(g,j,k,g,40),"artisan-avatar-"+d,!1)
@@ -108597,7 +108597,7 @@ j=A
 s=3
 return A.o(p.a.nX(),$async$GO)
 case 3:n=l.aj([k,"Bearer "+j.i(f)],o,o)
-m=A.bfn(a,A.dt("http://localhost:10000/api"+b,0,null))
+m=A.bfn(a,A.dt("https://proxi-services.onrender.com/api"+b,0,null))
 m.r.S(0,n)
 m.x.S(0,c)
 B.b.S(m.y,d)
@@ -108615,22 +108615,22 @@ A.acq.prototype={
 $1(a){return!1},
 $S:147}
 A.act.prototype={
-$1(a){return A.aY6(A.dt("http://localhost:10000/api"+this.a,0,null),a)},
+$1(a){return A.aY6(A.dt("https://proxi-services.onrender.com/api"+this.a,0,null),a)},
 $S:112}
 A.acv.prototype={
-$1(a){return A.b5Y(A.dt("http://localhost:10000/api"+this.a,0,null),B.K.zh(this.b,null),a)},
+$1(a){return A.b5Y(A.dt("https://proxi-services.onrender.com/api"+this.a,0,null),B.K.zh(this.b,null),a)},
 $S:112}
 A.acw.prototype={
-$1(a){return A.boY(A.dt("http://localhost:10000/api"+this.a,0,null),B.K.zh(this.b,null),a)},
+$1(a){return A.boY(A.dt("https://proxi-services.onrender.com/api"+this.a,0,null),B.K.zh(this.b,null),a)},
 $S:112}
 A.acr.prototype={
-$1(a){return A.b6g(A.dt("http://localhost:10000/api"+this.a,0,null),a)},
+$1(a){return A.b6g(A.dt("https://proxi-services.onrender.com/api"+this.a,0,null),a)},
 $S:112}
 A.acs.prototype={
-$0(){return A.aY6(A.dt("http://localhost:10000/api"+this.a,0,null),null)},
+$0(){return A.aY6(A.dt("https://proxi-services.onrender.com/api"+this.a,0,null),null)},
 $S:173}
 A.acu.prototype={
-$0(){var s=A.dt("http://localhost:10000/api"+this.a,0,null),r=t.N
+$0(){var s=A.dt("https://proxi-services.onrender.com/api"+this.a,0,null),r=t.N
 r=A.aj(["Content-Type","application/json; charset=UTF-8"],r,r)
 return A.b5Y(s,B.K.zh(this.b,null),r)},
 $S:173}
