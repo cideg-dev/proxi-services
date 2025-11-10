@@ -10,11 +10,13 @@
     "test": "jest --runInBand --verbose",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage --collectCoverageFrom=src/**/*.{js,jsx}",
-    "migrate": "node-pg-migrate",
-    "migrate:up": "npx node-pg-migrate up 2>/dev/null || true",
-    "migrate:down": "node-pg-migrate down",
+    "migrate": "npx node-pg-migrate",
+    "migrate:up": "npx node-pg-migrate up",
+    "migrate:down": "npx node-pg-migrate down",
     "lint": "eslint . --ext .js",
-    "lint:fix": "eslint . --ext .js --fix"
+    "lint:fix": "eslint . --ext .js --fix",
+    "security-check": "node scripts/security-test.js",
+    "security-audit": "npm audit"
   },
   "devDependencies": {
     "eslint": "^9.37.0",

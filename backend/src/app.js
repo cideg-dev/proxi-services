@@ -16,6 +16,7 @@ const { haversineDistance, logAuditAction } = require('./services/generalService
 
 // Importation des utilitaires avec journalisation structurée
 const { logger, logError } = require('./utils/logger');
+const { monitorSensitiveAccess } = require('./utils/securityMonitoring');
 
 const sharp = require('sharp');
 const multer = require('multer');
@@ -128,6 +129,9 @@ app.use(cors({
 }));
 
 app.use(express.json());
+
+// Middleware de surveillance des accès sensibles
+app.use(monitorSensitiveAccess);
 
 // Middleware de journalisation des requêtes
 app.use((req, res, next) => {

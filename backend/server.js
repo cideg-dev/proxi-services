@@ -7,12 +7,12 @@ const compression = require('compression');
 const http = require('http');
 
 // Importation des middlewares de sécurité
-const { 
-  limiter, 
-  helmetConfig, 
-  sanitize, 
-  xssProtection, 
-  hppProtection 
+const {
+  limiter,
+  helmetConfig,
+  sanitize,
+  xssProtection,
+  hppProtection
 } = require('./src/middleware/securityMiddleware');
 
 // Importation du service de cache
@@ -45,12 +45,14 @@ const server = http.createServer(app);
 server.listen(PORT, async () => {
   console.log(`Serveur démarré sur le port ${PORT}`);
   console.log(`Environnement: ${process.env.NODE_ENV || 'development'}`);
-  
+
   // Vérification de la connexion au cache
   try {
-    const redis = require('./src/services/cacheService');
-    if (redis.redisClient.isReady) {
+    const { redisClient, isRedisAvailable } = require('./src/services/cacheService');
+    if (isRedisAvailable && redisClient && redisClient.isReady) {
       console.log('Redis client is connected and ready');
+    } else if (!isRedisAvailable) {
+      console.log('Redis n\'est pas disponible - utilisation du cache en mémoire');
     } else {
       console.log('Waiting for Redis client to connect...');
     }

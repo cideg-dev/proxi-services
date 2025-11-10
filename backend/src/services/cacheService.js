@@ -4,15 +4,15 @@ require('dotenv').config();
 // Variable pour vérifier si Redis est disponible
 let isRedisAvailable = false;
 
-// Création du client Redis avec gestion d'erreurs
+// Création du client Redis avec gestion d'erreurs et paramètres de sécurité
 let redisClient;
 
 if (process.env.REDIS_HOST) {
-  redisClient = redis.createClient({
-    host: process.env.REDIS_HOST || 'localhost',
-    port: process.env.REDIS_PORT || 6379,
-    password: process.env.REDIS_PASSWORD || undefined,
+  // Configuration sécurisée du client Redis
+  const redisOptions = {
     socket: {
+      host: process.env.REDIS_HOST || 'localhost',
+      port: process.env.REDIS_PORT || 6379,
       connectTimeout: 5000,
       reconnectStrategy: (times) => {
         if (times >= 3) {
@@ -22,7 +22,14 @@ if (process.env.REDIS_HOST) {
         return 2000; // Réessayer après 2 secondes
       }
     }
-  });
+  };
+
+  // Ajouter l'authentification si disponible
+  if (process.env.REDIS_PASSWORD) {
+    redisOptions.password = process.env.REDIS_PASSWORD;
+  }
+
+  redisClient = redis.createClient(redisOptions);
 
   // Gestion des erreurs Redis
   redisClient.on('error', (err) => {
@@ -46,9 +53,18 @@ if (process.env.REDIS_HOST) {
   isRedisAvailable = false;
 }
 
-// Cache en mémoire pour les environnements sans Redis
+// Cache en mémoire sécurisé pour les environnements sans Redis
 const memoryCache = new Map();
 const cacheTimeouts = new Map();
+
+// Fonction d'échappement basique pour les clés de cache
+const sanitizeCacheKey = (key) => {
+  if (typeof key !== 'string') {
+    key = String(key);
+  }
+  // Échapper les caractères potentiellement dangereux
+  return key.replace(/[^a-zA-Z0-9-_:.]/g, '_');
+};
 
 // Connexion au client Redis
 const connectRedis = async () => {
@@ -67,21 +83,27 @@ const connectRedis = async () => {
 
 // Fonction pour récupérer une valeur du cache (Redis ou mémoire)
 const getFromCache = async (key) => {
+  // Sanitize la clé pour éviter les injections
+  const sanitizedKey = sanitizeCacheKey(key);
+  
   try {
     if (isRedisAvailable && redisClient) {
-      const cachedData = await redisClient.get(key);
+      const cachedData = await redisClient.get(sanitizedKey);
       return cachedData ? JSON.parse(cachedData) : null;
     } else {
       // Utiliser le cache en mémoire
-      const cachedItem = memoryCache.get(key);
+      const cachedItem = memoryCache.get(sanitizedKey);
       if (cachedItem) {
         // Vérifier si le cache est expiré
         if (Date.now() < cachedItem.expiry) {
           return cachedItem.data;
         } else {
           // Supprimer l'entrée expirée
-          memoryCache.delete(key);
-          cacheTimeouts.delete(key);
+          memoryCache.delete(sanitizedKey);
+          if (cacheTimeouts.has(sanitizedKey)) {
+            clearTimeout(cacheTimeouts.get(sanitizedKey));
+            cacheTimeouts.delete(sanitizedKey);
+          }
         }
       }
       return null;
@@ -94,21 +116,31 @@ const getFromCache = async (key) => {
 
 // Fonction pour sauvegarder une valeur dans le cache (Redis ou mémoire)
 const saveToCache = async (key, data, expiration = 3600) => { // 1 heure par défaut
+  // Sanitize la clé pour éviter les injections
+  const sanitizedKey = sanitizeCacheKey(key);
+  
+  // Limer la taille des données pour éviter la surcharge mémoire
+  if (JSON.stringify(data).length > 1024 * 1024) { // 1MB limit
+    console.warn('Données de cache trop volumineuses, non sauvegardées:', sanitizedKey);
+    return;
+  }
+  
   try {
     if (isRedisAvailable && redisClient) {
-      await redisClient.setEx(key, expiration, JSON.stringify(data));
+      // Sauvegarder dans Redis
+      await redisClient.setEx(sanitizedKey, expiration, JSON.stringify(data));
     } else {
       // Sauvegarde dans le cache en mémoire
       const expiry = Date.now() + (expiration * 1000);
-      memoryCache.set(key, { data, expiry });
-      
+      memoryCache.set(sanitizedKey, { data, expiry });
+
       // Nettoyer automatiquement à l'expiration
-      if (cacheTimeouts.has(key)) {
-        clearTimeout(cacheTimeouts.get(key));
+      if (cacheTimeouts.has(sanitizedKey)) {
+        clearTimeout(cacheTimeouts.get(sanitizedKey));
       }
-      cacheTimeouts.set(key, setTimeout(() => {
-        memoryCache.delete(key);
-        cacheTimeouts.delete(key);
+      cacheTimeouts.set(sanitizedKey, setTimeout(() => {
+        memoryCache.delete(sanitizedKey);
+        cacheTimeouts.delete(sanitizedKey);
       }, expiration * 1000));
     }
   } catch (error) {
@@ -118,14 +150,17 @@ const saveToCache = async (key, data, expiration = 3600) => { // 1 heure par dé
 
 // Fonction pour supprimer une clé du cache
 const removeFromCache = async (key) => {
+  // Sanitize la clé pour éviter les injections
+  const sanitizedKey = sanitizeCacheKey(key);
+  
   try {
     if (isRedisAvailable && redisClient) {
-      await redisClient.del(key);
+      await redisClient.del(sanitizedKey);
     } else {
-      memoryCache.delete(key);
-      if (cacheTimeouts.has(key)) {
-        clearTimeout(cacheTimeouts.get(key));
-        cacheTimeouts.delete(key);
+      memoryCache.delete(sanitizedKey);
+      if (cacheTimeouts.has(sanitizedKey)) {
+        clearTimeout(cacheTimeouts.get(sanitizedKey));
+        cacheTimeouts.delete(sanitizedKey);
       }
     }
   } catch (error) {

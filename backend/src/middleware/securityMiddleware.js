@@ -5,16 +5,24 @@ const validator = require('validator');
 const hpp = require('hpp');
 const cors = require('cors');
 
-// Rate limiting
+// Configuration avancée du rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limite chaque IP à 100 requêtes par windowMs
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: 'Trop de demandes depuis cette adresse IP, veuillez réessayer plus tard.',
+  max: process.env.NODE_ENV === 'production' ? 100 : 500, // Limite chaque IP à 100 reqs (500 en dev)
+  standardHeaders: true, // Retourne les infos de rate limit dans les headers
+  legacyHeaders: false, // Désactive les headers 'X-RateLimit-*'
+  message: {
+    error: 'Trop de demandes depuis cette adresse IP, veuillez réessayer plus tard.',
+    code: 429
+  },
   skip: (req, res) => {
     // Vous pouvez ajouter des exceptions ici
     return req.path === '/health';
+  },
+  // Suivi des requêtes par IP
+  keyGenerator: (req) => {
+    return req.ip || req.connection.remoteAddress || req.socket.remoteAddress || 
+           (req.connection.socket ? req.connection.socket.remoteAddress : null);
   }
 });
 
@@ -24,11 +32,15 @@ const helmetConfig = helmet({
     directives: {
       defaultSrc: ["'self'"],
       styleSrc: ["'self'", "'unsafe-inline'", "https:", "data:"],
-      scriptSrc: ["'self'"],
+      scriptSrc: ["'self'", "'strict-dynamic'", "'unsafe-inline'"], // Utiliser 'strict-dynamic' pour une sécurité renforcée
+      scriptSrcAttr: ["'none'"], // Empêche les attributs de script en ligne
       imgSrc: ["'self'", "data:", "https:"],
       connectSrc: ["'self'", "https://*.kkiapay.net", "wss:", "https://api.example.com"], // Ajouter d'autres domaines si nécessaire
       frameSrc: ["https://www.kkiapay.tg"],
       objectSrc: ["'none'"],
+      baseUri: ["'none'"], // Empêche l'utilisation de balises <base>
+      formAction: ["'self'"], // Restreint les actions de formulaire
+      frameAncestors: ["'none'"], // Empêche l'incorporation dans des iframes (anti-clickjacking)
     },
   },
   hsts: {
@@ -37,38 +49,43 @@ const helmetConfig = helmet({
     preload: true
   },
   frameguard: {
-    action: 'DENY'
+    action: 'DENY' // Empêche le rendu dans des iframes (anti-clickjacking)
   },
   referrerPolicy: {
-    policy: 'same-origin'
+    policy: 'strict-origin-when-cross-origin' // Réduit les fuites de referrer
   },
   dnsPrefetchControl: {
-    allow: false
+    allow: false // Désactive le prefetch DNS
   },
-  noSniff: true,
-  ieNoOpen: true,
+  noSniff: true, // Empêche le MIME type sniffing
+  ieNoOpen: true, // Empêche IE de s'exécuter en mode "Open"
+  xssFilter: true, // Active le filtre XSS d'IE/Chrome
+  hidePoweredBy: true, // Cache le header X-Powered-By
 });
 
 // Sanitisation des données (contre injection NoSQL)
-const sanitize = mongoSanitize();
+const sanitize = mongoSanitize({
+  allowDots: false, // Désactive l'accès aux propriétés imbriquées avec des points
+  replaceWith: '_', // Remplace les caractères problématiques par _
+});
 
-// Protection contre XSS avec middleware personnalisé
+// Protection contre XSS avec middleware personnalisé (amélioré)
 const xssProtection = (req, res, next) => {
   // Nettoyer les propriétés du body
-  if (req.body) {
+  if (req.body && typeof req.body === 'object') {
     req.body = sanitizeObjectXSS(req.body);
   }
-  
+
   // Nettoyer les query params
-  if (req.query) {
+  if (req.query && typeof req.query === 'object') {
     req.query = sanitizeObjectXSS(req.query);
   }
-  
+
   // Nettoyer les params
-  if (req.params) {
+  if (req.params && typeof req.params === 'object') {
     req.params = sanitizeObjectXSS(req.params);
   }
-  
+
   next();
 };
 
@@ -76,52 +93,91 @@ const xssProtection = (req, res, next) => {
 function sanitizeObjectXSS(obj) {
   if (typeof obj !== 'object' || obj === null) {
     if (typeof obj === 'string') {
-      return validator.escape(obj);
+      // Utiliser validator.escape avec validation supplémentaire
+      return validator.escape(obj).substring(0, 5000); // Limiter la longueur pour éviter les attaques par déni de service
     }
     return obj;
   }
+
+  const sanitizedObj = Array.isArray(obj) ? [] : {};
   
   Object.keys(obj).forEach(key => {
+    // Nettoyer la clé pour éviter les injections dans les noms de propriétés
+    const sanitizedKey = validator.escape(String(key));
+    
     if (typeof obj[key] === 'string') {
-      obj[key] = validator.escape(obj[key]);
+      // Limiter la longueur des chaînes pour éviter les attaques par déni de service
+      sanitizedObj[sanitizedKey] = validator.escape(obj[key]).substring(0, 5000);
     } else if (typeof obj[key] === 'object' && obj[key] !== null) {
-      obj[key] = sanitizeObjectXSS(obj[key]);
+      // Récursion pour les objets imbriqués
+      sanitizedObj[sanitizedKey] = sanitizeObjectXSS(obj[key]);
+    } else {
+      // Conserver les valeurs non string telles quelles
+      sanitizedObj[sanitizedKey] = obj[key];
     }
   });
-  
-  return obj;
+
+  return sanitizedObj;
 }
 
 // Protection contre la pollution du prototype (HPP)
-const hppProtection = hpp();
+const hppProtection = hpp({
+  whitelist: [], // Tableau vide signifie que tous les champs sont autorisés à moins qu'ils soient dans la liste noire
+  blacklist: ['constructor', 'prototype', '__proto__'] // Champs bloqués
+});
 
 // Configuration CORS sécurisée
 const corsOptions = {
   origin: function (origin, callback) {
-    const allowedOrigins = [
-      process.env.FRONTEND_URL || 'http://localhost:5173',
-      'https://cideg-dev.github.io',
-      'http://localhost:3000'  // Si vous avez un serveur de développement backend
-    ];
+    // En production, restreindre strictement les origines
+    if (process.env.NODE_ENV === 'production') {
+      const allowedOrigins = [
+        process.env.FRONTEND_URL || 'https://proxi-services.com',
+        'https://cideg-dev.github.io',
+      ];
 
-    // Autoriser les requêtes sans origine (ex: mobile apps ou requêtes curl)
-    if (!origin) return callback(null, true);
+      // Autoriser les requêtes sans origine (ex: mobile apps ou requêtes curl)
+      if (!origin) return callback(null, true);
 
-    // Vérifier si l'origine est dans la liste blanche
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      // En développement, autoriser les origines localhost
-      if (process.env.NODE_ENV === 'development' && origin && origin.startsWith('http://localhost:')) {
-        return callback(null, true);
+      // Vérifier si l'origine est dans la liste blanche
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        const msg = 'La politique CORS de ce site n\'autorise pas l\'accès depuis l\'origine spécifiée';
+        callback(new Error(msg), false);
       }
-      const msg = 'La politique CORS de ce site n\'autorise pas ' +
-                'l\'accès depuis l\'origine spécifiée : ' + origin;
-      callback(new Error(msg), false);
+    } else {
+      // En développement, permettre les origines localhost
+      const allowedOrigins = [
+        process.env.FRONTEND_URL || 'http://localhost:5173',
+        'https://cideg-dev.github.io',
+        'http://localhost:3000'
+      ];
+
+      // Autoriser les requêtes sans origine (ex: mobile apps ou requêtes curl)
+      if (!origin) return callback(null, true);
+
+      // Vérifier si l'origine est dans la liste blanche
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        // En développement, autoriser les origines localhost
+        if (origin && origin.startsWith('http://localhost:')) {
+          return callback(null, true);
+        }
+        const msg = 'La politique CORS de ce site n\'autorise pas l\'accès depuis l\'origine spécifiée';
+        callback(new Error(msg), false);
+      }
     }
   },
-  credentials: true,
-  optionsSuccessStatus: 200
+  credentials: true, // Autoriser les cookies et autres credentials
+  optionsSuccessStatus: 200, // Répondre avec 200 pour les requêtes OPTIONS
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Méthodes HTTP autorisées
+  allowedHeaders: [
+    'Origin', 'X-Requested-With', 'Content-Type', 'Accept', 
+    'Authorization', 'X-HTTP-Method-Override'
+  ], // En-têtes autorisés
+  maxAge: 86400 // Délai de mise en cache des résultats CORS (24h)
 };
 
 module.exports = {
