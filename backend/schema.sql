@@ -4,6 +4,8 @@ CREATE TABLE IF NOT EXISTS users (
     password VARCHAR(255) NOT NULL,
     role VARCHAR(50) NOT NULL, -- client, artisan, commercant
     is_blocked BOOLEAN DEFAULT FALSE, -- New column for user block status
+    mfa_enabled BOOLEAN DEFAULT FALSE, -- Multifactor authentication enabled
+    mfa_secret VARCHAR(255), -- Secret key for TOTP
     last_seen TIMESTAMP
 );
 

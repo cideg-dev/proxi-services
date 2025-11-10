@@ -19,7 +19,7 @@ const generateToken = (user) => {
       }
     },
     process.env.JWT_SECRET,
-    { expiresIn: '1h' } // Token valide pendant 1 heure
+    { expiresIn: '15m' } // Token valide pendant 15 minutes seulement pour plus de sécurité
   );
 };
 
@@ -42,20 +42,33 @@ const generateRefreshToken = (user) => {
   return refreshToken;
 };
 
-// Vérifier un refresh token
+// Vérifier un refresh token et l'utilisateur associé
 const verifyRefreshToken = async (refreshToken) => {
   try {
     const hashedToken = crypto.createHash('sha256').update(refreshToken).digest('hex');
-    
+
+    // Vérifiez que le refresh token existe et n'est pas expiré
     const result = await pool.query(
       'SELECT * FROM refresh_tokens WHERE token = $1 AND expires_at > NOW()',
       [hashedToken]
     );
-    
+
     if (result.rows.length === 0) {
       throw new Error('Refresh token invalide ou expiré');
     }
-    
+
+    // Vérifiez que l'utilisateur existe et n'est pas bloqué
+    const userResult = await pool.query(
+      'SELECT id, email, role, is_blocked FROM users WHERE id = $1',
+      [result.rows[0].user_id]
+    );
+
+    if (userResult.rows.length === 0 || userResult.rows[0].is_blocked) {
+      // Si l'utilisateur n'existe plus ou est bloqué, supprimez le refresh token
+      await pool.query('DELETE FROM refresh_tokens WHERE token = $1', [hashedToken]);
+      throw new Error('Compte utilisateur invalide ou bloqué');
+    }
+
     return result.rows[0];
   } catch (error) {
     logger.error('Erreur lors de la vérification du refresh token:', error.message);
@@ -77,6 +90,19 @@ const revokeRefreshToken = async (refreshToken) => {
   }
 };
 
+// Révoquer tous les refresh tokens d'un utilisateur (par exemple lors de la modification du mot de passe)
+const revokeAllUserRefreshTokens = async (userId) => {
+  try {
+    await pool.query(
+      'DELETE FROM refresh_tokens WHERE user_id = $1',
+      [userId]
+    );
+    logger.info(`Tous les refresh tokens révoqués pour l'utilisateur ${userId}`);
+  } catch (error) {
+    logger.error('Erreur lors de la révocation de tous les refresh tokens:', error.message);
+  }
+};
+
 // Supprimer les refresh tokens expirés
 const cleanupExpiredTokens = async () => {
   try {
@@ -94,5 +120,6 @@ module.exports = {
   generateRefreshToken,
   verifyRefreshToken,
   revokeRefreshToken,
+  revokeAllUserRefreshTokens, // Ajout de cette nouvelle fonction
   cleanupExpiredTokens
 };

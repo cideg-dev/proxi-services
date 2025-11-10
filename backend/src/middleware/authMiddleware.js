@@ -16,13 +16,16 @@ const authenticateToken = async (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await pool.query('SELECT id, email, role FROM users WHERE id = $1', [decoded.user.id]);
+    const userResult = await pool.query(
+      'SELECT id, email, role, is_blocked FROM users WHERE id = $1', 
+      [decoded.user.id]
+    );
 
-    if (user.rows.length === 0) {
-      return res.status(401).json({ message: 'Token invalide. Utilisateur non trouvé.' });
+    if (userResult.rows.length === 0 || userResult.rows[0].is_blocked) {
+      return res.status(401).json({ message: 'Token invalide ou compte bloqué.' });
     }
 
-    req.user = { user: user.rows[0] };
+    req.user = { user: userResult.rows[0] };
     next();
   } catch (error) {
     if (error.name === 'TokenExpiredError') {

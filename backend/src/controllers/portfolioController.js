@@ -8,20 +8,27 @@ const fs = require('fs');
 const addPortfolioItem = async (req, res) => {
   console.log('addPortfolioItem request body:', req.body);
   console.log('addPortfolioItem request file:', req.file);
-  const professionalId = parseInt(req.params.artisanId);
-  if (req.user.user.id !== professionalId) {
-    return res.status(403).json({ message: 'Action non autorisée.' });
-  }
+  
+  try {
+    const professionalId = parseInt(req.params.artisanId);
+    if (req.user.user.id !== professionalId) {
+      return res.status(403).json({ message: 'Action non autorisée.' });
+    }
 
-  if (!req.file) {
-    return res.status(400).json({ message: 'Image requise.' });
-  }
+    if (!req.file) {
+      return res.status(400).json({ message: 'Image requise.' });
+    }
 
-  const { name, description, price } = req.body;
+    // Vérification du type de fichier
+    if (!req.file.mimetype.startsWith('image/')) {
+      return res.status(400).json({ message: 'Type de fichier non supporté. Seules les images sont autorisées.' });
+    }
 
-  if (!name || !description) {
-    return res.status(400).json({ message: 'Le nom et la description sont requis.' });
-  }
+    const { name, description, price } = req.body;
+
+    if (!name || !description) {
+      return res.status(400).json({ message: 'Le nom et la description sont requis.' });
+    }
 
   try {
     // Generate a unique filename with .webp extension
@@ -51,6 +58,11 @@ const updatePortfolioItem = async (req, res) => {
   const { artisanId: professionalId, portfolioId } = req.params;
   if (req.user.user.id !== parseInt(professionalId)) {
     return res.status(403).json({ message: 'Action non autorisée.' });
+  }
+
+  // Vérification du type de fichier si un fichier est fourni
+  if (req.file && !req.file.mimetype.startsWith('image/')) {
+    return res.status(400).json({ message: 'Type de fichier non supporté. Seules les images sont autorisées.' });
   }
 
   const { caption } = req.body;

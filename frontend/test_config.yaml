@@ -1,0 +1,32 @@
+# Configuration des tests pour Proxi-Services
+
+# Couverture de code minimale requise
+min_coverage: 80
+
+# Dossiers à exclure des tests
+exclude:
+  - "lib/main\\.dart"
+  - "lib/generated/"
+  - "lib/l10n/"
+
+# Rapport de couverture
+coverage:
+  path: "coverage/lcov.info"
+
+# Timeout pour les tests individuels
+timeout: 30s
+
+# Tags pour organiser les tests
+tags:
+  - integration
+  - unit
+  - widget
+  - security
+
+# Commandes de test
+scripts:
+  test: "flutter test --coverage"
+  test_integration: "flutter test --tags integration"
+  test_unit: "flutter test --tags unit"
+  test_widget: "flutter test --tags widget"
+  coverage: "genhtml coverage/lcov.info -o coverage/html && open coverage/html/index.html"

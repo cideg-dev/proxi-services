@@ -43,7 +43,13 @@ const getArtisans = async (req, res, connectedUsers) => {
 
 const getArtisan = async (req, res, connectedUsers) => {
   try {
-    const professionalId = parseInt(req.params.id);
+    // Validation et parsing sécurisé de l'ID
+    const paramValue = req.params.id;
+    if (!paramValue || isNaN(paramValue) || parseInt(paramValue) <= 0) {
+      return res.status(400).json({ message: 'ID invalide fourni.' });
+    }
+    
+    const professionalId = parseInt(paramValue);
 
     // 1. Get user role
     const userResult = await pool.query('SELECT role FROM users WHERE id = $1', [professionalId]);
@@ -88,7 +94,13 @@ const getArtisan = async (req, res, connectedUsers) => {
 
 const getArtisanPortfolio = async (req, res) => {
   try {
-    const artisanId = parseInt(req.params.id);
+    // Validation et parsing sécurisé de l'ID
+    const paramValue = req.params.id;
+    if (!paramValue || isNaN(paramValue) || parseInt(paramValue) <= 0) {
+      return res.status(400).json({ message: 'ID invalide fourni.' });
+    }
+    
+    const artisanId = parseInt(paramValue);
     const result = await pool.query('SELECT * FROM portfolio_items WHERE artisan_id = $1', [artisanId]);
     res.json(result.rows);
   } catch (err) {
@@ -99,7 +111,13 @@ const getArtisanPortfolio = async (req, res) => {
 
 const getArtisanServices = async (req, res) => {
   try {
-    const artisanId = parseInt(req.params.artisanId || req.params.id);
+    // Validation et parsing sécurisé de l'ID
+    const paramValue = req.params.artisanId || req.params.id;
+    if (!paramValue || isNaN(paramValue) || parseInt(paramValue) <= 0) {
+      return res.status(400).json({ message: 'ID invalide fourni.' });
+    }
+    
+    const artisanId = parseInt(paramValue);
     const result = await pool.query('SELECT * FROM services WHERE artisan_id = $1', [artisanId]);
     res.json(result.rows);
   } catch (err) {

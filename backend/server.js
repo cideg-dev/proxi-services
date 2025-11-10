@@ -22,7 +22,33 @@ const limiter = rateLimit({
 // Application des middlewares de performance et de sécurité
 app.use(compression()); // Compression des réponses
 app.use(limiter);
-app.use(helmet());
+
+// Configuration renforcée de Helmet pour améliorer la sécurité
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https:"],
+      scriptSrc: ["'self'"],
+      imgSrc: ["'self'", "data:", "https:"],
+      connectSrc: ["'self'", "https://*.kkiapay.net", "wss:"], // Ajout des domaines nécessaires pour les paiements et WebSocket
+      frameSrc: ["https://www.kkiapay.tg"], // Autoriser kkiapay
+      objectSrc: ["'none'"],
+    },
+  },
+  hsts: {
+    maxAge: 31536000, // 1 an
+    includeSubDomains: true,
+    preload: true
+  },
+  frameguard: {
+    action: 'DENY'
+  },
+  referrerPolicy: {
+    policy: 'same-origin'
+  }
+}));
+
 app.use(express.json());
 
 // Trust proxy pour Render - Configuration sécurisée

@@ -4,9 +4,24 @@ const portfolioController = require('../controllers/portfolioController');
 const { authenticateToken, authorizeRole } = require('../middleware/authMiddleware');
 const multer = require('multer');
 
-// Configuration de Multer pour le stockage des images (en mémoire pour traitement Sharp)
-const storage = multer.memoryStorage(); // Store in memory for Sharp processing
-const upload = multer({ storage: storage });
+// Configuration sécurisée de Multer pour le stockage des images
+const fileFilter = (req, file, cb) => {
+  // Autoriser uniquement les images
+  if (file.mimetype.startsWith('image/')) {
+    cb(null, true);
+  } else {
+    cb(new Error('Type de fichier non supporté. Seules les images sont autorisées.'), false);
+  }
+};
+
+// Configuration de Multer avec limitations de taille et filtres
+const upload = multer({ 
+  storage: multer.memoryStorage(), // Store in memory for Sharp processing
+  limits: {
+    fileSize: 5 * 1024 * 1024, // Limite de 5 Mo
+  },
+  fileFilter: fileFilter
+});
 
 // @route   GET /api/portfolio/recent
 // @desc    Get 10 most recent portfolio items

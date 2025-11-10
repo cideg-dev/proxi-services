@@ -8,6 +8,7 @@ const pool = require(dbConfigPath);
 const { check, validationResult, body } = require('express-validator');
 const { authenticateToken } = require('../middleware/authMiddleware');
 const { refreshToken, logout } = require('../controllers/authController');
+const { revokeAllUserRefreshTokens } = require('../services/authService');
 
 const router = express.Router();
 
@@ -128,7 +129,7 @@ module.exports = function() {
         jwt.sign(
           payload,
           process.env.JWT_SECRET,
-          { expiresIn: '5h' },
+          { expiresIn: '15m' }, // Token valide pendant 15 minutes seulement pour plus de sécurité
           (err, token) => {
             if (err) throw err;
             res.status(201).json({ message: 'Utilisateur enregistré avec succès.', token, user: newUser });
@@ -181,7 +182,7 @@ module.exports = function() {
         jwt.sign(
           payload,
           process.env.JWT_SECRET,
-          { expiresIn: '5h' },
+          { expiresIn: '15m' }, // Token valide pendant 15 minutes seulement pour plus de sécurité
           (err, token) => {
             if (err) throw err;
             res.status(200).json({ message: 'Connexion réussie.', token, user: { id: user.id, email: user.email, role: user.role } });
@@ -227,6 +228,9 @@ module.exports = function() {
         const hashedNewPassword = await bcrypt.hash(newPassword, salt);
 
         await pool.query('UPDATE users SET password = $1 WHERE id = $2', [hashedNewPassword, userId]);
+
+        // Révoquer tous les refresh tokens de l'utilisateur pour forcer la déconnexion sur tous les appareils
+        await revokeAllUserRefreshTokens(userId);
 
         res.status(200).json({ message: 'Mot de passe mis à jour avec succès.' });
 
