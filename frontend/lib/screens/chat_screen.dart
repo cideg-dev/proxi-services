@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/services/chat_service.dart';
+import 'package:frontend/services/token_manager.dart';
 import 'package:frontend/widgets/message_bubble.dart';
 import 'package:intl/intl.dart';
 
