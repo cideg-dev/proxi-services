@@ -26,7 +26,13 @@ class SocketService with ChangeNotifier {
       return;
     }
 
-    _socket = IO.io(ApiConstants.baseUrl, <String, dynamic>{
+    // Remove '/api' suffix from base URL for socket connection
+    String socketUrl = ApiConstants.baseUrl;
+    if (socketUrl.endsWith('/api')) {
+      socketUrl = socketUrl.substring(0, socketUrl.length - 4);
+    }
+    
+    _socket = IO.io(socketUrl, <String, dynamic>{
       'transports': ['websocket'],
       'autoConnect': true,
       'auth': {
