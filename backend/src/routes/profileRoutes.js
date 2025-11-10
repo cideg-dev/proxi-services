@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
 const router = express.Router();
 
 // Utilisation d'un chemin relatif plus explicite pour éviter les problèmes de module
@@ -358,6 +359,76 @@ module.exports = function() {
         client.release();
       }
     });
+
+  // PUT /api/profile/photo - Upload and update user's profile photo
+  const { upload, handleUploadError } = require('../middleware/fileUploadMiddleware');
+  
+  router.put('/photo', authenticateToken, upload.single('photo'), handleUploadError, async (req, res) => {
+    const userId = req.user.user.id;
+    const userRole = req.user.user.role;
+    
+    if (!req.file) {
+      return res.status(400).json({ message: 'Aucun fichier téléchargé.' });
+    }
+
+    try {
+      // Chemin de la nouvelle photo
+      const photoPath = `/uploads/profile-pictures/${req.file.filename}`;
+      
+      // Obtenir l'ancien chemin de la photo pour le supprimer
+      let oldPhotoPath = null;
+      let selectQuery = '';
+      
+      if (userRole === 'client') {
+        selectQuery = 'SELECT photo_url FROM client_profiles WHERE user_id = $1';
+      } else if (userRole === 'artisan') {
+        selectQuery = 'SELECT photo_url FROM artisan_profiles WHERE user_id = $1';
+      } else if (userRole === 'commercant') {
+        selectQuery = 'SELECT photo_url FROM commercant_profiles WHERE user_id = $1';
+      }
+      
+      if (selectQuery) {
+        const profileResult = await pool.query(selectQuery, [userId]);
+        if (profileResult.rows.length > 0 && profileResult.rows[0].photo_url) {
+          oldPhotoPath = profileResult.rows[0].photo_url;
+        }
+      }
+      
+      // Mettre à jour la photo dans la table appropriée
+      let updateQuery = '';
+      if (userRole === 'client') {
+        updateQuery = 'UPDATE client_profiles SET photo_url = $1 WHERE user_id = $2';
+      } else if (userRole === 'artisan') {
+        updateQuery = 'UPDATE artisan_profiles SET photo_url = $1 WHERE user_id = $2';
+      } else if (userRole === 'commercant') {
+        updateQuery = 'UPDATE commercant_profiles SET photo_url = $1 WHERE user_id = $2';
+      }
+      
+      if (updateQuery) {
+        await pool.query(updateQuery, [photoPath, userId]);
+      }
+      
+      // Supprimer l'ancienne photo si elle existe
+      if (oldPhotoPath && oldPhotoPath.startsWith('/uploads/profile-pictures/')) {
+        const fullPath = path.join(__dirname, '..', '..', oldPhotoPath);
+        if (fs.existsSync(fullPath)) {
+          fs.unlinkSync(fullPath);
+        }
+      }
+      
+      res.json({ 
+        message: 'Photo de profil mise à jour avec succès.', 
+        photo_url: photoPath 
+      });
+    } catch (error) {
+      console.error('Error updating profile photo:', error);
+      // Supprimer le fichier uploadé en cas d'erreur
+      if (req.file && fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
+      res.status(500).json({ message: 'Erreur lors de la mise à jour de la photo de profil.' });
+    }
+  });
 
   return router;
 };

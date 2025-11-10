@@ -16,7 +16,8 @@
     "lint": "eslint . --ext .js",
     "lint:fix": "eslint . --ext .js --fix",
     "security-check": "node scripts/security-test.js",
-    "security-audit": "npm audit"
+    "security-audit": "npm audit",
+    "reset-db": "node scripts/reset_database.js"
   },
   "devDependencies": {
     "eslint": "^9.37.0",
