@@ -39,7 +39,7 @@ class PaymentService {
   // NEW: Create payment intent
   Future<Map<String, dynamic>> createPaymentIntent({
     required double amount,
-    required String currency = 'XOF', // Devise locale
+    String currency = 'XOF', // Devise locale
     required String description,
     String? paymentMethod,
     int? artisanId,

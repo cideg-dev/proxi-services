@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/services/advanced_search_service.dart';
+import 'package:frontend/widgets/search_filters.dart';
 
 class AdvancedSearchBar extends StatefulWidget {
   final Function(String query, Map<String, dynamic> filters) onSearch;

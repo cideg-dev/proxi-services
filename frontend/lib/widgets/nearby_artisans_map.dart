@@ -91,7 +91,7 @@ class _NearbyArtisansMapState extends State<NearbyArtisansMap> {
       );
     }
 
-    if (_userPosition == null) {
+    if (_userLatitude == null || _userLongitude == null) {
       return const Center(
         child: Text('Impossible de déterminer votre position'),
       );
