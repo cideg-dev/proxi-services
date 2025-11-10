@@ -4,9 +4,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticateToken, authorizeRole } = require('../middleware/authMiddleware');
 const { body, validationResult } = require('express-validator');
-const path = require('path');
-const dbConfigPath = path.join(__dirname, '..', 'db.config');
-const pool = require(dbConfigPath);
+const pool = require('../../db.config');
 
 // @route   GET /api/audit/logs
 // @desc    Récupérer les logs d'audit (admin seulement)
