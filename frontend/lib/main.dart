@@ -39,6 +39,7 @@ import 'package:frontend/services/localization_service.dart';
 import 'package:frontend/screens/my_groups_screen.dart';
 import 'package:frontend/screens/create_group_screen.dart';
 import 'package:frontend/widgets/in_app_notification.dart';
+import 'package:frontend/widgets/navigation/bottom_navigation_widget.dart';
 import 'dart:async';
 import 'package:google_fonts/google_fonts.dart';
 

@@ -3,6 +3,7 @@ import 'package:frontend/screens/home_screen.dart';
 import 'package:frontend/screens/login_screen.dart';
 import 'package:frontend/screens/public_home_screen.dart';
 import 'package:frontend/services/token_manager.dart';
+import 'package:frontend/widgets/navigation/bottom_navigation_widget.dart';
 
 class AuthNavigationService extends StatefulWidget {
   const AuthNavigationService({super.key});
@@ -46,16 +47,8 @@ class _AuthNavigationServiceState extends State<AuthNavigationService> {
   Widget build(BuildContext context) {
     // Afficher la page appropriée en fonction de l'état d'authentification et du rôle
     if (_token != null && _token!.isNotEmpty) {
-      // Si l'utilisateur est authentifié, afficher la page d'accueil correspondant à son rôle
-      switch (_userRole) {
-        case 'client':
-          // Importer et retourner l'écran client ici si implémenté
-          return const HomeScreen(); // Temporairement HomeScreen, à modifier plus tard
-        case 'artisan':
-        case 'commercant':
-        default:
-          return const HomeScreen();
-      }
+      // Si l'utilisateur est authentifié, afficher la navigation par onglets
+      return BottomNavigationWidget(userRole: _userRole ?? 'client');
     } else {
       // Si l'utilisateur n'est pas authentifié, afficher la page d'accueil publique
       return const PublicHomeScreen();
