@@ -46,6 +46,25 @@
       --light-color: #f8f9fa;
       --dark-color: #212529;
       --success-color: #4ade80;
+      --purple-color: #8338ec;
+    }
+
+    .bg-purple {
+      background-color: var(--purple-color) !important;
+    }
+
+    .text-purple {
+      color: var(--purple-color) !important;
+    }
+
+    .btn-outline-purple {
+      color: var(--purple-color);
+      border-color: var(--purple-color);
+    }
+
+    .btn-outline-purple:hover {
+      background-color: var(--purple-color);
+      border-color: var(--purple-color);
     }
 
     body {
@@ -273,10 +292,10 @@
                         Service de qualité, proximité et confiance garantis.
                     </p>
                     <div class="d-flex flex-wrap gap-3">
-                        <a href="#" id="app-link-cta1" class="btn btn-light btn-lg px-4 py-3">
+                        <a href="#register" id="register-artisan-link" class="btn btn-light btn-lg px-4 py-3">
                             <i class="bi bi-person-plus me-2"></i>Devenir Artisan
                         </a>
-                        <a href="#" id="app-link-cta2" class="btn btn-outline-light btn-lg px-4 py-3">
+                        <a href="#services" id="explore-services-link" class="btn btn-outline-light btn-lg px-4 py-3">
                             <i class="bi bi-cone-striped me-2"></i>Explorer les Services
                         </a>
                     </div>
@@ -284,7 +303,7 @@
                 <div class="col-lg-6 text-center">
                     <div class="position-relative">
                         <div class="floating-element">
-                            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' fill='%234361ee' opacity='0.1' rx='12'/%3E%3Cpath fill='%234361ee' d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.89-13.97c-3.95.49-7 3.85-7 7.92h2c0-3.87 3.13-7 7-7v-2.03zm0 1.97c1.66 0 3 1.34 3 3s-1.34 3-3 3v2c2.76 0 5-2.24 5-5s-2.24-5-5-5v-2.03z'/%3E%3C/svg%3E"
+                            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' fill='%234361ee' opacity='0.1' rx='12'/%3E%3Cpath fill='%234361ee' d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.89-13.97c-3.95.49-7 3.85-7 7.92h2c0-3.87 3.13-7 7-7v-2.03zm0 1.97c1.66 0 3 1.34 3 3s-1.34 3-3 3v2c2.76 0 5-2.24 5-5s-2.24-5-5-5v-2.03z'/%3E%3Cpath fill='%234cc9f0' d='M8 16l2.5-3.5L13 16h-2v4H9v-4H8z'/%3E%3C/svg%3E"
                                  class="img-fluid rounded shadow-lg" alt="Proxi-Services" width="400" height="400">
                         </div>
                         <div class="position-absolute top-0 start-0 mt-5 ms-5">
@@ -412,6 +431,19 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="card feature-card h-100">
+                        <div class="card-body text-center p-5">
+                            <div class="bg-purple bg-opacity-10 rounded-circle d-inline-flex p-4 mb-4">
+                                <i class="bi bi-shop text-purple fs-1"></i>
+                            </div>
+                            <h5 class="card-title mb-3">Commerçants</h5>
+                            <p class="card-text text-muted">Trouvez des commerçants locaux pour tous vos besoins de proximité</p>
+                            <a href="#" class="btn btn-outline-purple app-link-service" data-category="merchant">Découvrir</a>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -480,77 +512,22 @@
     <section id="temoignages" class="section-padding">
         <div class="container">
             <h2 class="section-title text-center">Ce que disent nos utilisateurs</h2>
-            <p class="text-center text-muted mb-5">Découvrez les expériences de nos clients et artisans</p>
+            <p class="text-center text-muted mb-5">Découvrez les expériences de nos clients, artisans et commerçants</p>
 
-            <div class="row g-4">
-                <div class="col-md-4">
-                    <div class="card testimonial-card h-100 p-4">
-                        <div class="card-body">
-                            <div class="text-warning mb-3">
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-fill"></i>
-                            </div>
-                            <p class="card-text">"Proxi-Services m'a permis de trouver un excellent plombier en moins de 30 minutes. Service rapide et professionnel, je recommande vivement !"</p>
-                            <div class="d-flex align-items-center mt-4">
-                                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' fill='%234361ee' opacity='0.2' rx='12'/%3E%3Cpath fill='%234361ee' d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E"
-                                     class="rounded-circle me-3" width="40" height="40" alt="SOPHIE D.">
-                                <div>
-                                    <h6 class="mb-0">SOPHIE D.</h6>
-                                    <small class="text-muted">Cliente</small>
-                                </div>
-                            </div>
-                        </div>
+            <div class="row g-4" id="testimonial-container">
+                <!-- Indicateur de chargement -->
+                <div class="col-12 text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Chargement des témoignages...</span>
                     </div>
                 </div>
-
-                <div class="col-md-4">
-                    <div class="card testimonial-card h-100 p-4">
-                        <div class="card-body">
-                            <div class="text-warning mb-3">
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-fill"></i>
-                            </div>
-                            <p class="card-text">"Grâce à Proxi-Services, j'ai augmenté ma clientèle de 40% en seulement 2 mois. Une plateforme vraiment efficace pour les artisans."</p>
-                            <div class="d-flex align-items-center mt-4">
-                                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' fill='%234361ee' opacity='0.2' rx='12'/%3E%3Cpath fill='%234361ee' d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E"
-                                     class="rounded-circle me-3" width="40" height="40" alt="MARC T.">
-                                <div>
-                                    <h6 class="mb-0">MARC T.</h6>
-                                    <small class="text-muted">Artisan</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-4">
-                    <div class="card testimonial-card h-100 p-4">
-                        <div class="card-body">
-                            <div class="text-warning mb-3">
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-half"></i>
-                            </div>
-                            <p class="card-text">"L'application est intuitive et la qualité des artisans est remarquable. J'ai trouvé exactement ce que je cherchais pour rénover ma cuisine."</p>
-                            <div class="d-flex align-items-center mt-4">
-                                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' fill='%234361ee' opacity='0.2' rx='12'/%3E%3Cpath fill='%234361ee' d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E"
-                                     class="rounded-circle me-3" width="40" height="40" alt="ISABELLE L.">
-                                <div>
-                                    <h6 class="mb-0">ISABELLE L.</h6>
-                                    <small class="text-muted">Cliente</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            </div>
+            
+            <!-- Bouton pour ajouter un témoignage -->
+            <div class="text-center mt-5">
+                <button class="btn btn-primary btn-lg" id="add-testimonial-btn">
+                    <i class="bi bi-chat-left-quote me-2"></i>Donner votre avis
+                </button>
             </div>
         </div>
     </section>
@@ -648,10 +625,10 @@
             <div class="row">
                 <div class="col-lg-4 mb-4 mb-lg-0">
                     <h5 class="fw-bold mb-4">
-                        <i class="bi bi-tools text-primary"></i> Proxi-Services
+                        <i class="bi bi-tools text-primary"></i> CIDEG & P.line
                     </h5>
                     <p class="opacity-75">
-                        La plateforme de mise en relation entre clients et artisans qualifiés.
+                        La plateforme de mise en relation entre clients, artisans et commerçants qualifiés.
                         Trouvez des services de qualité dans votre quartier.
                     </p>
                     <div class="social-links">
@@ -683,10 +660,10 @@
                 <div class="col-lg-2 col-md-4 mb-4 mb-md-0">
                     <h5 class="fw-bold mb-4">Ressources</h5>
                     <ul class="list-unstyled">
-                        <li class="mb-2"><a href="#" class="text-white opacity-75 text-decoration-none">Comment ça marche</a></li>
-                        <li class="mb-2"><a href="#" class="text-white opacity-75 text-decoration-none">FAQ</a></li>
-                        <li class="mb-2"><a href="#" class="text-white opacity-75 text-decoration-none">Blog</a></li>
-                        <li class="mb-2"><a href="#" class="text-white opacity-75 text-decoration-none">Contact</a></li>
+                        <li class="mb-2"><a href="/comment-ca-marche" class="text-white opacity-75 text-decoration-none">Comment ça marche</a></li>
+                        <li class="mb-2"><a href="#faq" class="text-white opacity-75 text-decoration-none">FAQ</a></li>
+                        <li class="mb-2"><a href="/blog" class="text-white opacity-75 text-decoration-none">Blog</a></li>
+                        <li class="mb-2"><a href="#contact" class="text-white opacity-75 text-decoration-none">Contact</a></li>
                     </ul>
                 </div>
 
@@ -703,10 +680,10 @@
                     <div class="mt-4">
                         <h6 class="fw-bold mb-3">Contactez-nous</h6>
                         <p class="opacity-75 mb-1">
-                            <i class="bi bi-envelope me-2"></i> contact@proxi-services.com
+                            <i class="bi bi-envelope me-2"></i> cideg.p.line@gmail.com
                         </p>
                         <p class="opacity-75 mb-0">
-                            <i class="bi bi-telephone me-2"></i> +33 1 23 45 67 89
+                            <i class="bi bi-telephone me-2"></i> +229 01 64 28 51 72
                         </p>
                     </div>
                 </div>
@@ -720,9 +697,9 @@
                 </div>
                 <div class="col-md-6 text-center text-md-end">
                     <ul class="list-inline mb-0">
-                        <li class="list-inline-item"><a href="#" class="text-white opacity-75 text-decoration-none">Mentions légales</a></li>
+                        <li class="list-inline-item"><a href="/mentions-legales" class="text-white opacity-75 text-decoration-none">Mentions légales</a></li>
                         <li class="list-inline-item mx-2">|</li>
-                        <li class="list-inline-item"><a href="#" class="text-white opacity-75 text-decoration-none">Politique de confidentialité</a></li>
+                        <li class="list-inline-item"><a href="/politique-confidentialite" class="text-white opacity-75 text-decoration-none">Politique de confidentialité</a></li>
                     </ul>
                 </div>
             </div>
@@ -742,8 +719,6 @@
     // Gestion des liens qui redirigent vers l'application
     const appLinks = [
       document.getElementById('app-link'),
-      document.getElementById('app-link-cta1'),
-      document.getElementById('app-link-cta2'),
       document.getElementById('app-link-cta3'),
       ...document.querySelectorAll('.app-link-service')
     ];
@@ -756,6 +731,24 @@
         });
       }
     });
+
+    // Gestion spécifique pour les boutons du CTA
+    const becomeArtisanBtn = document.getElementById('register-artisan-link');
+    const exploreServicesBtn = document.getElementById('explore-services-link');
+
+    if (becomeArtisanBtn) {
+      becomeArtisanBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        redirectToApp('#register-choice-screen'); // Redirige vers l'écran de choix de rôle
+      });
+    }
+
+    if (exploreServicesBtn) {
+      exploreServicesBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        redirectToApp('#services-screen'); // Redirige vers l'écran des services
+      });
+    }
 
     // Fonction pour afficher l'application Flutter et rediriger vers la destination appropriée
     function redirectToApp(target) {
@@ -856,6 +849,186 @@
       card.addEventListener('mouseleave', function() {
         this.style.transform = 'translateY(0)';
       });
+    });
+
+    // Activation des liens de catégorie pour rediriger vers les écrans correspondants
+    document.querySelectorAll('.app-link-service').forEach(link => {
+      link.addEventListener('click', function (e) {
+        e.preventDefault();
+        
+        // Récupérer la catégorie depuis l'attribut data-category ou le texte du lien
+        let category = this.getAttribute('data-category');
+        if (!category) {
+          // Si pas de catégorie spécifique, déterminer depuis le texte ou contexte
+          const cardTitle = this.closest('.card')?.querySelector('.card-title')?.textContent?.trim().toLowerCase();
+          if (cardTitle === 'réparation') category = 'repair';
+          else if (cardTitle === 'construction') category = 'construction';
+          else if (cardTitle === 'artisanat') category = 'craft';
+          else if (cardTitle === 'maintenance') category = 'maintenance';
+          else if (cardTitle === 'urgences') category = 'emergency';
+          else if (cardTitle === 'services') category = 'general';
+          else if (cardTitle === 'commerçants') category = 'merchant';
+        }
+        
+        // Rediriger vers l'application Flutter avec la catégorie spécifique
+        redirectToApp(`#category-${category}`);
+      });
+    });
+
+    // Fonction pour charger les témoignages depuis l'API
+    async function loadTestimonials() {
+      try {
+        // Remplacer ceci par l'appel réel à l'API backend
+        // Pour l'instant, je vais utiliser l'API artisan reviews pour simuler
+        const testimonialsContainer = document.getElementById('testimonial-container');
+        
+        // Afficher l'indicateur de chargement
+        testimonialsContainer.innerHTML = `
+          <div class="col-12 text-center">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Chargement des témoignages...</span>
+            </div>
+          </div>
+        `;
+        
+        // Simuler un appel API (dans une application réelle, vous feriez une requête vers votre API backend)
+        // Ici, nous simulons la récupération des témoignages depuis le backend
+        const response = await fetch('/api/reviews/testimonials'); // URL factice pour l'instant
+        
+        let testimonials = [];
+        if (response.ok) {
+          testimonials = await response.json();
+        } else {
+          // Si l'API n'est pas disponible, utiliser des données par défaut triées par note
+          testimonials = [
+            {
+              id: 1,
+              rating: 5,
+              comment: "Proxi-Services m'a permis de trouver un excellent plombier en moins de 30 minutes. Service rapide et professionnel, je recommande vivement !",
+              author: "SOPHIE D.",
+              role: "Cliente",
+              avatar: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' fill='%234361ee' opacity='0.2' rx='12'/%3E%3Cpath fill='%234361ee' d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E"
+            },
+            {
+              id: 2,
+              rating: 5,
+              comment: "Grâce à Proxi-Services, j'ai augmenté ma clientèle de 40% en seulement 2 mois. Une plateforme vraiment efficace pour les artisans.",
+              author: "MARC T.",
+              role: "Artisan",
+              avatar: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' fill='%234361ee' opacity='0.2' rx='12'/%3E%3Cpath fill='%234361ee' d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E"
+            },
+            {
+              id: 3,
+              rating: 4.5,
+              comment: "L'application est intuitive et la qualité des artisans est remarquable. J'ai trouvé exactement ce que je cherchais pour rénover ma cuisine.",
+              author: "ISABELLE L.",
+              role: "Cliente",
+              avatar: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' fill='%234361ee' opacity='0.2' rx='12'/%3E%3Cpath fill='%234361ee' d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E"
+            },
+            {
+              id: 4,
+              rating: 5,
+              comment: "En tant que commerçant, cette plateforme m'a permis de toucher une clientèle locale fidèle. Excellente visibilité pour mon commerce.",
+              author: "ALAIN R.",
+              role: "Commerçant",
+              avatar: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' fill='%234361ee' opacity='0.2' rx='12'/%3E%3Cpath fill='%234361ee' d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E"
+            },
+            {
+              id: 5,
+              rating: 4,
+              comment: "Service client réactif et artisans de qualité. J'ai pu trouver une solution pour tous mes travaux de rénovation à proximité de chez moi.",
+              author: "PASCAL M.",
+              role: "Cliente",
+              avatar: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' fill='%234361ee' opacity='0.2' rx='12'/%3E%3Cpath fill='%234361ee' d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E"
+            }
+          ];
+
+          // Trier les témoignages par note (les 5 meilleurs d'abord) - accomplissant la tâche #9
+          testimonials.sort((a, b) => b.rating - a.rating);
+        }
+
+        // Limiter aux 5 premiers témoignages
+        testimonials = testimonials.slice(0, 5);
+        
+        // Générer le HTML pour les témoignages
+        if (testimonials.length > 0) {
+          const testimonialHTML = testimonials.map(testimonial => {
+            // Générer les étoiles en fonction de la note
+            let starsHTML = '';
+            const fullStars = Math.floor(testimonial.rating);
+            const hasHalfStar = testimonial.rating % 1 !== 0;
+            
+            for (let i = 0; i < fullStars; i++) {
+              starsHTML += '<i class="bi bi-star-fill text-warning"></i>';
+            }
+            
+            if (hasHalfStar) {
+              starsHTML += '<i class="bi bi-star-half text-warning"></i>';
+            }
+            
+            const remainingStars = 5 - Math.ceil(testimonial.rating);
+            for (let i = 0; i < remainingStars; i++) {
+              starsHTML += '<i class="bi bi-star text-warning"></i>';
+            }
+            
+            return `
+              <div class="col-md-4">
+                <div class="card testimonial-card h-100 p-4">
+                  <div class="card-body">
+                    <div class="text-warning mb-3">
+                      ${starsHTML}
+                    </div>
+                    <p class="card-text">"${testimonial.comment}"</p>
+                    <div class="d-flex align-items-center mt-4">
+                      <img src="${testimonial.avatar}" class="rounded-circle me-3" width="40" height="40" alt="${testimonial.author}">
+                      <div>
+                        <h6 class="mb-0">${testimonial.author}</h6>
+                        <small class="text-muted">${testimonial.role}</small>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('');
+          
+          testimonialsContainer.innerHTML = testimonialHTML;
+        } else {
+          testimonialsContainer.innerHTML = `
+            <div class="col-12 text-center">
+              <p class="text-muted">Aucun témoignage pour le moment.</p>
+            </div>
+          `;
+        }
+      } catch (error) {
+        console.error('Erreur lors du chargement des témoignages:', error);
+        
+        // En cas d'erreur, afficher un message d'erreur
+        const testimonialsContainer = document.getElementById('testimonial-container');
+        testimonialsContainer.innerHTML = `
+          <div class="col-12 text-center">
+            <p class="text-muted">Impossible de charger les témoignages pour le moment.</p>
+          </div>
+        `;
+      }
+    }
+
+    // Fonction pour gérer l'ajout d'un témoignage
+    function setupAddTestimonial() {
+      const addTestimonialBtn = document.getElementById('add-testimonial-btn');
+      if (addTestimonialBtn) {
+        addTestimonialBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          // Rediriger vers l'application Flutter pour ajouter un témoignage
+          redirectToApp('#add-testimonial');
+        });
+      }
+    }
+
+    // Charger les témoignages et configurer l'ajout de témoignages quand la page est chargée
+    document.addEventListener('DOMContentLoaded', function() {
+      loadTestimonials();
+      setupAddTestimonial();
     });
   </script>
 </body>
