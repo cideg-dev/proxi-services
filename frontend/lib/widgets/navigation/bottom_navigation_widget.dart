@@ -5,6 +5,7 @@ import 'package:frontend/screens/artisan_portfolio_screen.dart';
 import 'package:frontend/screens/professionals_list_screen.dart';
 import 'package:frontend/screens/settings_screen.dart';
 import 'package:frontend/screens/enhanced_dashboard_screen.dart';
+import 'package:frontend/screens/home_screen.dart';
 
 class BottomNavigationWidget extends StatefulWidget {
   final String userRole;
