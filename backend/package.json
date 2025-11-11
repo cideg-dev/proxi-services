@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "prestart": "node file_structure_check.js",
-    "start": "node server.js",
+    "start": "node scripts/migrate-and-start.js",
     "dev": "nodemon server.js",
     "test": "jest --runInBand --verbose",
     "test:watch": "jest --watch",
