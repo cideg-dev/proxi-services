@@ -24,7 +24,7 @@ class ReviewService {
 
   // Ajouter un avis pour un commerçant
   Future<Map<String, dynamic>> addMerchantReview(int merchantId, int rating, String comment) async {
-    final response = await _apiService.post('/api/merchants/$merchantId/reviews', 
+    final response = await _apiService.post('/api/artisans/$merchantId/reviews', 
       body: {
         'rating': rating,
         'comment': comment,
@@ -50,7 +50,7 @@ class ReviewService {
 
   // Récupérer les avis d'un commerçant
   Future<List<dynamic>> getMerchantReviews(int merchantId) async {
-    final response = await _apiService.getPublic('/api/merchants/$merchantId/reviews');
+    final response = await _apiService.getPublic('/api/artisans/$merchantId/reviews');
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {
@@ -71,7 +71,7 @@ class ReviewService {
 
   // Récupérer la moyenne des notes d'un commerçant
   Future<double> getMerchantAverageRating(int merchantId) async {
-    final response = await _apiService.getPublic('/api/merchants/$merchantId/rating');
+    final response = await _apiService.getPublic('/api/artisans/$merchantId/rating');
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       return (data['average_rating'] as num?)?.toDouble() ?? 0.0;
