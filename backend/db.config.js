@@ -58,8 +58,22 @@ const pool = new Pool(config);
 // Gestion des erreurs de connexion
 pool.on('error', (err) => {
   console.error('Erreur inattendue du pool PostgreSQL :', err);
-  // Redémarrer le pool en cas d'erreur critique
-  process.exit(-1);
+  // Ne pas quitter le processus en cas d'erreur de connexion
+  // Le pool va automatiquement réessayer de se connecter
 });
 
-module.exports = pool;
+// Fonction pour tester la connexion à la base de données
+const testConnection = async () => {
+  try {
+    const client = await pool.connect();
+    await client.query('SELECT NOW()');
+    client.release();
+    console.log('Connecté à la base de données PostgreSQL');
+    return true;
+  } catch (err) {
+    console.error('Erreur de connexion à la base de données PostgreSQL:', err.message);
+    return false;
+  }
+};
+
+module.exports = { pool, testConnection };

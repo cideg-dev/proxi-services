@@ -19,6 +19,9 @@ const {
 // Importation du service de cache
 const { connectRedis } = require('./src/services/cacheService');
 
+// Importation de la connexion à la base de données
+const { testConnection } = require('./db.config');
+
 // Importation de l'application principale
 const app = require('./src/app');
 
@@ -73,5 +76,12 @@ server.listen(PORT, async () => {
     }
   } catch (error) {
     console.error('Erreur lors de la vérification du service de chiffrement:', error);
+  }
+
+  // Vérification de la connexion à la base de données
+  try {
+    await testConnection();
+  } catch (error) {
+    console.error('Erreur lors de la vérification de la connexion à la base de données:', error);
   }
 });
