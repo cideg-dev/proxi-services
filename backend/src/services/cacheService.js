@@ -1,6 +1,10 @@
 const redis = require('redis');
 require('dotenv').config();
 
+// Variables pour le cache en mémoire
+const memoryCache = new Map();
+const cacheTimeouts = new Map();
+
 // Variable pour vérifier si Redis est disponible
 let isRedisAvailable = false;
 let usePostgresCache = false;
@@ -226,10 +230,6 @@ const _clearCacheRedis = async () => {
     console.error('Erreur de vidage du cache:', error.message);
   }
 };
-
-// Cache en mémoire sécurisé pour les environnements sans Redis
-const memoryCache = new Map();
-const cacheTimeouts = new Map();
 
 module.exports = {
   connectRedis,
