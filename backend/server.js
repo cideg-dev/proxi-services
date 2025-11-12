@@ -5,6 +5,7 @@ require('dotenv').config();
 const express = require('express');
 const compression = require('compression');
 const http = require('http');
+const path = require('path'); // Ajout pour la gestion des chemins
 
 // Importation des middlewares de sécurité
 const {
@@ -58,5 +59,19 @@ server.listen(PORT, async () => {
     }
   } catch (error) {
     console.error('Erreur lors de la vérification de Redis:', error);
+  }
+  
+  // Vérification de la configuration de chiffrement
+  try {
+    const EncryptionService = require('./src/services/encryptionService');
+    if (!EncryptionService.isConfigured()) {
+      console.warn('ATTENTION: Le service de chiffrement n\'est pas correctement configuré.');
+      console.warn('Générez une clé de chiffrement avec: node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'hex\'))"');
+      console.warn('Puis définissez la variable d\'environnement ENCRYPTION_KEY avec cette clé.');
+    } else {
+      console.log('Service de chiffrement configuré correctement');
+    }
+  } catch (error) {
+    console.error('Erreur lors de la vérification du service de chiffrement:', error);
   }
 });

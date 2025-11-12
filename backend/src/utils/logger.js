@@ -59,19 +59,35 @@ const logError = (error, req = null, context = {}) => {
     context,
     timestamp: new Date().toISOString()
   };
-  
+
   if (req) {
-    errorLog.request = {
+    // Créer un objet de requête sans les données sensibles
+    const safeRequest = {
       method: req.method,
       url: req.url,
       headers: req.headers,
-      body: req.body,
       params: req.params,
       query: req.query,
       ip: req.ip || req.connection.remoteAddress
     };
+    
+    // N'ajouter le body que s'il ne contient pas de données sensibles
+    if (req.body) {
+      const safeBody = {};
+      for (const [key, value] of Object.entries(req.body)) {
+        // Ne pas inclure les champs sensibles dans les logs
+        if (!['password', 'currentPassword', 'newPassword', 'token', 'refreshToken', 'authorization'].includes(key.toLowerCase())) {
+          safeBody[key] = value;
+        } else {
+          safeBody[key] = '[REDACTED]';
+        }
+      }
+      safeRequest.body = safeBody;
+    }
+    
+    errorLog.request = safeRequest;
   }
-  
+
   logger.error('APPLICATION_ERROR', errorLog);
 };
 

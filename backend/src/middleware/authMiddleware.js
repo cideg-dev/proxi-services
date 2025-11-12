@@ -1,11 +1,12 @@
 const { verifyToken, verifyRefreshToken } = require('../services/jwtService');
 const { logger, logError } = require('../utils/logger');
 const { pool } = require('../../db.config');
+const TokenBlacklistService = require('../services/tokenBlacklistService');
 
 // Middleware d'authentification
 const authenticateToken = async (req, res, next) => {
   const authHeader = req.headers['authorization'];
-  
+
   // Vérifier la présence de l'en-tête Authorization
   if (!authHeader) {
     return res.status(401).json({
@@ -33,6 +34,15 @@ const authenticateToken = async (req, res, next) => {
   }
 
   try {
+    // Vérifier d'abord si le token est dans la liste noire
+    const isBlacklisted = await TokenBlacklistService.isBlacklisted(token);
+    if (isBlacklisted) {
+      return res.status(401).json({
+        success: false,
+        message: 'Token révoqué. Veuillez vous reconnecter.'
+      });
+    }
+
     const decoded = verifyToken(token);
 
     // Vérifier si l'utilisateur existe encore dans la base
@@ -146,7 +156,7 @@ const checkResourceOwnership = (resourceOwnerIdField = 'user_id') => {
   return (req, res, next) => {
     // Vérifier plusieurs emplacements pour l'ID du propriétaire
     let resourceOwnerId = req.params.id || req.body[resourceOwnerIdField] || req.query[resourceOwnerIdField];
-    
+
     // Si l'ID est dans le corps, vérifier qu'il est une chaîne ou un nombre
     if (req.body[resourceOwnerIdField]) {
       if (typeof req.body[resourceOwnerIdField] === 'string' || typeof req.body[resourceOwnerIdField] === 'number') {
@@ -164,7 +174,7 @@ const checkResourceOwnership = (resourceOwnerIdField = 'user_id') => {
     // Conversion sécurisée pour comparaison
     const userId = parseInt(req.user.id);
     const ownerId = parseInt(resourceOwnerId);
-    
+
     if (isNaN(userId) || isNaN(ownerId)) {
       logger.warn('INVALID_ID_FOR_OWNERSHIP_CHECK', {
         userId: req.user.id,

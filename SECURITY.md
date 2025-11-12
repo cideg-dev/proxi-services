@@ -101,7 +101,64 @@ Pour une surveillance efficace, configurez un service d'analyse comme ELK Stack,
 - `NODE_ENV`: Environnement (development, production)
 - `PORT`: Port d'écoute du serveur (par défaut 3000)
 
-## 8. Tests de Sécurité
+## 8. Gestion des Sessions et des Tokens
+
+### Révocation des Tokens
+- **Système de liste noire** pour révoquer les tokens avant leur expiration
+- **Endpoint de déconnexion** qui ajoute le token à la liste noire
+- **Déconnexion de toutes les sessions** pour un utilisateur spécifique
+- **Déconnexion des autres sessions** (garde la session actuelle)
+
+### Sécurité des Sessions
+- **Vérification des tokens** contre la liste noire à chaque requête authentifiée
+- **Gestion des sessions multiples** avec identification unique
+- **Révocation centralisée** des tokens via Redis
+
+## 9. Chiffrement des Données Sensibles
+
+### Chiffrement au Repos
+- **AES-256-GCM** pour chiffrer les données sensibles dans la base de données
+- **Séparateur clé-IV** pour un chiffrement sécurisé
+- **Authentification des données** avec tag pour vérifier l'intégrité
+
+### Données Chiffrées
+- **Messages privés** entre utilisateurs
+- **Informations personnelles sensibles** dans les profils
+- **Données de paiement** et autres informations financières
+
+## 10. Surveillance et Détection des Anomalies
+
+### Surveillance Continue
+- **Tentatives d'authentification échouées répétées** 
+- **Accès non autorisés répétés** à des ressources
+- **Anomalies de trafic** 
+- **Accès suspects** aux routes sensibles
+- **Détection de comportements suspects** dans les messages et requêtes
+- **Journalisation des accès aux routes sensibles**
+
+### Configuration du Système
+Le système inclut un service de surveillance des événements de sécurité qui:
+- Détecte les tentatives d'authentification répétées depuis la même IP
+- Surveille les accès non autorisés répétés à des ressources
+- Détecte les comportements suspects dans les messages (XSS, injection SQL, etc.)
+- Journalise les accès aux routes sensibles
+- Vérifie la taille et le contenu des requêtes pour détecter les attaques potentielles
+
+## 11. Journalisation Sécurisée
+
+### Protection des Logs
+- **Masquage des données sensibles** dans les logs d'erreur (mots de passe, tokens, etc.)
+- **Nettoyage automatique** des champs sensibles avant enregistrement
+- **Format structuré** pour une analyse facilitée
+- **Rotation quotidienne** des fichiers de log
+
+### Types d'Événements Surveillés
+- **Authentifications réussies/échouées** avec IP et User-Agent
+- **Tentatives d'autorisation échouées** avec détails sur le rôle tenté
+- **Vérifications de propriété de ressources échouées**
+- **Accès aux routes sensibles** avec détails de l'utilisateur et de l'IP
+
+## 12. Tests de Sécurité
 
 ### Types de tests
 - **Tests d'injection** (SQL, NoSQL, XSS)
@@ -110,6 +167,8 @@ Pour une surveillance efficace, configurez un service d'analyse comme ELK Stack,
 - **Tests de sécurité des APIs**
 - **Tests de force brute**
 - **Tests de déni de service (DoS)**
+- **Tests de révocation des tokens**
+- **Tests de chiffrement/déchiffrement**
 
 ### Outils recommandés
 - OWASP ZAP pour les tests d'intrusion
@@ -117,7 +176,7 @@ Pour une surveillance efficace, configurez un service d'analyse comme ELK Stack,
 - Jest pour les tests unitaires et d'intégration
 - SonarQube pour l'analyse statique de code
 
-## 9. Procédures de réponse aux incidents
+## 13. Procédures de réponse aux incidents
 
 ### En cas de détection d'une vulnérabilité
 1. **Isoler immédiatement** l'élément compromis

@@ -4,6 +4,7 @@ const mongoSanitize = require('express-mongo-sanitize');
 const validator = require('validator');
 const hpp = require('hpp');
 const cors = require('cors');
+const SecurityMonitoringService = require('../services/securityMonitoringService');
 
 // Configuration avancée du rate limiting
 const limiter = rateLimit({
@@ -66,6 +67,14 @@ const sanitize = mongoSanitize({
 
 // Protection contre XSS avec middleware personnalisé (amélioré)
 const xssProtection = (req, res, next) => {
+  // Détecter les requêtes potentiellement suspectes
+  if (SecurityMonitoringService.detectSuspiciousRequest(req)) {
+    return res.status(413).json({ 
+      success: false, 
+      message: 'Requête trop volumineuse ou suspecte' 
+    });
+  }
+
   // Nettoyer les propriétés du body
   if (req.body && typeof req.body === 'object') {
     req.body = sanitizeObjectXSS(req.body);
