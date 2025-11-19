@@ -3,16 +3,13 @@ require('dotenv').config();
 
 let config;
 
-// Render and other platforms use a single DATABASE_URL.
-// This is the preferred way for production.
+// Utilisation de DATABASE_URL pour la connexion à Supabase
 if (process.env.DATABASE_URL) {
-  // Si DATABASE_URL est définie, l'utiliser directement
   config = {
     connectionString: process.env.DATABASE_URL,
     ssl: {
-      rejectUnauthorized: false, // Required for Render connections
-      // Désactiver SSL en développement si nécessaire
-      ...(process.env.NODE_ENV === 'production' && { 
+      rejectUnauthorized: false, // Requis pour les connexions Supabase
+      ...(process.env.NODE_ENV === 'production' && {
         require: true,
         rejectUnauthorized: false
       })
@@ -33,7 +30,7 @@ if (process.env.DATABASE_URL) {
     process.exit(1);
   }
 
-  // Fallback for local development using separate variables
+  // Fallback pour le développement local
   config = {
     user: process.env.DB_USER,
     host: process.env.DB_HOST,
@@ -68,10 +65,10 @@ const testConnection = async () => {
     const client = await pool.connect();
     await client.query('SELECT NOW()');
     client.release();
-    console.log('Connecté à la base de données PostgreSQL');
+    console.log('Connecté à la base de données Supabase');
     return true;
   } catch (err) {
-    console.error('Erreur de connexion à la base de données PostgreSQL:', err.message);
+    console.error('Erreur de connexion à la base de données Supabase:', err.message);
     return false;
   }
 };

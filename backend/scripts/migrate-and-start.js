@@ -3,23 +3,16 @@
 const { spawn } = require('child_process');
 const path = require('path');
 
-// Exécuter les migrations PostgreSQL avant de démarrer le serveur
-console.log('Exécution des migrations PostgreSQL...');
+// Exécuter les migrations PostgreSQL si la base de données est accessible
+console.log('Vérification de la disponibilité de la base de données...');
 
-// Chemin vers node-pg-migrate
-const migratePath = path.join(__dirname, '../node_modules/.bin/node-pg-migrate');
-
-// Déterminer le script correct selon le système d'exploitation
-const isWindows = process.platform === 'win32';
-const migrateCommand = isWindows ? `${migratePath}.cmd` : migratePath;
-
-const migrate = spawn(migrateCommand, ['up'], {
+// Lancer le script de migration conditionnelle
+const migrateIfDbAvailable = spawn('node', ['../migrate-if-db-available.js'], {
   stdio: 'inherit',
-  shell: isWindows, // Utiliser le shell sur Windows pour exécuter les fichiers .cmd
-  env: { ...process.env }
+  cwd: __dirname
 });
 
-migrate.on('close', (code) => {
+migrateIfDbAvailable.on('close', (code) => {
   if (code === 0) {
     console.log('Migrations terminées avec succès. Démarrage du serveur...');
     
@@ -50,7 +43,7 @@ migrate.on('close', (code) => {
   }
 });
 
-migrate.on('error', (err) => {
+migrateIfDbAvailable.on('error', (err) => {
   console.error('Erreur lors de l\'exécution des migrations:', err.message);
   process.exit(1);
 });

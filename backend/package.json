@@ -13,6 +13,7 @@
     "migrate": "npx node-pg-migrate",
     "migrate:up": "npx node-pg-migrate up",
     "migrate:down": "npx node-pg-migrate down",
+    "migrate-if-db-available": "node migrate-if-db-available.js",
     "lint": "eslint . --ext .js",
     "lint:fix": "eslint . --ext .js --fix",
     "security-check": "node scripts/security-test.js",
