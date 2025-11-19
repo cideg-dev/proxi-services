@@ -316,7 +316,7 @@ app.use('/api/profile', profileRoutes());
 const artisanController = require('./controllers/artisanController');
 
 // Routes Artisan
-app.get('/api/artisans', authenticateToken, (req, res) => artisanController.getArtisans(req, res, connectedUsers));
+app.get('/api/artisans', (req, res) => artisanController.getArtisans(req, res, connectedUsers));
 app.get('/api/artisans/:id', (req, res) => artisanController.getArtisan(req, res, connectedUsers));
 
 // Routes de messagerie
