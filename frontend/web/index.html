@@ -893,7 +893,7 @@
         
         // Simuler un appel API (dans une application réelle, vous feriez une requête vers votre API backend)
         // Ici, nous simulons la récupération des témoignages depuis le backend
-        const response = await fetch('/api/reviews/testimonials'); // URL factice pour l'instant
+        const response = await fetch('https://proxi-services.onrender.com/api/reviews/testimonials'); // URL complète du backend
         
         let testimonials = [];
         if (response.ok) {
