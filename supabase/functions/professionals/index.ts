@@ -21,25 +21,16 @@ serve(async (req) => {
 
   try {
     // Cette requête récupère les artisans et commercants avec leurs profils
-    const { data, error } = await supabase
+    // Utilisons d'abord une requête simple pour éviter les problèmes de jointure
+    const { data: usersData, error: usersError } = await supabase
       .from('users')
-      .select(`
-        id,
-        role,
-        COALESCE(artisan_profiles.nom_complet, commercant_profiles.nom_entreprise) AS nom,
-        COALESCE(artisan_profiles.specialite, commercant_profiles.type_commerce) AS specialite,
-        COALESCE(artisan_profiles.description, commercant_profiles.description) AS description,
-        COALESCE(artisan_profiles.photo_url, commercant_profiles.photo_url) AS photo_url,
-        COALESCE(artisan_profiles.location, commercant_profiles.location) AS location,
-        COALESCE(avg_reviews.avg_rating, 0) AS rating
-      `)
-      .eq('role', 'artisan')
-      .or('role.eq.commercant')
+      .select('id, role')
+      .in('role', ['artisan', 'commercant'])
       .limit(10)
       .returns<any[]>()
 
-    if (error) {
-      console.error('Erreur lors de la récupération des professionnels mis en avant:', error)
+    if (usersError) {
+      console.error('Erreur lors de la récupération des utilisateurs:', usersError)
       return new Response(JSON.stringify({ message: "Erreur serveur lors de la récupération des professionnels mis en avant" }), {
         status: 500,
         headers: {
@@ -51,24 +42,70 @@ serve(async (req) => {
       })
     }
 
-    // Ajouter une logique pour calculer les notes moyennes
-    const resultsWithRatings = await Promise.all(data.map(async (item) => {
-      if (item.id) {
+    // Récupérons les données détaillées pour chaque utilisateur
+    const resultsWithDetails = await Promise.all(usersData.map(async (user) => {
+      let profileData = {};
+
+      if (user.role === 'artisan') {
+        // Récupérer les détails du profil artisan
+        const { data: artisanProfile, error: profileError } = await supabase
+          .from('artisan_profiles')
+          .select('nom_complet, specialite, description, photo_url, location')
+          .eq('user_id', user.id)
+          .single()
+          .returns<any[]>()
+
+        if (!profileError && artisanProfile) {
+          profileData = {
+            nom: artisanProfile.nom_complet,
+            specialite: artisanProfile.specialite,
+            description: artisanProfile.description,
+            photo_url: artisanProfile.photo_url,
+            location: artisanProfile.location,
+          };
+        }
+      } else if (user.role === 'commercant') {
+        // Récupérer les détails du profil commerçant
+        const { data: commercantProfile, error: profileError } = await supabase
+          .from('commercant_profiles')
+          .select('nom_entreprise, type_commerce, description, photo_url, location')
+          .eq('user_id', user.id)
+          .single()
+          .returns<any[]>()
+
+        if (!profileError && commercantProfile) {
+          profileData = {
+            nom: commercantProfile.nom_entreprise,
+            specialite: commercantProfile.type_commerce,
+            description: commercantProfile.description,
+            photo_url: commercantProfile.photo_url,
+            location: commercantProfile.location,
+          };
+        }
+      }
+
+      // Récupérer la note moyenne - utiliser artisan_id pour les artisans, mais pour les commerçants il se peut qu'il n'y ait pas de reviews
+      let avgRating = 0;
+      if (user.role === 'artisan') {
         const { data: avgData, error: avgError } = await supabase
           .from('reviews')
           .select('avg(rating)')
-          .eq('artisan_id', item.id)
+          .eq('artisan_id', user.id)  // Supposons que reviews.artisan_id est lié à users.id dans ce contexte
+          .single();
 
-        if (!avgError && avgData && avgData[0]) {
-          item.rating = avgData[0].avg || 0
-        } else {
-          item.rating = 0
-        }
+        avgRating = (!avgError && avgData) ? avgData.avg : 0;
       }
-      return item
+      // Pour les commerçants, on suppose qu'il n'y a pas de système de notation basé sur les avis
+
+      return {
+        id: user.id,
+        role: user.role,
+        ...profileData,
+        rating: avgRating || 0
+      }
     }))
 
-    return new Response(JSON.stringify(resultsWithRatings), {
+    return new Response(JSON.stringify(resultsWithDetails), {
       status: 200,
       headers: {
         'Content-Type': 'application/json',
