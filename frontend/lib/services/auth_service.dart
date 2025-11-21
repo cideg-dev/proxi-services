@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:frontend/services/api_service.dart';
+import 'package:frontend/services/compatibility_api_service.dart';
 import 'package:frontend/services/token_manager.dart';
 
 class AuthService {
-  final ApiService _apiService = ApiService();
+  final CompatibilityApiService _apiService = CompatibilityApiService();
   final TokenManager _tokenManager = TokenManager();
 
   Future<Map<String, dynamic>> login(String email, String password) async {

@@ -1,10 +1,10 @@
 import 'dart:convert';
-import 'package:frontend/services/api_service.dart';
+import 'package:frontend/services/compatibility_api_service.dart';
 import 'package:frontend/services/token_manager.dart';
 import 'package:http/http.dart' as http;
 
 class ArtisanService {
-  final ApiService _apiService = ApiService();
+  final CompatibilityApiService _apiService = CompatibilityApiService();
   final TokenManager _tokenManager = TokenManager();
 
   Future<List<dynamic>> getArtisans() async {
