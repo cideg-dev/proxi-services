@@ -893,10 +893,8 @@
           </div>
         `;
         
-        // Simuler un appel API (dans une application réelle, vous feriez une requête vers votre API backend)
-        // Ici, nous simulons la récupération des témoignages depuis le backend
-        // Utilisation d'une route qui récupère des données existantes (les professionnels mis en avant)
-        const response = await fetch('https://proxi-services.onrender.com/api/professionals/featured'); // Utilisation d'une route existante pour les données
+        // Appel à la fonction Supabase artisans pour récupérer les professionnels mis en avant
+        const response = await fetch('https://ufeqnnbokyalwjfskhmw.supabase.co/functions/v1/professionals');
 
         let testimonials = [];
         if (response.ok) {
