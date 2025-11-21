@@ -1,4 +1,11 @@
+﻿// frontend/lib/services/api_constants.dart
+// URLs des fonctions Supabase
 class ApiConstants {
-  // Use environment variable or default to production URL for deployment
-  static const String baseUrl = String.fromEnvironment('API_BASE_URL', defaultValue: 'https://proxi-services.onrender.com');
+  static const String baseUrl = 'https://ufeqnnbokyalwjfskhmw.supabase.co/functions/v1';
+
+  // URLs spécifiques pour chaque fonction
+  static const String signupUrl = '$baseUrl/signup';
+  static const String signinUrl = '$baseUrl/signin';
+  static const String artisansUrl = '$baseUrl/artisans';
+  static const String reviewsUrl = '$baseUrl/reviews';
 }
