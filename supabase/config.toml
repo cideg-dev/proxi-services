@@ -1,0 +1,17 @@
+# Human-readable description for the project
+project_id = "ufeqnnbokyalwjfskhmw"
+
+# Specify how vercel builds and deploys your project
+[functions]
+  [functions.signup]
+    verify_jwt = false
+  [functions.signin]
+    verify_jwt = false
+  [functions.artisans]
+    verify_jwt = false
+  [functions.professionals]
+    verify_jwt = false
+  [functions.reviews]
+    verify_jwt = false
+  [functions.migrate-users]
+    verify_jwt = false
