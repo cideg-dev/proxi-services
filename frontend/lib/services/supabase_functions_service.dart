@@ -82,8 +82,7 @@ class SupabaseFunctionsService {
 
   // Méthode pour les professionnels mis en avant
   Future<http.Response> getFeaturedProfessionals() async {
-    // L'URL spécifique pour les professionnels mis en avant - utiliser la fonction Supabase appropriée
-    final url = Uri.parse('https://ufeqnnbokyalwjfskhmw.supabase.co/functions/v1/professionals');
+    final url = Uri.parse('${ApiConstants.baseUrl}/professionals');
 
     final response = await http.get(
       url,
