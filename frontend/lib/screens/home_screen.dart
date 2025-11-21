@@ -96,7 +96,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           ),
         ),
         child: _userRole == null
-            ? Center(child: Lottie.asset('lottie/loading.json', height: 100))
+            ? Center(child: Lottie.asset('assets/lottie/loading.json', height: 100))
             : FadeTransition(
                 opacity: _fadeAnimation,
                 child: DashboardScreen(userRole: _userRole!),

@@ -160,7 +160,7 @@ class _ArtisanDetailScreenState extends State<ArtisanDetailScreen> {
         future: _dataFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: Lottie.asset('lottie/loading.json', width: 150, height: 150));
+            return Center(child: Lottie.asset('assets/lottie/loading.json', width: 150, height: 150));
           }
           if (snapshot.hasError) {
             return EmptyState(message: 'Erreur de chargement: ${snapshot.error}');

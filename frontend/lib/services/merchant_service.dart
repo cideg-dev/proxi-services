@@ -1,9 +1,9 @@
 import 'dart:convert';
-import 'package:frontend/services/api_service.dart';
+import 'package:frontend/services/redirect_api_service.dart';
 import 'package:frontend/services/token_manager.dart';
 
 class MerchantService {
-  final ApiService _apiService = ApiService();
+  final RedirectApiService _apiService = RedirectApiService();
   final TokenManager _tokenManager = TokenManager();
 
   Future<List<dynamic>> getMerchants() async {

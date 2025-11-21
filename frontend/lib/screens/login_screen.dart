@@ -185,7 +185,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                 ),
                               ),
                             if (_isLoading)
-                              Center(child: Lottie.asset('lottie/loading.json', height: 100))
+                              Center(child: Lottie.asset('assets/lottie/loading.json', height: 100))
                             else
                               MouseRegion(
                                 onEnter: (_) => setState(() => _isHoveringLogin = true),

@@ -24,8 +24,12 @@ class RedirectApiService {
         return _functionsService.getArtisans();
       }
       // Autres méthodes pour artisans selon les besoins
+    } else if (endpoint.contains('/api/professionals/featured')) {
+      if (method == 'GET') {
+        return _functionsService.getFeaturedProfessionals();
+      }
     }
-    
+
     // Pour les autres endpoints, il faudra ajouter des redirections spécifiques
     throw Exception('Endpoint non pris en charge: $endpoint');
   }
@@ -54,6 +58,8 @@ class RedirectApiService {
         return _functionsService.getArtisans();
       }
       // Traitement pour les sous-endpoints artisans
+    } else if (endpoint.contains('/api/professionals/featured')) {
+      return _functionsService.getFeaturedProfessionals();
     } else if (endpoint.contains('/api/auth/login')) {
       // Cette requête ne devrait pas être public
       throw Exception('La connexion requiert une authentification');
@@ -61,7 +67,7 @@ class RedirectApiService {
       // Cette requête ne devrait pas non plus être publique
       throw Exception('L\'inscription requiert une authentification spécifique');
     }
-    
+
     throw Exception('Endpoint public non géré: $endpoint');
   }
 

@@ -32,7 +32,7 @@ class _ProfessionalsListScreenState extends State<ProfessionalsListScreen> {
         future: _professionalsFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: Lottie.asset('lottie/loading.json', width: 150, height: 150));
+            return Center(child: Lottie.asset('assets/lottie/loading.json', width: 150, height: 150));
           }
           if (snapshot.hasError) {
             return EmptyState(message: 'Une erreur est survenue lors du chargement des professionnels.\n${snapshot.error}');

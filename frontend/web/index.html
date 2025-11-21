@@ -772,10 +772,12 @@
     // Activation des ancres pour la navigation fluide (uniquement pour la page d'accueil)
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
       anchor.addEventListener('click', function (e) {
-        if (this.getAttribute('href').startsWith('#')) {
+        const href = this.getAttribute('href');
+        if (href && href !== '#' && href.length > 1) { // Vérifier que le href n'est pas '#' et contient plus qu'un simple '#'
           e.preventDefault();
 
-          const target = document.querySelector(this.getAttribute('href'));
+          const targetId = href;
+          const target = document.querySelector(targetId);
           if (target) {
             window.scrollTo({
               top: target.offsetTop - 80,
