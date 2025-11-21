@@ -1,4 +1,4 @@
-// frontend/lib/services/supabase_functions_service.dart
+// frontend/lib/services/supabase_functions_service.dart (mis à jour avec gestion CORS)
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:frontend/services/api_constants.dart';
@@ -23,9 +23,16 @@ class SupabaseFunctionsService {
       'profileData': profileData ?? {},
     });
 
+    // Pour les requêtes depuis GitHub Pages, nous devons gérer CORS différemment
+    // En attendant que les fonctions soient correctement configurées pour CORS
+    // Utilisons une requête avec tous les headers nécessaires
     final response = await http.post(
       url,
-      headers: {'Content-Type': 'application/json'},
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (compatible; FlutterApp)',
+      },
       body: body,
     );
 
@@ -46,7 +53,11 @@ class SupabaseFunctionsService {
 
     final response = await http.post(
       url,
-      headers: {'Content-Type': 'application/json'},
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (compatible; FlutterApp)',
+      },
       body: body,
     );
 
@@ -59,7 +70,28 @@ class SupabaseFunctionsService {
     
     final response = await http.get(
       url,
-      headers: {'Content-Type': 'application/json'},
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (compatible; FlutterApp)',
+      },
+    );
+
+    return response;
+  }
+
+  // Méthode pour les professionnels mis en avant
+  Future<http.Response> getFeaturedProfessionals() async {
+    // L'URL spécifique pour les professionnels mis en avant
+    final url = Uri.parse('${ApiConstants.baseUrl}/professionals');
+    
+    final response = await http.get(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (compatible; FlutterApp)',
+      },
     );
 
     return response;
@@ -85,7 +117,9 @@ class SupabaseFunctionsService {
       url,
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
         'Authorization': 'Bearer $token',
+        'User-Agent': 'Mozilla/5.0 (compatible; FlutterApp)',
       },
       body: body,
     );
@@ -99,7 +133,11 @@ class SupabaseFunctionsService {
     
     final response = await http.get(
       url,
-      headers: {'Content-Type': 'application/json'},
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (compatible; FlutterApp)',
+      },
     );
 
     return response;
