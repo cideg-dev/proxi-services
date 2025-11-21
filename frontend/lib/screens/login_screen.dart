@@ -174,7 +174,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                 padding: const EdgeInsets.only(bottom: 10),
                                 child: Column(
                                   children: [
-                                    Lottie.asset('lottie/error.json', height: 80, errorBuilder: (context, error, stackTrace) => Icon(Icons.error, color: theme.colorScheme.error, size: 60)),
+                                    Lottie.asset('assets/lottie/error.json', height: 80, errorBuilder: (context, error, stackTrace) => Icon(Icons.error, color: theme.colorScheme.error, size: 60)),
                                     const SizedBox(height: 8),
                                     Text(
                                       _errorMessage,
