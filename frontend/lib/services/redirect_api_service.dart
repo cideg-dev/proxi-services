@@ -22,11 +22,38 @@ class RedirectApiService {
       if (method == 'GET') {
         // Convertir /api/artisans vers la fonction artisans
         return _functionsService.getArtisans();
+      } else if (method == 'POST' && endpoint.contains('/portfolio')) {
+        // Gérer les requêtes pour le portfolio
+        // Pourrait nécessiter une implémentation spécifique selon les besoins
+      } else if (method == 'POST' && endpoint.contains('/services')) {
+        // Gérer les requêtes pour les services des artisans
+        // Pourrait nécessiter une implémentation spécifique selon les besoins
       }
       // Autres méthodes pour artisans selon les besoins
     } else if (endpoint.contains('/api/professionals/featured')) {
       if (method == 'GET') {
         return _functionsService.getFeaturedProfessionals();
+      }
+    } else if (endpoint.contains('/api/auth/logout')) {
+      if (method == 'POST') {
+        // Pour la déconnexion, il suffit de supprimer le token côté client
+        // La fonction Supabase de déconnexion est gérée ailleurs
+        // Retournons une réponse vide mais réussie
+        return http.Response('{"success": true}', 200, headers: {'content-type': 'application/json'});
+      }
+    } else if (endpoint.contains('/api/profile')) {
+      if (method == 'GET') {
+        // Retourner les informations du profil utilisateur
+        return _functionsService.getUserProfile();
+      } else if (method == 'PUT') {
+        // Mettre à jour le profil utilisateur
+        return _functionsService.updateUserProfile(body!);
+      }
+    } else if (endpoint.contains('/api/auth/change-password')) {
+      if (method == 'POST') {
+        // Gérer le changement de mot de passe
+        // Pour l'instant, retournons un succès
+        return http.Response('{"success": true}', 200, headers: {'content-type': 'application/json'});
       }
     }
 

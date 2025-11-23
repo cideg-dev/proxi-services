@@ -630,7 +630,8 @@ class _EnhancedDashboardScreenState extends State<EnhancedDashboardScreen> with 
             // Afficher le dashboard spécifique selon le rôle
             switch (widget.userRole) {
               'client' => _buildClientDashboard(),
-              'artisan' || 'commercant' => _buildArtisanDashboard(),
+              'artisan' => _buildArtisanDashboard(),
+              'commercant' => _buildArtisanDashboard(),
               'admin' => _buildAdminDashboard(),
               _ => const Center(child: Text('Rôle non reconnu')),
             },

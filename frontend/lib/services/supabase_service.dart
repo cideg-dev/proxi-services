@@ -2,9 +2,9 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SupabaseService {
-  static const String _url = '';
-  static const String _anonKey = '';
-  
+  static const String _url = 'https://ufeqnnbokyalwjfskhmw.supabase.co';
+  static const String _anonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmZXFubmJva3lhbHdqZnNraG13Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTg0NzAsImV4cCI6MjA3OTEzNDQ3MH0.R9hzOusA0ESMwCrZlmrNTFNgbj4c5YYpexPA4UksLcs';
+
   final SupabaseClient _client = SupabaseClient(_url, _anonKey);
 
   SupabaseClient get client => _client;

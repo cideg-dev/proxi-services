@@ -141,4 +141,41 @@ class SupabaseFunctionsService {
 
     return response;
   }
+
+  // Méthode pour récupérer le profil utilisateur
+  Future<http.Response> getUserProfile() async {
+    final token = await _tokenManager.getToken();
+    final url = Uri.parse('${ApiConstants.baseUrl}/profile'); // ou un endpoint spécifique
+
+    final response = await http.get(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': 'Bearer $token',
+        'User-Agent': 'Mozilla/5.0 (compatible; FlutterApp)',
+      },
+    );
+
+    return response;
+  }
+
+  // Méthode pour mettre à jour le profil utilisateur
+  Future<http.Response> updateUserProfile(Map<String, dynamic> profileData) async {
+    final token = await _tokenManager.getToken();
+    final url = Uri.parse('${ApiConstants.baseUrl}/profile'); // ou un endpoint spécifique
+
+    final response = await http.put(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': 'Bearer $token',
+        'User-Agent': 'Mozilla/5.0 (compatible; FlutterApp)',
+      },
+      body: jsonEncode(profileData),
+    );
+
+    return response;
+  }
 }
