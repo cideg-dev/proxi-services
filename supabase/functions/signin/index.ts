@@ -1,6 +1,6 @@
 import { serve } from 'https://deno.land/std@0.114.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { SignJWT } from 'https://deno.land/x/djwt@v3.0.1/mod.ts'
+import { SignJWT } from 'https://deno.land/x/djwt@v2.8/mod.ts'
 
 serve(async (req) => {
   // Gérer les requêtes OPTIONS pour CORS
@@ -124,7 +124,7 @@ serve(async (req) => {
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime(tokenPayload.exp * 1000)
-    .sign(new TextEncoder().encode(jwtSecret))
+    .sign(new TextEncoder().encode(jwtSecret));
 
   // Générer le refresh token
   const refreshTokenPayload = {
@@ -138,7 +138,7 @@ serve(async (req) => {
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime(refreshTokenPayload.exp * 1000)
-    .sign(new TextEncoder().encode(Deno.env.get('SUPABASE_JWT_SECRET') || Deno.env.get('JWT_REFRESH_SECRET') || 'fallback_refresh_secret'))
+    .sign(new TextEncoder().encode(Deno.env.get('SUPABASE_JWT_SECRET') || Deno.env.get('JWT_REFRESH_SECRET') || 'fallback_refresh_secret'));
 
   // Mettre à jour le last_seen
   await supabase
