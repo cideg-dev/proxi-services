@@ -8,9 +8,10 @@ serve(async (req) => {
     return new Response(null, {
       status: 204,
       headers: {
-        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Origin': 'https://cideg-dev.github.io',
         'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization, Accept, X-Requested-With, X-Client-Info',
+        'Access-Control-Allow-Credentials': 'true',
       }
     });
   }
@@ -20,9 +21,10 @@ serve(async (req) => {
       status: 405,
       headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Origin': 'https://cideg-dev.github.io',
         'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization, Accept, X-Requested-With, X-Client-Info',
+        'Access-Control-Allow-Credentials': 'true',
       }
     })
   }
@@ -40,9 +42,10 @@ serve(async (req) => {
       status: 400,
       headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Origin': 'https://cideg-dev.github.io',
         'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization, Accept, X-Requested-With, X-Client-Info',
+        'Access-Control-Allow-Credentials': 'true',
       }
     })
   }
@@ -58,9 +61,10 @@ serve(async (req) => {
       status: 400,
       headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Origin': 'https://cideg-dev.github.io',
         'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization, Accept, X-Requested-With, X-Client-Info',
+        'Access-Control-Allow-Credentials': 'true',
       }
     })
   }
@@ -77,9 +81,10 @@ serve(async (req) => {
       status: 404,
       headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Origin': 'https://cideg-dev.github.io',
         'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization, Accept, X-Requested-With, X-Client-Info',
+        'Access-Control-Allow-Credentials': 'true',
       }
     })
   }
@@ -90,9 +95,10 @@ serve(async (req) => {
       status: 401,
       headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Origin': 'https://cideg-dev.github.io',
         'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization, Accept, X-Requested-With, X-Client-Info',
+        'Access-Control-Allow-Credentials': 'true',
       }
     })
   }
@@ -105,9 +111,10 @@ serve(async (req) => {
       status: 500,
       headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Origin': 'https://cideg-dev.github.io',
         'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization, Accept, X-Requested-With, X-Client-Info',
+        'Access-Control-Allow-Credentials': 'true',
       }
     })
   }
@@ -158,9 +165,10 @@ serve(async (req) => {
     status: 200,
     headers: {
       'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Origin': 'https://cideg-dev.github.io',
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, Accept, X-Requested-With, X-Client-Info',
+      'Access-Control-Allow-Credentials': 'true',
     }
   })
 })
