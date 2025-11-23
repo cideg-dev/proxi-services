@@ -51,9 +51,9 @@ class TokenManager {
   Future<int?> getUserId() async {
     try {
       final decodedToken = await _getDecodedToken();
-      // The user ID is nested within a 'user' object in the payload
-      if (decodedToken.containsKey('user') && decodedToken['user'] is Map) {
-        return (decodedToken['user']['id'] as num?)?.toInt();
+      // The user ID is directly in the token payload as 'id'
+      if (decodedToken.containsKey('id')) {
+        return (decodedToken['id'] as num?)?.toInt();
       }
       return null;
     } catch (e) {
@@ -73,8 +73,8 @@ class TokenManager {
 
     try {
       final decodedToken = await _getDecodedToken();
-      if (decodedToken.containsKey('user') && decodedToken['user'] is Map) {
-        role = decodedToken['user']['role'] as String?;
+      if (decodedToken.containsKey('role')) {
+        role = decodedToken['role'] as String?;
         if (role != null) {
           _userRoleCache = role;
           await _storage.write(key: _roleKey, value: role);
@@ -100,8 +100,8 @@ class TokenManager {
 
     try {
       final decodedToken = await _getDecodedToken();
-      if (decodedToken.containsKey('user') && decodedToken['user'] is Map) {
-        email = decodedToken['user']['email'] as String?;
+      if (decodedToken.containsKey('email')) {
+        email = decodedToken['email'] as String?;
         if (email != null) {
           _userEmailCache = email;
           await _storage.write(key: _emailKey, value: email);
@@ -116,19 +116,30 @@ class TokenManager {
   }
   
   // This method is kept for compatibility in places where the whole user object might be needed
-  // but it should be used with caution as it reconstructs the user from the token. 
+  // but it should be used with caution as it reconstructs the user from the token.
   // It will now also try to get role/email from storage if not in token.
   Future<Map<String, dynamic>?> getUser() async {
     try {
       final decodedToken = await _getDecodedToken();
-      if (decodedToken.containsKey('user') && decodedToken['user'] is Map) {
-        final userMap = decodedToken['user'] as Map<String, dynamic>;
-        // Try to fill missing role/email from storage if not in token
-        userMap['role'] ??= await getUserRole();
-        userMap['email'] ??= await getUserEmail();
-        return userMap;
+      // Create a user object from the token payload
+      final userMap = <String, dynamic>{};
+
+      // Add properties from the token directly
+      if (decodedToken.containsKey('id')) {
+        userMap['id'] = decodedToken['id'];
       }
-      return null;
+      if (decodedToken.containsKey('email')) {
+        userMap['email'] = decodedToken['email'];
+      }
+      if (decodedToken.containsKey('role')) {
+        userMap['role'] = decodedToken['role'];
+      }
+
+      // Try to fill missing role/email from storage if not in token
+      userMap['role'] ??= await getUserRole();
+      userMap['email'] ??= await getUserEmail();
+
+      return userMap.isEmpty ? null : userMap;
     } catch (e) {
       print('Error decoding token or getting user object: $e');
       return null;

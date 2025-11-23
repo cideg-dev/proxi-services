@@ -1,17 +1,35 @@
 ﻿// frontend/lib/services/api_constants.dart
-// URLs des fonctions Supabase
+// URLs de configuration pour l'API
 class ApiConstants {
-  static const String baseUrl = 'https://ufeqnnbokyalwjfskhmw.supabase.co/functions/v1';
+  // Configuration pour basculer entre local et production
+  static const bool useLocalBackend = bool.fromEnvironment('USE_LOCAL_BACKEND', defaultValue: false);
+
+  // URLs de base
+  static const String localBaseUrl = 'http://localhost:3000'; // ou l'URL de votre backend local
+  static const String supabaseBaseUrl = 'https://ufeqnnbokyalwjfskhmw.supabase.co/functions/v1';
+
+  // Sélectionner l'URL de base en fonction de la configuration
+  static const String baseUrl = useLocalBackend ? localBaseUrl : supabaseBaseUrl;
 
   // URLs spécifiques pour chaque fonction
-  static const String signupUrl = '$baseUrl/signup';
-  static const String signinUrl = '$baseUrl/signin';
-  static const String artisansUrl = '$baseUrl/artisans';
-  static const String reviewsUrl = '$baseUrl/reviews';
+  static const String signupUrl = useLocalBackend
+      ? '$localBaseUrl/api/auth/register'
+      : '$supabaseBaseUrl/signup';
+  static const String signinUrl = useLocalBackend
+      ? '$localBaseUrl/api/auth/login'
+      : '$supabaseBaseUrl/signin';
+  static const String logoutUrl = useLocalBackend
+      ? '$localBaseUrl/api/auth/logout'
+      : '$supabaseBaseUrl/logout';
+  static const String artisansUrl = useLocalBackend
+      ? '$localBaseUrl/api/artisans'
+      : '$supabaseBaseUrl/artisans';
+  static const String reviewsUrl = useLocalBackend
+      ? '$localBaseUrl/api/reviews'
+      : '$supabaseBaseUrl/reviews';
 
   // Pour les services existants qui utilisent encore les anciens endpoints
-  // Ces chemins sont maintenant redirigés vers les fonctions Supabase
-  static const String authLoginEndpoint = '/auth/login';
-  static const String authRegisterEndpoint = '/auth/register';
-  static const String artisansEndpoint = '/artisans';
+  static const String authLoginEndpoint = '/api/auth/login';
+  static const String authRegisterEndpoint = '/api/auth/register';
+  static const String artisansEndpoint = '/api/artisans';
 }

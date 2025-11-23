@@ -21,12 +21,27 @@ class AuthService {
       final token = data['token'];
       if (token != null) {
         await _tokenManager.setToken(token);
+        // Récupérer les données utilisateur du token pour plus de cohérence
         final user = data['user'] as Map<String, dynamic>?;
         if (user != null) {
           await _tokenManager.persistUserIdentity(
             role: user['role'] as String?,
             email: user['email'] as String?,
           );
+        } else {
+          // Si les données utilisateur ne sont pas fournies dans la réponse,
+          // on peut essayer de les récupérer du token
+          try {
+            final decodedUser = await _tokenManager.getUser();
+            if (decodedUser != null) {
+              await _tokenManager.persistUserIdentity(
+                role: decodedUser['role'] as String?,
+                email: decodedUser['email'] as String?,
+              );
+            }
+          } catch (e) {
+            print('Erreur lors de la récupération des données utilisateur depuis le token: $e');
+          }
         }
       }
       return data;
@@ -62,12 +77,27 @@ class AuthService {
       final token = data['token'];
       if (token != null) {
         await _tokenManager.setToken(token);
+        // Récupérer les données utilisateur du token pour plus de cohérence
         final user = data['user'] as Map<String, dynamic>?;
         if (user != null) {
           await _tokenManager.persistUserIdentity(
             role: user['role'] as String?,
             email: user['email'] as String?,
           );
+        } else {
+          // Si les données utilisateur ne sont pas fournies dans la réponse,
+          // on peut essayer de les récupérer du token
+          try {
+            final decodedUser = await _tokenManager.getUser();
+            if (decodedUser != null) {
+              await _tokenManager.persistUserIdentity(
+                role: decodedUser['role'] as String?,
+                email: decodedUser['email'] as String?,
+              );
+            }
+          } catch (e) {
+            print('Erreur lors de la récupération des données utilisateur depuis le token: $e');
+          }
         }
       }
       return data;
@@ -88,6 +118,17 @@ class AuthService {
   }
 
   Future<void> logout() async {
+    // Appel API pour se déconnecter du backend
+    final token = await _tokenManager.getToken();
+    if (token != null) {
+      try {
+        await _apiService.postPublic('/api/auth/logout'); // Cela sera redirigé vers la fonction Supabase
+      } catch (e) {
+        // Même si l'appel API échoue, on continue de nettoyer le token côté client
+        print('Erreur lors de la déconnexion du backend: $e');
+      }
+    }
+    // Nettoyer le token côté client
     await _tokenManager.clearToken();
   }
 
