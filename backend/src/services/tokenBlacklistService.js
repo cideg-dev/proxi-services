@@ -22,7 +22,7 @@ class TokenBlacklistService {
 
       // Décoder l'en-tête et le payload (sans vérifier la signature)
       const payload = JSON.parse(atob(tokenParts[1]));
-      const userId = payload.userId;
+      const userId = payload.id;
       
       // Générer une clé unique pour ce token
       const tokenKey = `blacklisted_token:${token}`;
