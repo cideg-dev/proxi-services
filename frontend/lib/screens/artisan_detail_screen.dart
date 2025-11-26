@@ -31,6 +31,8 @@ class _ArtisanDetailScreenState extends State<ArtisanDetailScreen> {
   List<dynamic> _questions = [];
   bool _isFavorited = false; // New state variable for favorite status
   String? _userRole; // To check if the current user can favorite
+  int? _currentUserId; // To check if the current user is the owner
+  bool _isOwner = false; // To show owner-specific actions
 
   @override
   void initState() {
@@ -88,9 +90,14 @@ class _ArtisanDetailScreenState extends State<ArtisanDetailScreen> {
 
   void _loadUserData() async {
     final role = await _tokenManager.getUserRole();
-    setState(() {
-      _userRole = role;
-    });
+    final userId = await _tokenManager.getUserId();
+    if (mounted) {
+      setState(() {
+        _userRole = role;
+        _currentUserId = userId;
+        _isOwner = _currentUserId != null && _currentUserId == widget.artisanId;
+      });
+    }
   }
 
   void _checkFavoriteStatus(int professionalId) async {
@@ -188,6 +195,23 @@ class _ArtisanDetailScreenState extends State<ArtisanDetailScreen> {
           );
         },
       ),
+      floatingActionButton: _isOwner ? _buildGeneratePortfolioButton() : null,
+    );
+  }
+
+  Widget _buildGeneratePortfolioButton() {
+    return FloatingActionButton.extended(
+      onPressed: () {
+        // We need professional data to pre-fill the description
+        _dataFuture.then((professional) {
+          if (professional.isNotEmpty) {
+            _showGeneratePortfolioDialog(professional);
+          }
+        });
+      },
+      label: const Text('Générer Portfolio'),
+      icon: const Icon(Icons.auto_awesome),
+      backgroundColor: Theme.of(context).colorScheme.secondary,
     );
   }
 
@@ -472,6 +496,83 @@ class _ArtisanDetailScreenState extends State<ArtisanDetailScreen> {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Impossible d\'ouvrir le lien: $url')),
+      );
+    }
+  }
+
+  // --- AI Portfolio Generation Logic ---
+
+  void _showGeneratePortfolioDialog(Map<String, dynamic> professional) {
+    final descriptionController = TextEditingController(
+      text: professional['description'] ?? '',
+    );
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Générer le Portfolio par IA'),
+          content: TextField(
+            controller: descriptionController,
+            decoration: const InputDecoration(
+              labelText: 'Décrivez votre activité',
+              hintText: 'Ex: Je suis un boulanger passionné par le levain naturel...',
+            ),
+            maxLines: 5,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Annuler'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _triggerPortfolioGeneration(descriptionController.text);
+              },
+              child: const Text('Générer'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _triggerPortfolioGeneration(String description) async {
+    if (description.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('La description ne peut pas être vide.'), backgroundColor: Colors.red),
+      );
+      return;
+    }
+
+    // Show a loading indicator
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Center(child: Lottie.asset('assets/lottie/loading.json', width: 150, height: 150)),
+    );
+
+    try {
+      // This service method needs to be created
+      await _artisanService.generateAIPortfolio(description);
+
+      Navigator.of(context).pop(); // Dismiss loading indicator
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Portfolio généré avec succès ! Rechargement...'), backgroundColor: Colors.green),
+      );
+
+      // Reload all data to show the new portfolio
+      setState(() {
+        _dataFuture = _fetchProfessionalDetails();
+        _loadSecondaryData();
+      });
+
+    } catch (e) {
+      Navigator.of(context).pop(); // Dismiss loading indicator
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erreur: $e'), backgroundColor: Colors.red),
       );
     }
   }

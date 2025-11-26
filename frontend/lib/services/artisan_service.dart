@@ -279,4 +279,23 @@ class ArtisanService {
       throw Exception('Failed to delete service: ${response.body}');
     }
   }
+
+  // --- AI Features ---
+
+  Future<void> generateAIPortfolio(String description) async {
+    final response = await _apiService.post(
+      '/api/ai/generate-portfolio',
+      body: {'description': description},
+    );
+
+    if (response.statusCode != 200) {
+      try {
+        final errorBody = jsonDecode(response.body);
+        final errorMessage = errorBody['error'] ?? 'Failed to generate AI portfolio';
+        throw Exception(errorMessage);
+      } catch (e) {
+        throw Exception('Failed to generate AI portfolio: ${response.body}');
+      }
+    }
+  }
 }

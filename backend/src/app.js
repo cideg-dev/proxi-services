@@ -50,6 +50,7 @@ const reviewRoutes = require('./routes/reviewRoutes');
 const portfolioRoutes = require('./routes/portfolioRoutes');
 const demacheurRoutes = require('./routes/demacheurRoutes');
 const profileRoutes = require('./routes/profileRoutes');
+const aiRoutes = require('./routes/aiRoutes');
 
 // Vérification des variables d'environnement critiques
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -311,6 +312,7 @@ app.use('/api/reviews', reviewRoutes(io, connectedUsers));
 app.use('/api/artisans', portfolioRoutes);
 app.use('/api/demacheur', demacheurRoutes);
 app.use('/api/profile', profileRoutes());
+app.use('/api/ai', aiRoutes);
 
 // Importation du contrôleur artisan
 const artisanController = require('./controllers/artisanController');
