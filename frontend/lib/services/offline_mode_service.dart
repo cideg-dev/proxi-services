@@ -10,32 +10,46 @@ class OfflineModeService {
 
   static const String _offlineDataKey = 'offline_data';
   static const String _offlineModeKey = 'offline_mode';
-  
+
   late SharedPreferences _prefs;
   final ApiService _apiService = ApiService();
   final TokenManager _tokenManager = TokenManager();
 
+  bool _isInitialized = false;
+
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
+    _isInitialized = true;
+  }
+
+  // Méthode pour s'assurer que le service est initialisé avant utilisation
+  Future<void> _ensureInitialized() async {
+    if (!_isInitialized) {
+      await init();
+    }
   }
 
   // Activer/désactiver le mode hors-ligne
   Future<void> setOfflineMode(bool enabled) async {
+    await _ensureInitialized();
     await _prefs.setBool(_offlineModeKey, enabled);
   }
 
   // Vérifier si le mode hors-ligne est activé
   bool isOfflineMode() {
+    _ensureInitialized();
     return _prefs.getBool(_offlineModeKey) ?? false;
   }
 
   // Enregistrer des données pour le mode hors-ligne
   Future<void> cacheData(String key, dynamic data) async {
+    await _ensureInitialized();
     await _prefs.setString(key, jsonEncode(data));
   }
 
   // Récupérer des données du mode hors-ligne
   T? getCachedData<T>(String key, T Function(dynamic) parser) {
+    _ensureInitialized();
     final jsonString = _prefs.getString(key);
     if (jsonString != null) {
       final jsonData = jsonDecode(jsonString);
@@ -66,6 +80,7 @@ class OfflineModeService {
 
   // Mettre en file d'attente une action à effectuer en ligne
   Future<void> queueOfflineAction(String action, Map<String, dynamic> params) async {
+    await _ensureInitialized();
     final queue = _prefs.getStringList('offline_queue') ?? <String>[];
     final actionData = {
       'action': action,
@@ -78,6 +93,7 @@ class OfflineModeService {
 
   // Obtenir la file d'attente des actions hors-ligne
   List<Map<String, dynamic>> getOfflineQueue() {
+    _ensureInitialized();
     final queue = _prefs.getStringList('offline_queue') ?? <String>[];
     return queue.map((item) {
       final data = jsonDecode(item);
@@ -106,6 +122,7 @@ class OfflineModeService {
 
   // Retirer une action de la file
   Future<void> removeFromQueue(Map<String, dynamic> actionData) async {
+    await _ensureInitialized();
     final queue = _prefs.getStringList('offline_queue') ?? <String>[];
     final actionString = jsonEncode({
       'action': actionData['action'],
@@ -186,11 +203,13 @@ class OfflineModeService {
 
   // Nettoyer la file d'attente
   Future<void> clearOfflineQueue() async {
+    await _ensureInitialized();
     await _prefs.setStringList('offline_queue', <String>[]);
   }
 
   // Obtenir le nombre d'actions en attente
   int getOfflineQueueCount() {
+    _ensureInitialized();
     final queue = _prefs.getStringList('offline_queue') ?? <String>[];
     return queue.length;
   }
