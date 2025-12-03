@@ -12,6 +12,9 @@ Ce fichier suit les tâches de développement basées sur le cahier des charges.
     - [x] Frontend : Remplacer les URLs codées en dur (ancien port 5000).
     - [x] Backend : Configurer le serveur pour qu'il serve l'application frontend compilée.
     - [x] Backend : Mettre en place un fichier `.env.example` pour la configuration.
+    - [x] **Déploiement :**
+        - [x] Frontend : Configurer le workflow GitHub Actions pour GitHub Pages.
+        - [ ] Frontend : Vérifier le déploiement en ligne (équipe de test).
 - [x] **Affichage des Professionnels :**
     - [x] Backend : Modifier l'API pour que la liste des professionnels inclue les artisans ET les commerçants.
     - [x] Frontend : Mettre à jour l'écran d'accueil pour afficher la liste mixte des professionnels.
