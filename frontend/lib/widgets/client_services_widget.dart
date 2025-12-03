@@ -90,7 +90,7 @@ class ClientServicesWidget extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: (MediaQuery.of(context).size.width - 52) / 2, // Pour 2 colonnes avec espacement
+        width: _calculateWidth(context), // Pour 2 colonnes avec espacement
         decoration: BoxDecoration(
           color: theme.cardColor,
           borderRadius: BorderRadius.circular(12),
@@ -123,5 +123,25 @@ class ClientServicesWidget extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  double _calculateWidth(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+
+    // Vérifier que la largeur de l'écran est valide
+    if (screenWidth.isNaN || screenWidth.isInfinite || screenWidth <= 0) {
+      // Valeur par défaut si la largeur de l'écran est invalide
+      return 100.0;
+    }
+
+    double calculatedWidth = (screenWidth - 52) / 2;
+
+    // Vérifier que le calcul est valide
+    if (calculatedWidth.isNaN || calculatedWidth.isInfinite || calculatedWidth <= 0) {
+      // Valeur par défaut si le calcul est invalide
+      return 100.0;
+    }
+
+    return calculatedWidth;
   }
 }

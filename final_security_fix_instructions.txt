@@ -1,0 +1,38 @@
+Instructions pour la correction finale de sécurité :
+
+1. Ouvrez votre dashboard Supabase : https://supabase.com/dashboard/project/ufeqnnbokyalwjfskhmw/sql
+
+2. Copiez-collez le contenu suivant dans l'éditeur SQL :
+
+-- Check if function exists and get its details
+SELECT proname, probin, prokind, provolatile, prosecdef, proargtypes
+FROM pg_proc 
+WHERE proname = 'get_app_user_id';
+
+-- Drop existing function to resolve ambiguity
+DROP FUNCTION IF EXISTS public.get_app_user_id();
+
+-- Create the function with secure search_path
+CREATE OR REPLACE FUNCTION public.get_app_user_id()
+RETURNS UUID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public -- Fixed search_path for security
+AS $$
+BEGIN
+  RETURN auth.uid();
+END;
+$$;
+
+-- Grant necessary permissions
+GRANT EXECUTE ON FUNCTION public.get_app_user_id TO authenticated;
+GRANT EXECUTE ON FUNCTION public.get_app_user_id TO anon;
+
+-- Add security comment
+COMMENT ON FUNCTION public.get_app_user_id IS 'Secure function to get the current application user ID with fixed search_path';
+
+3. Exécutez la requête
+
+Cela résoudra la vulnérabilité de search_path pour la fonction get_app_user_id.
+
+Remarque : Nous avons ajouté un DROP FUNCTION IF EXISTS avant la création pour résoudre le problème d'ambiguïté signalé par Supabase.

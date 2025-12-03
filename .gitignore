@@ -50,3 +50,5 @@ android/app/src/main/assets/flutter_assets/
 .gemini/
 gha-creds-*.json
 .aider*
+github_pages_deploy/
+dist/

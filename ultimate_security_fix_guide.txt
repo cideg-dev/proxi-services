@@ -1,0 +1,58 @@
+Guide ultime pour la correction de sécurité de la fonction get_app_user_id
+
+Étape 1: Analyse des fonctions existantes
+-----------------------------------------
+1. Allez dans votre dashboard Supabase : https://supabase.com/dashboard/project/ufeqnnbokyalwjfskhmw/sql
+2. Exécutez cette requête pour identifier les signatures exactes :
+   ```sql
+   SELECT 
+       proname,
+       oidvectortypes(proargtypes) AS argument_types,
+       proargnames AS argument_names,
+       probin AS source_binary,
+       prosecdef AS is_security_definer,
+       prokind AS function_type
+   FROM pg_proc 
+   JOIN pg_namespace n ON pg_proc.pronamespace = n.oid
+   WHERE proname = 'get_app_user_id' AND n.nspname = 'public';
+   ```
+
+Étape 2: Suppression des fonctions ambigues
+--------------------------------------------
+3. Pour chaque signature trouvée dans le résultat, exécutez une commande DROP spécifique
+   Exemple : Si vous trouvez une fonction avec signature `get_app_user_id(integer, text)`
+   Alors exécutez : `DROP FUNCTION IF EXISTS public.get_app_user_id(integer, text);`
+   
+   Exemple : Si vous trouvez une fonction avec signature `get_app_user_id()` (sans arguments)
+   Alors exécutez : `DROP FUNCTION IF EXISTS public.get_app_user_id();`
+
+Étape 3: Création de la fonction sécurisée
+------------------------------------------
+4. Une fois toutes les versions supprimées, créez la version sécurisée :
+   ```sql
+   CREATE OR REPLACE FUNCTION public.get_app_user_id()
+   RETURNS UUID
+   LANGUAGE plpgsql
+   SECURITY DEFINER
+   SET search_path = public -- Fixed search_path for security
+   AS $$
+   BEGIN
+     RETURN auth.uid();
+   END;
+   $$;
+   ```
+
+Étape 4: Configuration finale
+-----------------------------
+5. Accordez les permissions nécessaires :
+   ```sql
+   GRANT EXECUTE ON FUNCTION public.get_app_user_id TO authenticated;
+   GRANT EXECUTE ON FUNCTION public.get_app_user_id TO anon;
+   ```
+
+6. Ajoutez la documentation de sécurité :
+   ```sql
+   COMMENT ON FUNCTION public.get_app_user_id IS 'Secure function to get the current application user ID with fixed search_path';
+   ```
+
+Note : Le fichier find_function_signatures.sql contient la requête d'analyse initiale.

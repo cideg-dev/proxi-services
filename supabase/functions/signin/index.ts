@@ -1,6 +1,5 @@
 import { serve } from 'https://deno.land/std@0.114.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { SignJWT } from 'https://deno.land/x/djwt@v2.8/mod.ts'
 
 serve(async (req) => {
   // Gérer les requêtes OPTIONS pour CORS
@@ -104,10 +103,14 @@ serve(async (req) => {
   }
 
   // Générer des tokens personnalisés comme dans le backend local
-  // Utiliser le secret JWT de Supabase ou un secret personnalisé
-  const jwtSecret = Deno.env.get('SUPABASE_JWT_SECRET') || Deno.env.get('JWT_SECRET')
-  if (!jwtSecret) {
-    return new Response(JSON.stringify({ error: 'Clé JWT manquante' }), {
+  // Pour cette version, utilisons les tokens fournis par Supabase
+  // Plutôt que de générer nos propres tokens JWT personnalisés
+  const token = authData.session?.access_token;
+  const refreshToken = authData.session?.refresh_token;
+
+  // Si les tokens n'existent pas, c'est une erreur
+  if (!token) {
+    return new Response(JSON.stringify({ error: 'Impossible de générer le token d\'accès' }), {
       status: 500,
       headers: {
         'Content-Type': 'application/json',
@@ -118,34 +121,6 @@ serve(async (req) => {
       }
     })
   }
-
-  // Générer le token d'accès
-  const tokenPayload = {
-    id: userData.id,
-    email: userData.email,
-    role: userData.role,
-    exp: Math.floor(Date.now() / 1000) + (15 * 60), // 15 minutes
-  }
-
-  const token = await new SignJWT(tokenPayload)
-    .setProtectedHeader({ alg: 'HS256' })
-    .setIssuedAt()
-    .setExpirationTime(tokenPayload.exp * 1000)
-    .sign(new TextEncoder().encode(jwtSecret));
-
-  // Générer le refresh token
-  const refreshTokenPayload = {
-    id: userData.id,
-    email: userData.email,
-    role: userData.role,
-    exp: Math.floor(Date.now() / 1000) + (7 * 24 * 60 * 60), // 7 jours
-  }
-
-  const refreshToken = await new SignJWT(refreshTokenPayload)
-    .setProtectedHeader({ alg: 'HS256' })
-    .setIssuedAt()
-    .setExpirationTime(refreshTokenPayload.exp * 1000)
-    .sign(new TextEncoder().encode(Deno.env.get('SUPABASE_JWT_SECRET') || Deno.env.get('JWT_REFRESH_SECRET') || 'fallback_refresh_secret'));
 
   // Mettre à jour le last_seen
   await supabase

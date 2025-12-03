@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:frontend/services/api_service.dart';
+import 'package:frontend/services/enhanced_auth_service.dart';
 import 'package:frontend/services/socket_service.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
@@ -8,7 +8,7 @@ import 'package:frontend/services/token_manager.dart';
 class ChatService {
   SocketService? _socketService;
   final TokenManager _tokenManager = TokenManager();
-  final ApiService _apiService = ApiService();
+  final EnhancedApiService _apiService = EnhancedApiService();
 
   // Singleton pattern
   static final ChatService _instance = ChatService._internal();
@@ -87,44 +87,59 @@ class ChatService {
 
   // NEW: Fetch all conversations for the logged-in user
   Future<List<dynamic>> getConversations() async {
-    final response = await _apiService.get('/api/conversations');
+    try {
+      final response = await _apiService.get('/api/conversations');
 
-    if (response.statusCode == 200) {
-      return jsonDecode(response.body) as List<dynamic>;
-    } else {
-      final errorBody = jsonDecode(response.body);
-      final errorMessage = errorBody['message'] ?? 'Failed to load conversations';
-      throw Exception(errorMessage);
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body) as List<dynamic>;
+      } else {
+        final errorBody = jsonDecode(response.body);
+        final errorMessage = errorBody['message'] ?? 'Failed to load conversations';
+        throw Exception(errorMessage);
+      }
+    } catch (e) {
+      print('Error getting conversations: $e');
+      rethrow;
     }
   }
 
   // NEW: Start a new conversation
   Future<Map<String, dynamic>> startConversation(int receiverId) async {
-    final response = await _apiService.post('/api/conversations', 
-      body: {'receiverId': receiverId}
-    );
+    try {
+      final response = await _apiService.post('/api/conversations',
+        body: {'receiverId': receiverId}
+      );
 
-    if (response.statusCode == 201) {
-      return jsonDecode(response.body);
-    } else {
-      final errorBody = jsonDecode(response.body);
-      final errorMessage = errorBody['message'] ?? 'Failed to start conversation';
-      throw Exception(errorMessage);
+      if (response.statusCode == 201) {
+        return jsonDecode(response.body);
+      } else {
+        final errorBody = jsonDecode(response.body);
+        final errorMessage = errorBody['message'] ?? 'Failed to start conversation';
+        throw Exception(errorMessage);
+      }
+    } catch (e) {
+      print('Error starting conversation: $e');
+      rethrow;
     }
   }
 
   // NEW: Send a message to a specific conversation
   Future<Map<String, dynamic>> sendMessageToConversation(int conversationId, String message) async {
-    final response = await _apiService.post('/api/conversations/$conversationId/messages',
-      body: {'content': message}
-    );
+    try {
+      final response = await _apiService.post('/api/conversations/$conversationId/messages',
+        body: {'content': message}
+      );
 
-    if (response.statusCode == 201) {
-      return jsonDecode(response.body);
-    } else {
-      final errorBody = jsonDecode(response.body);
-      final errorMessage = errorBody['message'] ?? 'Failed to send message';
-      throw Exception(errorMessage);
+      if (response.statusCode == 201) {
+        return jsonDecode(response.body);
+      } else {
+        final errorBody = jsonDecode(response.body);
+        final errorMessage = errorBody['message'] ?? 'Failed to send message';
+        throw Exception(errorMessage);
+      }
+    } catch (e) {
+      print('Error sending message to conversation: $e');
+      rethrow;
     }
   }
 
