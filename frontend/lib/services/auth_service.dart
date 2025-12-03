@@ -133,7 +133,7 @@ class AuthService {
   }
 
   Future<Map<String, dynamic>> getProfile() async {
-    final response = await _apiService.get('/api/profile');
+    final response = await _apiService.get('/profile');
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       if (!data.containsKey('user') || data['user'] == null) {
@@ -160,7 +160,7 @@ class AuthService {
 
   Future<Map<String, dynamic>> updateProfile(Map<String, dynamic> profileData) async {
     final response = await _apiService.put(
-      '/api/profile',
+      '/profile',
       body: profileData,
     );
     if (response.statusCode == 200) {
@@ -195,7 +195,7 @@ class AuthService {
   }
 
   Future<Map<String, dynamic>> getProfileById(int userId) async {
-    final response = await _apiService.get('/api/profile/$userId');
+    final response = await _apiService.get('/profile/$userId');
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {

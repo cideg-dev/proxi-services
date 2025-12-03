@@ -88,7 +88,7 @@ class ChatService {
   // NEW: Fetch all conversations for the logged-in user
   Future<List<dynamic>> getConversations() async {
     try {
-      final response = await _apiService.get('/api/conversations');
+      final response = await _apiService.get('/conversations');
 
       if (response.statusCode == 200) {
         return jsonDecode(response.body) as List<dynamic>;
@@ -106,7 +106,7 @@ class ChatService {
   // NEW: Start a new conversation
   Future<Map<String, dynamic>> startConversation(int receiverId) async {
     try {
-      final response = await _apiService.post('/api/conversations',
+      final response = await _apiService.post('/conversations',
         body: {'receiverId': receiverId}
       );
 
@@ -126,7 +126,7 @@ class ChatService {
   // NEW: Send a message to a specific conversation
   Future<Map<String, dynamic>> sendMessageToConversation(int conversationId, String message) async {
     try {
-      final response = await _apiService.post('/api/conversations/$conversationId/messages',
+      final response = await _apiService.post('/conversations/$conversationId/messages',
         body: {'content': message}
       );
 
@@ -152,7 +152,7 @@ class ChatService {
       queryParams['beforeId'] = beforeId.toString();
     }
 
-    final uri = Uri.parse('/api/conversations/$conversationId/messages').replace(queryParameters: queryParams);
+    final uri = Uri.parse('/conversations/$conversationId/messages').replace(queryParameters: queryParams);
     final response = await _apiService.get(uri.toString());
 
     if (response.statusCode == 200) {
@@ -165,7 +165,7 @@ class ChatService {
 
   // NEW: Mark all messages in a conversation as read
   Future<void> markConversationAsRead(int conversationId) async {
-    final response = await _apiService.put('/api/conversations/$conversationId/mark-as-read');
+    final response = await _apiService.put('/conversations/$conversationId/mark-as-read');
 
     if (response.statusCode != 200) {
       final errorBody = jsonDecode(response.body);
