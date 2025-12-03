@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/services/chat_service.dart';
+import 'package:frontend/services/token_manager.dart';
 import 'package:frontend/widgets/conversation_item.dart';
 import 'package:frontend/screens/chat_screen.dart';
 
@@ -15,10 +16,29 @@ class _ConversationsListScreenState extends State<ConversationsListScreen> {
   List<dynamic> _conversations = [];
   bool _isLoading = true;
   String _errorMessage = '';
+  bool _isAuthenticated = false;
 
   @override
   void initState() {
     super.initState();
+    _checkAuthAndLoadConversations();
+  }
+
+  Future<void> _checkAuthAndLoadConversations() async {
+    final tokenManager = TokenManager();
+    final token = await tokenManager.getToken();
+    
+    if (token == null || token.isEmpty) {
+      setState(() {
+        _isAuthenticated = false;
+        _isLoading = false;
+      });
+      return;
+    }
+    
+    setState(() {
+      _isAuthenticated = true;
+    });
     _loadConversations();
   }
 
@@ -50,7 +70,29 @@ class _ConversationsListScreenState extends State<ConversationsListScreen> {
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : _errorMessage.isNotEmpty
+          : !_isAuthenticated
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.lock_outline, size: 60, color: Colors.grey),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Vous devez être connecté pour voir vos conversations',
+                        style: TextStyle(fontSize: 16),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).pushReplacementNamed('/login');
+                        },
+                        child: const Text('Se connecter'),
+                      ),
+                    ],
+                  ),
+                )
+              : _errorMessage.isNotEmpty
               ? Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,

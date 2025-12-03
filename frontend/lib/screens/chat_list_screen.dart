@@ -14,12 +14,28 @@ class ChatListScreen extends StatefulWidget {
 class _ChatListScreenState extends State<ChatListScreen> {
   final ChatService _chatService = ChatService();
   final TokenManager _tokenManager = TokenManager();
-  late Future<List<dynamic>> _conversationsFuture;
+  Future<List<dynamic>>? _conversationsFuture;
   int? _currentUserId;
+  bool _isAuthenticated = false;
 
   @override
   void initState() {
     super.initState();
+    _checkAuthAndLoadConversations();
+  }
+
+  Future<void> _checkAuthAndLoadConversations() async {
+    final token = await _tokenManager.getToken();
+    if (token == null || token.isEmpty) {
+      setState(() {
+        _isAuthenticated = false;
+      });
+      return;
+    }
+    
+    setState(() {
+      _isAuthenticated = true;
+    });
     _loadConversations();
   }
 
@@ -36,65 +52,107 @@ class _ChatListScreenState extends State<ChatListScreen> {
       appBar: AppBar(
         title: const Text('Mes Conversations'),
       ),
-      body: FutureBuilder<List<dynamic>>(
-        future: _conversationsFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            return Center(child: Text('Erreur de chargement des conversations: ${snapshot.error}'));
-          }
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('Aucune conversation pour le moment.'));
-          }
-
-          final conversations = snapshot.data!;
-
-          return ListView.builder(
-            itemCount: conversations.length,
-            itemBuilder: (context, index) {
-              final conversation = conversations[index];
-              final partner = conversation['partner'];
-              final lastMessage = conversation['lastMessage'];
-
-              return Card(
-                margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-                child: ListTile(
-                  leading: CircleAvatar(
-                    backgroundImage: partner['imageUrl'] != null
-                        ? NetworkImage(partner['imageUrl'])
-                        : null,
-                    child: partner['imageUrl'] == null
-                        ? const Icon(Icons.person)
-                        : null,
+      body: !_isAuthenticated
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.lock_outline, size: 60, color: Colors.grey),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Vous devez être connecté pour voir vos conversations',
+                    style: TextStyle(fontSize: 16),
+                    textAlign: TextAlign.center,
                   ),
-                  title: Text(partner['nom'] ?? 'Utilisateur inconnu'),
-                  subtitle: Text(lastMessage['content'] ?? 'Pas de message'),
-                  trailing: Text(
-                    lastMessage != null
-                        ? DateTime.parse(lastMessage['timestamp']).toLocal().toString().substring(11, 16)
-                        : '',
-                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pushReplacementNamed('/login');
+                    },
+                    child: const Text('Se connecter'),
                   ),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ChatScreen(
-                          conversationId: conversation['id'],
-                          partnerId: partner['id'],
-                          partnerName: partner['nom'] ?? 'Utilisateur inconnu',
+                ],
+              ),
+            )
+          : _conversationsFuture == null
+              ? const Center(child: CircularProgressIndicator())
+              : FutureBuilder<List<dynamic>>(
+                  future: _conversationsFuture,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    if (snapshot.hasError) {
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.error_outline, size: 60, color: Colors.grey),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Erreur de chargement: ${snapshot.error}',
+                              style: const TextStyle(fontSize: 16),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 16),
+                            ElevatedButton(
+                              onPressed: _loadConversations,
+                              child: const Text('Réessayer'),
+                            ),
+                          ],
                         ),
-                      ),
+                      );
+                    }
+                    if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                      return const Center(child: Text('Aucune conversation pour le moment.'));
+                    }
+
+                    final conversations = snapshot.data!;
+
+                    return ListView.builder(
+                      itemCount: conversations.length,
+                      itemBuilder: (context, index) {
+                        final conversation = conversations[index];
+                        final partner = conversation['partner'];
+                        final lastMessage = conversation['lastMessage'];
+
+                        return Card(
+                          margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                          child: ListTile(
+                            leading: CircleAvatar(
+                              backgroundImage: partner['imageUrl'] != null
+                                  ? NetworkImage(partner['imageUrl'])
+                                  : null,
+                              child: partner['imageUrl'] == null
+                                  ? const Icon(Icons.person)
+                                  : null,
+                            ),
+                            title: Text(partner['nom'] ?? 'Utilisateur inconnu'),
+                            subtitle: Text(lastMessage['content'] ?? 'Pas de message'),
+                            trailing: Text(
+                              lastMessage != null
+                                  ? DateTime.parse(lastMessage['timestamp']).toLocal().toString().substring(11, 16)
+                                  : '',
+                              style: const TextStyle(fontSize: 12, color: Colors.grey),
+                            ),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ChatScreen(
+                                    conversationId: conversation['id'],
+                                    partnerId: partner['id'],
+                                    partnerName: partner['nom'] ?? 'Utilisateur inconnu',
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        );
+                      },
                     );
                   },
                 ),
-              );
-            },
-          );
-        },
-      ),
     );
   }
 }
