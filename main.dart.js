@@ -111814,7 +111814,7 @@ return A.t($async$vR,r)},
 q6(){var s=0,r=A.u(t.P),q,p=this,o,n,m,l,k,j,i,h,g,f
 var $async$q6=A.p(function(a,b){if(a===1)return A.q(b,r)
 for(;;)switch(s){case 0:s=3
-return A.n(p.a.jx("/api/profile",null,"GET"),$async$q6)
+return A.n(p.a.jx("/profile",null,"GET"),$async$q6)
 case 3:h=b
 s=h.b===200?4:6
 break
@@ -111855,7 +111855,7 @@ IY(a){return this.aO2(a)},
 aO2(a){var s=0,r=A.u(t.P),q,p=this,o,n,m,l,k,j
 var $async$IY=A.p(function(b,c){if(b===1)return A.q(c,r)
 for(;;)switch(s){case 0:s=3
-return A.n(p.a.jx("/api/profile",t.nA.a(a),"PUT"),$async$IY)
+return A.n(p.a.jx("/profile",t.nA.a(a),"PUT"),$async$IY)
 case 3:j=c
 if(j.b===200){m=j
 q=B.A.bS(0,A.c1(A.c0(m.e)).b8(0,m.w),null)
@@ -111892,7 +111892,7 @@ BK(){var s=0,r=A.u(t.j),q,p=2,o=[],n=this,m,l,k,j,i,h,g,f
 var $async$BK=A.p(function(a,b){if(a===1){o.push(b)
 s=p}for(;;)switch(s){case 0:p=4
 s=7
-return A.n(n.c.ef(0,"/api/conversations"),$async$BK)
+return A.n(n.c.ef(0,"/conversations"),$async$BK)
 case 7:m=b
 if(m.b===200){i=m
 i=t.j.a(B.A.bS(0,A.c1(A.c0(i.e)).b8(0,i.w),null))
@@ -111924,7 +111924,7 @@ var $async$Ce=A.p(function(c,d){if(c===1){o.push(d)
 s=p}for(;;)switch(s){case 0:p=4
 i=t.N
 s=7
-return A.n(n.c.vZ("/api/conversations/"+a+"/messages",A.ac(["content",b],i,i)),$async$Ce)
+return A.n(n.c.vZ("/conversations/"+a+"/messages",A.ac(["content",b],i,i)),$async$Ce)
 case 7:m=d
 if(m.b===201){i=m
 i=B.A.bS(0,A.c1(A.c0(i.e)).b8(0,i.w),null)
@@ -111956,7 +111956,7 @@ var $async$BQ=A.p(function(b,c){if(b===1)return A.q(c,r)
 for(;;)switch(s){case 0:o=t.N
 n=A.ac(["limit",B.f.k(20)],o,o)
 s=3
-return A.n(p.c.ef(0,A.cr("/api/conversations/"+a+"/messages",0,null).pM(0,n).gjB()),$async$BQ)
+return A.n(p.c.ef(0,A.cr("/conversations/"+a+"/messages",0,null).pM(0,n).gjB()),$async$BQ)
 case 3:m=c
 if(m.b===200){o=J.i1(t.j.a(B.A.bS(0,A.c1(A.c0(m.e)).b8(0,m.w),null)),new A.afo(),t.P)
 o=A.a4(o,o.$ti.i("az.E"))
@@ -111969,7 +111969,7 @@ Hu(a){return this.aKd(a)},
 aKd(a){var s=0,r=A.u(t.H),q=this,p,o
 var $async$Hu=A.p(function(b,c){if(b===1)return A.q(c,r)
 for(;;)switch(s){case 0:s=2
-return A.n(q.c.Ig(0,"/api/conversations/"+a+"/mark-as-read"),$async$Hu)
+return A.n(q.c.Ig(0,"/conversations/"+a+"/mark-as-read"),$async$Hu)
 case 2:o=c
 if(o.b!==200){p=J.a0(B.A.bS(0,A.c1(A.c0(o.e)).b8(0,o.w),null),"message")
 throw A.c(A.al(p==null?"Failed to mark conversation as read":p))}return A.r(null,r)}})
