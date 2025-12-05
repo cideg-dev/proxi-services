@@ -56,9 +56,9 @@ serve(async (req) => {
       if (error) throw error;
 
       // Filter conversations where current user is a participant
-      const userConversations = data.filter((c: any) =>
-        c.participants.some((p: any) => p.user_id === user.id)
-      );
+      const userConversations = data ? data.filter((c: any) =>
+        c.participants && c.participants.some((p: any) => p.user_id === user.id)
+      ) : [];
 
       // Transform data for frontend
       const formattedConversations = userConversations.map((c: any) => {

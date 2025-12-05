@@ -49,6 +49,10 @@ class RedirectApiService {
         // Mettre à jour le profil utilisateur
         return _functionsService.updateUserProfile(body!);
       }
+    } else if (endpoint.startsWith('/conversations')) {
+       // Rediriger vers la fonction conversations
+       // On passe l'endpoint complet car il peut contenir des ID ou des sous-chemins
+       return _functionsService.proxyToFunction('conversations', endpoint, method, body: body);
     } else if (endpoint.contains('/api/auth/change-password')) {
       if (method == 'POST') {
         // Gérer le changement de mot de passe

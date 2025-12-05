@@ -178,4 +178,46 @@ class SupabaseFunctionsService {
 
     return response;
   }
+
+  // Méthode générique pour proxy vers une fonction Supabase
+  Future<http.Response> proxyToFunction(String functionName, String path, String method, {Map<String, dynamic>? body}) async {
+    final token = await _tokenManager.getToken();
+    // Construit l'URL de la fonction. 
+    // Si path est "/conversations/123", et functionName est "conversations",
+    // on veut probablement appeler ".../functions/v1/conversations/123"
+    // Mais attention, si path est "/conversations", on veut ".../functions/v1/conversations"
+    
+    // Nettoyer le path pour qu'il soit relatif à la fonction si besoin, 
+    // ou simplement utiliser le nom de la fonction comme base.
+    // Supposons que ApiConstants.baseUrl pointe vers ".../functions/v1"
+    
+    // Si le path commence par le nom de la fonction, on l'utilise tel quel après le baseUrl
+    // Sinon on l'ajoute.
+    
+    String relativePath = path;
+    if (relativePath.startsWith('/')) {
+      relativePath = relativePath.substring(1);
+    }
+    
+    final url = Uri.parse('${ApiConstants.baseUrl}/$relativePath');
+
+    final headers = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': 'Bearer $token',
+      'User-Agent': 'Mozilla/5.0 (compatible; FlutterApp)',
+    };
+
+    if (method == 'GET') {
+      return http.get(url, headers: headers);
+    } else if (method == 'POST') {
+      return http.post(url, headers: headers, body: body != null ? jsonEncode(body) : null);
+    } else if (method == 'PUT') {
+      return http.put(url, headers: headers, body: body != null ? jsonEncode(body) : null);
+    } else if (method == 'DELETE') {
+      return http.delete(url, headers: headers);
+    } else {
+      throw Exception('Method not supported: $method');
+    }
+  }
 }

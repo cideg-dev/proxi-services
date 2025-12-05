@@ -58,7 +58,11 @@ serve(async (req) => {
                 .eq("user_id", user.id)
                 .single();
 
-            if (artisanError && artisanError.code !== 'PGRST116') throw artisanError;
+            if (artisanError) {
+                if (artisanError.code !== 'PGRST116') throw artisanError;
+                // If no artisan profile found, return empty list instead of crashing
+                return new Response(JSON.stringify([]), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+            }
 
             if (artisan) {
                 const { data, error } = await supabase
