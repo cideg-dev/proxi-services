@@ -6,7 +6,7 @@ class DemandService {
 
   // Fetch all demands for the currently logged-in client
   Future<List<dynamic>> getClientDemands() async {
-    final response = await _apiService.get('/api/client/demandes');
+    final response = await _apiService.get('/demands/client');
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {
@@ -16,7 +16,7 @@ class DemandService {
 
   // Cancel a specific demand
   Future<void> cancelDemand(int demandId) async {
-    final response = await _apiService.delete('/api/demandes/$demandId');
+    final response = await _apiService.delete('/demands/$demandId');
     if (response.statusCode != 200) {
       final errorBody = jsonDecode(response.body);
       final errorMessage = errorBody['message'] ?? 'Failed to cancel demand';
@@ -26,7 +26,7 @@ class DemandService {
 
   // Get details for a specific demand
   Future<Map<String, dynamic>> getDemandById(int demandId) async {
-    final response = await _apiService.get('/api/demandes/$demandId');
+    final response = await _apiService.get('/demands/$demandId');
     if (response.statusCode != 200) {
       throw Exception('Failed to load demand details');
     }
@@ -35,7 +35,7 @@ class DemandService {
 
   // Fetch all demands for the currently logged-in professional (artisan or commercant)
   Future<List<dynamic>> getProfessionalDemands() async {
-    final response = await _apiService.get('/api/professional/demandes');
+    final response = await _apiService.get('/demands/professional');
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {
@@ -46,7 +46,7 @@ class DemandService {
   // Update the status of a demand
   Future<void> updateDemandStatus(int demandId, String status) async {
     final response = await _apiService.put(
-      '/api/demandes/$demandId/status',
+      '/demands/$demandId/status',
       body: {'status': status},
     );
     if (response.statusCode != 200) {
