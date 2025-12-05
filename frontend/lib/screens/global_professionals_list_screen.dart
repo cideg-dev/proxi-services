@@ -113,23 +113,6 @@ class _GlobalProfessionalsListScreenState extends State<GlobalProfessionalsListS
                       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                       child: ListTile(
                         leading: CircleAvatar(
-                          child: Text(user['email'] != null ? user['email'][0].toUpperCase() : '?'),
-                        ),
-                        title: Text(user['email'] ?? 'Utilisateur inconnu'),
-                        subtitle: Text(user['role'] ?? 'Rôle non défini'),
-                        onTap: () {
-                          // Navigate to user profile screen
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ProfileScreen(userId: user['id']), // Assuming ProfileScreen can take a userId
-                            ),
-                          );
-                        },
-                      ),
-                    );
-                  },
-                );
               },
             ),
           ),

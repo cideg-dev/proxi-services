@@ -35,14 +35,14 @@ class _ProfileBoostScreenState extends State<ProfileBoostScreen> {
       final String ourTransactionId = response['ourTransactionId'];
 
       // Navigate to WebView for Kkiapay payment
-      final result = await Navigator.push(
+      // Navigate to WebView for Kkiapay payment
+      final result = await Navigator.pushNamed(
         context,
-        MaterialPageRoute(
-          builder: (context) => KkiapayWebviewScreen(
-            paymentUrl: paymentUrl,
-            ourTransactionId: ourTransactionId,
-          ),
-        ),
+        '/kkiapay_webview',
+        arguments: {
+          'paymentUrl': paymentUrl,
+          'ourTransactionId': ourTransactionId,
+        },
       );
 
       if (!mounted) return;

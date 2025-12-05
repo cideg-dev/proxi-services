@@ -136,15 +136,14 @@ class _ChatListScreenState extends State<ChatListScreen> {
                               style: const TextStyle(fontSize: 12, color: Colors.grey),
                             ),
                             onTap: () {
-                              Navigator.push(
+                              Navigator.pushNamed(
                                 context,
-                                MaterialPageRoute(
-                                  builder: (context) => ChatScreen(
-                                    conversationId: conversation['id'],
-                                    partnerId: partner['id'],
-                                    partnerName: partner['nom'] ?? 'Utilisateur inconnu',
-                                  ),
-                                ),
+                                '/chat',
+                                arguments: {
+                                  'conversationId': conversation['id'],
+                                  'partnerId': partner['id'],
+                                  'partnerName': partner['nom'] ?? 'Utilisateur inconnu',
+                                },
                               );
                             },
                           ),

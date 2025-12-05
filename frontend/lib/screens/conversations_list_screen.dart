@@ -152,15 +152,14 @@ class _ConversationsListScreenState extends State<ConversationsListScreen> {
                           return ConversationItem(
                             conversation: conversation,
                             onTap: () {
-                              Navigator.push(
+                              Navigator.pushNamed(
                                 context,
-                                MaterialPageRoute(
-                                  builder: (context) => ChatScreen(
-                                    conversationId: conversation['id'],
-                                    partnerId: conversation['partner']['id'],
-                                    partnerName: conversation['partner']['name'] ?? conversation['partner']['email'],
-                                  ),
-                                ),
+                                '/chat',
+                                arguments: {
+                                  'conversationId': conversation['id'],
+                                  'partnerId': conversation['partner']['id'],
+                                  'partnerName': conversation['partner']['name'] ?? conversation['partner']['email'],
+                                },
                               );
                             },
                             onLongPress: () {

@@ -75,11 +75,10 @@ class _ProfessionalsListScreenState extends State<ProfessionalsListScreen> {
                         title: Text(professional['name'] ?? 'Nom non disponible'),
                         subtitle: Text(professional['specialty'] ?? 'Information non disponible'),
                         onTap: () {
-                          Navigator.push(
+                          Navigator.pushNamed(
                             context,
-                            MaterialPageRoute(
-                              builder: (context) => ArtisanDetailScreen(artisanId: professional['id']),
-                            ),
+                            '/artisan_detail',
+                            arguments: professional['id'],
                           );
                         },
                       ),

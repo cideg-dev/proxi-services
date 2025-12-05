@@ -42,6 +42,23 @@ import 'package:frontend/widgets/in_app_notification.dart';
 import 'package:frontend/widgets/navigation/bottom_navigation_widget.dart';
 import 'dart:async';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:frontend/screens/artisan_demands_screen.dart';
+import 'package:frontend/screens/artisan_portfolio_screen.dart';
+import 'package:frontend/screens/artisan_services_screen.dart';
+import 'package:frontend/screens/client_demands_screen.dart';
+import 'package:frontend/screens/professionals_list_screen.dart';
+import 'package:frontend/screens/profile_boost_screen.dart';
+import 'package:frontend/screens/register_choice_screen.dart';
+import 'package:frontend/screens/register_screen.dart';
+import 'package:frontend/screens/admin_panel_screen.dart';
+import 'package:frontend/screens/artisan_detail_screen.dart';
+import 'package:frontend/screens/chat_list_screen.dart';
+import 'package:frontend/screens/chat_screen.dart';
+import 'package:frontend/screens/demand_detail_screen.dart';
+import 'package:frontend/screens/create_demand_screen.dart';
+import 'package:frontend/screens/kkiapay_webview_screen.dart';
+import 'package:frontend/screens/my_profile_screen.dart';
+import 'package:frontend/screens/settings_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -216,15 +233,63 @@ class _MyAppState extends State<MyApp> {
             '/login': (context) => const LoginScreen(),
             '/my_groups': (context) => const MyGroupsScreen(),
             '/create_group': (context) => const CreateGroupScreen(),
+            '/advanced_search': (context) => const AdvancedSearchScreen(),
+            '/chat_list': (context) => const ChatListScreen(),
+            '/client_demands': (context) => const ClientDemandsScreen(),
+            '/conversations': (context) => const ConversationsListScreen(),
+            '/professionals_list': (context) => const ProfessionalsListScreen(),
+            '/nearby_artisans': (context) => const NearbyArtisansScreen(),
+            '/profile_boost': (context) => const ProfileBoostScreen(),
+            '/register': (context) => const RegisterChoiceScreen(),
+            '/register/client': (context) => const RegisterScreen(role: 'client'),
+            '/register/artisan': (context) => const RegisterScreen(role: 'artisan'),
+            '/register/commercant': (context) => const RegisterScreen(role: 'commercant'),
+            '/artisan_portfolio': (context) => const ArtisanPortfolioScreen(),
+            '/artisan_services': (context) => const ArtisanServicesScreen(),
+            '/artisan_demands': (context) => const ArtisanDemandsScreen(),
+            '/admin_panel': (context) => const AdminPanelScreen(),
+            '/create_demand': (context) => const CreateDemandScreen(),
+            '/my_profile': (context) => const MyProfileScreen(),
+            '/settings': (context) => const SettingsScreen(),
           },
           onGenerateRoute: (settings) {
-            if (settings.name != null && settings.name!.startsWith('/reset-password')) {
+            if (settings.name != null) {
               final uri = Uri.parse(settings.name!);
-              final token = uri.queryParameters['token'];
-              if (token != null) {
+              if (settings.name!.startsWith('/reset-password')) {
+                final token = uri.queryParameters['token'];
+                if (token != null) {
+                  return MaterialPageRoute(
+                    builder: (context) => ResetPasswordScreen(token: token),
+                  );
+                }
+              }
+              if (settings.name!.startsWith('/artisan_detail')) {
+                 // Extract arguments if passed via arguments object or query params
+                 // Assuming arguments are passed via settings.arguments for internal navigation
+                 final args = settings.arguments;
+                 if (args is int) {
+                   return MaterialPageRoute(
+                     builder: (context) => ArtisanDetailScreen(artisanId: args),
+                   );
+                 }
+              }
+              if (settings.name!.startsWith('/chat')) {
+                final args = settings.arguments as Map<String, dynamic>;
                 return MaterialPageRoute(
-                  builder: (context) => ResetPasswordScreen(token: token),
+                  builder: (context) => ChatScreen(
+                    conversationId: args['conversationId'],
+                    partnerId: args['partnerId'],
+                    partnerName: args['partnerName'],
+                  ),
                 );
+              }
+              if (settings.name!.startsWith('/demand_detail')) {
+                 final args = settings.arguments;
+                 if (args is int) {
+                   return MaterialPageRoute(
+                     builder: (context) => DemandDetailScreen(demandId: args),
+                   );
+                 }
               }
             }
             return null;

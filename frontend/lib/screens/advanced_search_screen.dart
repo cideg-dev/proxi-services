@@ -160,11 +160,10 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
         onTap: () {
           // Naviguer vers le détail selon le type
           if (isArtisan) {
-            Navigator.push(
+            Navigator.pushNamed(
               context,
-              MaterialPageRoute(
-                builder: (context) => ArtisanDetailScreen(artisanId: item['id']),
-              ),
+              '/artisan_detail',
+              arguments: item['id'],
             );
           } else {
             // Pour les commerçants, vous pouvez créer un écran similaire

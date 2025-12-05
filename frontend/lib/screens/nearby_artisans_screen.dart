@@ -220,11 +220,10 @@ class _NearbyArtisansScreenState extends State<NearbyArtisansScreen> {
         ),
         onTap: () {
           // Naviguer vers le détail de l'artisan
-          Navigator.push(
+          Navigator.pushNamed(
             context,
-            MaterialPageRoute(
-              builder: (context) => ArtisanDetailScreen(artisanId: artisan['id']),
-            ),
+            '/artisan_detail',
+            arguments: artisan['id'],
           );
         },
       ),

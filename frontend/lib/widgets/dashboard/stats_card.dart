@@ -21,15 +21,18 @@ class StatsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final color = iconColor ?? theme.colorScheme.primary;
+    final colorScheme = theme.colorScheme;
+    final color = iconColor ?? colorScheme.primary;
 
     return Card(
-      elevation: 4,
+      elevation: 0,
+      color: colorScheme.surface,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: colorScheme.outline.withOpacity(0.1)),
       ),
       child: InkWell(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -47,11 +50,12 @@ class StatsCard extends StatelessWidget {
                     child: Icon(icon, color: color),
                   ),
                   const Spacer(),
-                  Icon(
-                    Icons.trending_up,
-                    color: Colors.green,
-                    size: 20,
-                  ),
+                  if (onTap != null)
+                    Icon(
+                      Icons.arrow_forward,
+                      color: colorScheme.onSurfaceVariant,
+                      size: 20,
+                    ),
                 ],
               ),
               const SizedBox(height: 12),
@@ -59,21 +63,21 @@ class StatsCard extends StatelessWidget {
                 value,
                 style: theme.textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.onSurface,
+                  color: colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: 4),
               Text(
                 title,
                 style: theme.textTheme.titleSmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
+                  color: colorScheme.onSurfaceVariant,
                 ),
               ),
               const SizedBox(height: 8),
               Text(
                 subtitle,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: Colors.grey[600],
+                  color: colorScheme.onSurfaceVariant.withOpacity(0.7),
                 ),
               ),
             ],

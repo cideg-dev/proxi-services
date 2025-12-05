@@ -35,10 +35,7 @@ class ClientServicesWidget extends StatelessWidget {
                 Icons.build,
                 theme.colorScheme.primary,
                 () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const NearbyArtisansScreen()),
-                  );
+                  Navigator.pushNamed(context, '/nearby_artisans');
                 },
               ),
               _buildServiceCard(
@@ -47,10 +44,7 @@ class ClientServicesWidget extends StatelessWidget {
                 Icons.store,
                 theme.colorScheme.secondary,
                 () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const MerchantsScreen()),
-                  );
+                  Navigator.pushNamed(context, '/professionals_list');
                 },
               ),
               _buildServiceCard(

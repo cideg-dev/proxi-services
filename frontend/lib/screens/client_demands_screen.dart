@@ -182,11 +182,10 @@ class _ClientDemandsScreenState extends State<ClientDemandsScreen> {
             child: GlassCard(
               child: ListTile(
                 onTap: () {
-                  Navigator.push(
+                  Navigator.pushNamed(
                     context,
-                    MaterialPageRoute(
-                      builder: (context) => DemandDetailScreen(demandId: demand['id']),
-                    ),
+                    '/demand_detail',
+                    arguments: demand['id'],
                   ).then((_) => _loadDemands()); // Refresh when coming back
                 },
                 title: Text(demand['professional_name'] ?? 'Professionnel inconnu'),

@@ -204,11 +204,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                               onExit: (_) => setState(() => _isHoveringRegister = false),
                               child: TextButton(
                                 onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(builder: (context) => const RegisterChoiceScreen()),
-                                  );
-                                },
+                                  Navigator.pushNamed(context, '/register');},
                                 style: TextButton.styleFrom(
                                   foregroundColor: _isHoveringRegister ? theme.colorScheme.primary : theme.colorScheme.secondary,
                                 ),

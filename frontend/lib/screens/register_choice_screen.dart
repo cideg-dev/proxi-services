@@ -16,36 +16,21 @@ class RegisterChoiceScreen extends StatelessWidget {
           children: <Widget>[
             ElevatedButton(
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const RegisterScreen(role: 'client'),
-                  ),
-                );
+                Navigator.pushNamed(context, '/register/client');
               },
               child: const Text('Client'),
             ),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const RegisterScreen(role: 'artisan'),
-                  ),
-                );
+                Navigator.pushNamed(context, '/register/artisan');
               },
               child: const Text('Artisan'),
             ),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const RegisterScreen(role: 'commercant'),
-                  ),
-                );
+                Navigator.pushNamed(context, '/register/commercant');
               },
               child: const Text('Commerçant'),
             ),
