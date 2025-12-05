@@ -27,6 +27,15 @@ class CommercantDashboard extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         const QuickActionCard(
+          title: 'Messages',
+          subtitle: 'Discutez avec vos clients',
+          icon: Icons.message,
+          iconColor: Colors.green,
+          route: '/chat_list',
+          onTap: () => Navigator.pushNamed(context, '/chat_list'), // Assuming chat_list handles role
+        ),
+        const SizedBox(height: 16),
+        const QuickActionCard(
           title: 'Booster ma Boutique',
           subtitle: 'Attirez plus de clients',
           icon: Icons.rocket_launch,

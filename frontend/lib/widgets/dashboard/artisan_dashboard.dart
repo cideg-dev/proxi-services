@@ -47,6 +47,15 @@ class _ArtisanDashboardState extends State<ArtisanDashboard> {
             ),
             const SizedBox(height: 16),
             QuickActionCard(
+              title: 'Messages',
+              subtitle: 'Discutez avec vos clients',
+              icon: Icons.message,
+              iconColor: Colors.green,
+              route: '/chat_list',
+              onTap: () => Navigator.pushNamed(context, '/chat_list'),
+            ),
+            const SizedBox(height: 16),
+            QuickActionCard(
               title: 'Mon Portfolio',
               subtitle: 'Gérez vos réalisations',
               icon: Icons.photo_library,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/services/artisan_service.dart';
+import 'package:frontend/services/token_manager.dart';
 
 class ArtisanServicesScreen extends StatefulWidget {
   const ArtisanServicesScreen({super.key});
