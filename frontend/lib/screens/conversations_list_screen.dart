@@ -46,15 +46,24 @@ class _ConversationsListScreenState extends State<ConversationsListScreen> {
     try {
       final conversations = await _chatService.getConversations();
       
-      setState(() {
-        _conversations = conversations;
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _conversations = conversations;
+          _isLoading = false;
+        });
+      }
     } catch (e) {
-      setState(() {
-        _errorMessage = 'Erreur lors du chargement des conversations: $e';
-        _isLoading = false;
-      });
+      if (mounted) {
+        if (e.toString().contains('Unauthorized')) {
+           // Token invalide ou expiré, redirection vers la connexion
+           Navigator.of(context).pushReplacementNamed('/login');
+           return;
+        }
+        setState(() {
+          _errorMessage = 'Erreur lors du chargement des conversations: $e';
+          _isLoading = false;
+        });
+      }
     }
   }
 

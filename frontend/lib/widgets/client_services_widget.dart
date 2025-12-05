@@ -131,7 +131,7 @@ class ClientServicesWidget extends StatelessWidget {
     // Vérifier que la largeur de l'écran est valide
     if (screenWidth.isNaN || screenWidth.isInfinite || screenWidth <= 0) {
       // Valeur par défaut si la largeur de l'écran est invalide
-      return 100.0;
+      return 150.0;
     }
 
     double calculatedWidth = (screenWidth - 52) / 2;
@@ -139,7 +139,12 @@ class ClientServicesWidget extends StatelessWidget {
     // Vérifier que le calcul est valide
     if (calculatedWidth.isNaN || calculatedWidth.isInfinite || calculatedWidth <= 0) {
       // Valeur par défaut si le calcul est invalide
-      return 100.0;
+      return 150.0;
+    }
+
+    // Protection supplémentaire contre les valeurs trop grandes qui pourraient causer des erreurs de layout
+    if (calculatedWidth > 1000) {
+      return 400.0; // Largeur max raisonnable pour une carte
     }
 
     return calculatedWidth;

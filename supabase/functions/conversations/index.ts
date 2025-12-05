@@ -131,22 +131,14 @@ serve(async (req) => {
 
 async function getConversations(userId: string) {
   try {
-    // In a real application, you would query your database to get conversations
-    // This is a simplified version assuming you have a conversations table
-    // and a participants table to track who belongs to which conversation
-    
-    const { data, error } = await supabase
-      .from('conversations')
-      .select(`
-        id, 
-        created_at,
-        updated_at,
-        participants(user_id, profile:profiles(name, avatar_url, email))
-      `)
-      .contains('participants', { user_id: userId });
+    // Get all conversation IDs where the user is a participant
+    const { data: userConversations, error: convError } = await supabase
+      .from('conversation_participants')
+      .select('conversation_id')
+      .eq('user_id', userId);
 
-    if (error) {
-      console.error("Error getting conversations:", error);
+    if (convError) {
+      console.error("Error getting user conversations:", convError);
       return new Response(JSON.stringify({ error: "Failed to get conversations" }), {
         status: 500,
         headers: {
@@ -158,27 +150,92 @@ async function getConversations(userId: string) {
       });
     }
 
-    // Transform the data to match the expected format in the app
-    const transformedConversations = data.map(conv => {
-      // Find the other participant (not the current user)
-      const otherParticipant = conv.participants.find(
-        (p: any) => p.user_id !== userId
-      );
-      
-      return {
-        id: conv.id,
-        updated_at: conv.updated_at,
-        created_at: conv.created_at,
-        partner: otherParticipant ? {
-          id: otherParticipant.user_id,
-          name: otherParticipant.profile?.name,
-          email: otherParticipant.profile?.email,
-          avatar_url: otherParticipant.profile?.avatar_url
-        } : null
-      };
-    });
+    if (!userConversations || userConversations.length === 0) {
+      // User has no conversations
+      return new Response(JSON.stringify([]), {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "https://cideg-dev.github.io",
+          "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+          "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+        },
+      });
+    }
 
-    return new Response(JSON.stringify(transformedConversations), {
+    const conversationIds = userConversations.map(c => c.conversation_id);
+
+    // Get conversation details
+    const { data: conversations, error: detailsError } = await supabase
+      .from('conversations')
+      .select('id, created_at, updated_at')
+      .in('id', conversationIds);
+
+    if (detailsError) {
+      console.error("Error getting conversation details:", detailsError);
+      return new Response(JSON.stringify({ error: "Failed to get conversation details" }), {
+        status: 500,
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "https://cideg-dev.github.io",
+          "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+          "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+        },
+      });
+    }
+
+    // For each conversation, get the other participant
+    const transformedConversations = await Promise.all(
+      conversations.map(async (conv) => {
+        // Get all participants of this conversation
+        const { data: participants, error: partError } = await supabase
+          .from('conversation_participants')
+          .select('user_id')
+          .eq('conversation_id', conv.id);
+
+        if (partError || !participants) {
+          console.error("Error getting participants:", partError);
+          return null;
+        }
+
+        // Find the other participant (not the current user)
+        const otherParticipantId = participants.find(
+          (p: any) => p.user_id !== userId
+        )?.user_id;
+
+        if (!otherParticipantId) {
+          return null;
+        }
+
+        // Get the other participant's profile
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('name, email, avatar_url')
+          .eq('id', otherParticipantId)
+          .single();
+
+        if (profileError) {
+          console.error("Error getting profile:", profileError);
+        }
+
+        return {
+          id: conv.id,
+          updated_at: conv.updated_at,
+          created_at: conv.created_at,
+          partner: {
+            id: otherParticipantId,
+            name: profile?.name || null,
+            email: profile?.email || null,
+            avatar_url: profile?.avatar_url || null
+          }
+        };
+      })
+    );
+
+    // Filter out null values
+    const validConversations = transformedConversations.filter(c => c !== null);
+
+    return new Response(JSON.stringify(validConversations), {
       status: 200,
       headers: {
         "Content-Type": "application/json",

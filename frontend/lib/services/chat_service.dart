@@ -92,6 +92,8 @@ class ChatService {
 
       if (response.statusCode == 200) {
         return jsonDecode(response.body) as List<dynamic>;
+      } else if (response.statusCode == 401) {
+        throw Exception('Unauthorized: Invalid token');
       } else {
         final errorBody = jsonDecode(response.body);
         final errorMessage = errorBody['message'] ?? 'Failed to load conversations';
