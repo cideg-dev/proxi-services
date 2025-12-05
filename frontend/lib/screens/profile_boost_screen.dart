@@ -48,15 +48,16 @@ class _ProfileBoostScreenState extends State<ProfileBoostScreen> {
       if (!mounted) return;
 
       // Handle result from WebView (e.g., payment success/failure)
-      if (result != null && result['status'] == 'success') {
+      if (result != null && (result as Map<String, dynamic>)['status'] == 'success') {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Paiement réussi ! Votre profil est boosté.'), backgroundColor: Colors.green),
         );
         // Optionally, navigate back to profile or update UI
         Navigator.pop(context, true); // Indicate success to previous screen
       } else {
+        final message = result != null ? (result as Map<String, dynamic>)['message'] : 'Inconnu';
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Paiement annulé ou échoué: ${result?['message'] ?? 'Inconnu'}'), backgroundColor: Colors.red),
+          SnackBar(content: Text('Paiement annulé ou échoué: $message'), backgroundColor: Colors.red),
         );
       }
     } catch (e) {

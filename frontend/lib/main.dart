@@ -4,7 +4,7 @@ import 'package:frontend/providers/notification_ui_provider.dart';
 import 'package:frontend/screens/advanced_search_screen.dart';
 import 'package:frontend/screens/appointment_booking_screen.dart';
 import 'package:frontend/screens/chat_screen.dart';
-import 'package:frontend/screens/client_home_screen.dart';
+// import 'package:frontend/screens/client_home_screen.dart'; // Removed unused import
 import 'package:frontend/screens/conversations_list_screen.dart';
 import 'package:frontend/screens/integration_test_screen.dart';
 import 'package:frontend/screens/login_screen.dart';
@@ -62,6 +62,7 @@ import 'package:frontend/screens/settings_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  GoogleFonts.config.allowRuntimeFetching = false; // Prevent CanvasKit Typeface error
 
   runApp(
     MultiProvider(
@@ -248,7 +249,14 @@ class _MyAppState extends State<MyApp> {
             '/artisan_services': (context) => const ArtisanServicesScreen(),
             '/artisan_demands': (context) => const ArtisanDemandsScreen(),
             '/admin_panel': (context) => const AdminPanelScreen(),
-            '/create_demand': (context) => const CreateDemandScreen(),
+            '/create_demand': (context) {
+              final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+              return CreateDemandScreen(
+                artisanId: args?['artisanId'] ?? 0,
+                artisanName: args?['artisanName'] ?? 'Artisan',
+                selectedService: args?['selectedService'],
+              );
+            },
             '/my_profile': (context) => const MyProfileScreen(),
             '/settings': (context) => const SettingsScreen(),
           },

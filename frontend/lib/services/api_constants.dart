@@ -32,4 +32,5 @@ class ApiConstants {
   static const String authLoginEndpoint = '/api/auth/login';
   static const String authRegisterEndpoint = '/api/auth/register';
   static const String artisansEndpoint = '/api/artisans';
+  static const String demands = '/demands'; // Added for DashboardService
 }

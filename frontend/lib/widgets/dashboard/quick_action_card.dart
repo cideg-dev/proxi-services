@@ -5,7 +5,8 @@ class QuickActionCard extends StatelessWidget {
   final String subtitle;
   final IconData icon;
   final Color iconColor;
-  final VoidCallback onTap;
+  final String? route; // Made optional to avoid breaking other usages if any
+  final VoidCallback? onTap; // Made optional
 
   const QuickActionCard({
     super.key,
@@ -13,7 +14,8 @@ class QuickActionCard extends StatelessWidget {
     required this.subtitle,
     required this.icon,
     this.iconColor = Colors.blue,
-    required this.onTap,
+    this.route,
+    this.onTap,
   });
 
   @override
@@ -30,7 +32,11 @@ class QuickActionCard extends StatelessWidget {
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
-        onTap: onTap,
+        onTap: onTap ?? () {
+          if (route != null) {
+            Navigator.pushNamed(context, route!);
+          }
+        },
         child: Container(
           padding: const EdgeInsets.all(16),
           child: Row(
