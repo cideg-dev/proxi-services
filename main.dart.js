@@ -110302,7 +110302,7 @@ A.Eo.prototype={
 BI(){var s=0,r=A.t(t.j),q,p=this,o
 var $async$BI=A.o(function(a,b){if(a===1)return A.p(b,r)
 for(;;)switch(s){case 0:s=3
-return A.l(p.a.dG(0,"/api/client/demandes"),$async$BI)
+return A.l(p.a.dG(0,"/demands/client"),$async$BI)
 case 3:o=b
 if(o.b===200){q=B.x.bD(0,A.bR(A.bQ(o.e)).b_(0,o.w),null)
 s=1
@@ -110313,7 +110313,7 @@ FS(a){return this.aCF(a)},
 aCF(a){var s=0,r=A.t(t.H),q=this,p,o
 var $async$FS=A.o(function(b,c){if(b===1)return A.p(c,r)
 for(;;)switch(s){case 0:s=2
-return A.l(q.a.Pv(0,"/api/demandes/"+a),$async$FS)
+return A.l(q.a.Pv(0,"/demands/"+a),$async$FS)
 case 2:o=c
 if(o.b!==200){p=J.W(B.x.bD(0,A.bR(A.bQ(o.e)).b_(0,o.w),null),"message")
 throw A.c(A.ag(p==null?"Failed to cancel demand":p))}return A.q(null,r)}})
@@ -110322,7 +110322,7 @@ BM(a){return this.a9R(a)},
 a9R(a){var s=0,r=A.t(t.P),q,p=this,o
 var $async$BM=A.o(function(b,c){if(b===1)return A.p(c,r)
 for(;;)switch(s){case 0:s=3
-return A.l(p.a.dG(0,"/api/demandes/"+a),$async$BM)
+return A.l(p.a.dG(0,"/demands/"+a),$async$BM)
 case 3:o=c
 if(o.b!==200)throw A.c(A.ag("Failed to load demand details"))
 q=B.x.bD(0,A.bR(A.bQ(o.e)).b_(0,o.w),null)
@@ -110333,7 +110333,7 @@ return A.r($async$BM,r)},
 BW(){var s=0,r=A.t(t.j),q,p=this,o
 var $async$BW=A.o(function(a,b){if(a===1)return A.p(b,r)
 for(;;)switch(s){case 0:s=3
-return A.l(p.a.dG(0,"/api/professional/demandes"),$async$BW)
+return A.l(p.a.dG(0,"/demands/professional"),$async$BW)
 case 3:o=b
 if(o.b===200){q=B.x.bD(0,A.bR(A.bQ(o.e)).b_(0,o.w),null)
 s=1
@@ -110345,7 +110345,7 @@ aN8(a,b){var s=0,r=A.t(t.H),q=this,p,o,n
 var $async$IW=A.o(function(c,d){if(c===1)return A.p(d,r)
 for(;;)switch(s){case 0:o=t.N
 s=2
-return A.l(q.a.Ih(0,"/api/demandes/"+a+"/status",A.ac(["status",b],o,o)),$async$IW)
+return A.l(q.a.Ih(0,"/demands/"+a+"/status",A.ac(["status",b],o,o)),$async$IW)
 case 2:n=d
 if(n.b!==200){p=J.W(B.x.bD(0,A.bR(A.bQ(n.e)).b_(0,n.w),null),"message")
 throw A.c(A.ag(p==null?"Failed to update demand status":p))}return A.q(null,r)}})
