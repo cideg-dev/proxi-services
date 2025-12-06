@@ -62,7 +62,7 @@ class _GlobalProfessionalsListScreenState extends State<GlobalProfessionalsListS
                   borderSide: BorderSide.none,
                 ),
                 filled: true,
-                fillColor: theme.colorScheme.surfaceVariant.withOpacity(0.5),
+                fillColor: theme.colorScheme.surfaceVariant.withValues(alpha: 0.5),
               ),
               onChanged: _onSearchChanged,
             ),
@@ -77,7 +77,7 @@ class _GlobalProfessionalsListScreenState extends State<GlobalProfessionalsListS
                   borderSide: BorderSide.none,
                 ),
                 filled: true,
-                fillColor: theme.colorScheme.surfaceVariant.withOpacity(0.5),
+                fillColor: theme.colorScheme.surfaceVariant.withValues(alpha: 0.5),
               ),
               value: _selectedRoleFilter,
               items: const [

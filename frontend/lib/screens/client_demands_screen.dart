@@ -9,6 +9,7 @@ import '../widgets/glass_card.dart';
 import 'demand_detail_screen.dart';
 import 'package:lottie/lottie.dart';
 import '../widgets/empty_state.dart';
+import '../models/demand_model.dart';
 
 class ClientDemandsScreen extends StatefulWidget {
   const ClientDemandsScreen({Key? key}) : super(key: key);
@@ -20,7 +21,7 @@ class ClientDemandsScreen extends StatefulWidget {
 class _ClientDemandsScreenState extends State<ClientDemandsScreen> {
   final DemandService _demandService = DemandService();
   final TokenManager _tokenManager = TokenManager();
-  List<dynamic> _demands = [];
+  List<Demand> _demands = [];
   String? _error;
   bool _isLoading = true;
   String? _userRole;
@@ -87,11 +88,14 @@ class _ClientDemandsScreenState extends State<ClientDemandsScreen> {
     _demandUpdateSubscription = socketService.demandUpdates.listen((updatedDemand) {
       if (!mounted) return;
 
-      final int index = _demands.indexWhere((d) => d['id'] == updatedDemand['id']);
+      // Note: socket update returns Map, not Demand object directly usually.
+      // We might need to handle this carefully. Assuming updatedDemand is Map.
+      final int index = _demands.indexWhere((d) => d.id == updatedDemand['id']);
       if (index != -1) {
-        setState(() {
-          _demands[index]['status'] = updatedDemand['status'];
-        });
+        // We can't easily update immutable Demand object in place.
+        // We should probably reload or create a new Demand object.
+        // For now, let's just reload to be safe and consistent.
+        _loadDemands();
 
         final notificationProvider = context.read<NotificationUIProvider>();
         notificationProvider.showNotification(
@@ -175,7 +179,7 @@ class _ClientDemandsScreenState extends State<ClientDemandsScreen> {
         itemCount: _demands.length,
         itemBuilder: (context, index) {
           final demand = _demands[index];
-          final isPending = demand['status'] == 'pending';
+          final isPending = demand.status == 'pending';
 
           return Padding(
             padding: const EdgeInsets.only(bottom: 8.0),
@@ -185,20 +189,20 @@ class _ClientDemandsScreenState extends State<ClientDemandsScreen> {
                   Navigator.pushNamed(
                     context,
                     '/demand_detail',
-                    arguments: demand['id'],
+                    arguments: demand.id,
                   ).then((_) => _loadDemands()); // Refresh when coming back
                 },
-                title: Text(demand['professional_name'] ?? 'Professionnel inconnu'),
+                title: Text(demand.professionalName ?? 'Professionnel inconnu'),
                 subtitle: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Demande #${demand['id']}'),
+                    Text('Demande #${demand.id}'),
                     const SizedBox(height: 4),
-                    Text(demand['service_description'] ?? 'Pas de description.'),
+                    Text(demand.serviceDescription),
                     const SizedBox(height: 8),
                     Chip(
-                      label: Text(demand['status'] ?? 'inconnu'),
-                      backgroundColor: Colors.black.withOpacity(0.3),
+                      label: Text(demand.status),
+                      backgroundColor: Colors.black.withValues(alpha: 0.3),
                       side: BorderSide.none,
                     ),
                   ],
@@ -207,7 +211,7 @@ class _ClientDemandsScreenState extends State<ClientDemandsScreen> {
                     ? TextButton.icon(
                         icon: const Icon(Icons.cancel, color: Colors.redAccent),
                         label: const Text('Annuler', style: TextStyle(color: Colors.redAccent)),
-                        onPressed: () => _showCancelConfirmation(demand['id']),
+                        onPressed: () => _showCancelConfirmation(demand.id),
                       )
                     : null,
               ),

@@ -107,7 +107,7 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
       child: ListTile(
         contentPadding: const EdgeInsets.all(16.0),
         leading: CircleAvatar(
-          backgroundColor: theme.colorScheme.primary.withOpacity(0.2),
+          backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.2),
           child: Icon(
             isArtisan ? Icons.build : Icons.store,
             color: theme.colorScheme.primary,

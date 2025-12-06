@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/services/profile_service.dart';
+import 'package:frontend/services/auth_service.dart';
 import 'package:frontend/services/identity_verification_service.dart';
 import 'package:frontend/services/analytics_service.dart';
 import 'package:frontend/services/badge_service.dart';
@@ -111,10 +111,12 @@ class _IntegrationTestScreenState extends State<IntegrationTestScreen> {
 
   Future<void> _testProfileService() async {
     try {
-      final service = ProfileService();
-      _testResults.add('PASS: ProfileService initialisé correctement');
+      // ProfileService has been refactored into AuthService and ArtisanService
+      // Testing AuthService instead
+      final service = AuthService();
+      _testResults.add('PASS: AuthService (ex-ProfileService) initialisé correctement');
     } catch (e) {
-      _testResults.add('FAIL: ProfileService - $e');
+      _testResults.add('FAIL: AuthService - $e');
     }
   }
 

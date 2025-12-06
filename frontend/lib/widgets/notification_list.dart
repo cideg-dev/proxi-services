@@ -203,14 +203,14 @@ class _NotificationListState extends State<NotificationList> {
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      color: isRead ? null : theme.cardColor.withOpacity(0.3),
+      color: isRead ? null : theme.cardColor.withValues(alpha: 0.3),
       child: ListTile(
         contentPadding: const EdgeInsets.all(16.0),
         leading: Container(
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: iconColor.withOpacity(0.1),
+            color: iconColor.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Icon(

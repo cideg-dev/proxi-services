@@ -3,6 +3,8 @@ import 'package:frontend/services/location_service.dart';
 import 'package:frontend/services/artisan_service.dart';
 import 'package:frontend/widgets/nearby_artisans_map.dart';
 import 'package:frontend/screens/artisan_detail_screen.dart';
+import 'package:frontend/models/artisan_model.dart';
+import 'package:geolocator/geolocator.dart'; // For distance calculation
 
 class NearbyArtisansScreen extends StatefulWidget {
   const NearbyArtisansScreen({super.key});
@@ -15,10 +17,11 @@ class _NearbyArtisansScreenState extends State<NearbyArtisansScreen> {
   final LocationService _locationService = LocationService();
   final ArtisanService _artisanService = ArtisanService();
   
-  List<dynamic> _artisans = [];
+  List<Artisan> _artisans = [];
   bool _isLoading = true;
   bool _showMap = true; // Pour basculer entre carte et liste
   String _errorMessage = '';
+  Position? _currentPosition;
 
   @override
   void initState() {
@@ -37,9 +40,11 @@ class _NearbyArtisansScreenState extends State<NearbyArtisansScreen> {
         return;
       }
 
+      final position = await _locationService.getCurrentLocation();
       final artisans = await _locationService.getNearbyArtisans();
       
       setState(() {
+        _currentPosition = position;
         _artisans = artisans;
         _isLoading = false;
       });
@@ -107,7 +112,7 @@ class _NearbyArtisansScreenState extends State<NearbyArtisansScreen> {
                             borderRadius: BorderRadius.circular(12.0),
                           ),
                           filled: true,
-                          fillColor: theme.colorScheme.surfaceVariant.withOpacity(0.5),
+                          fillColor: theme.colorScheme.surfaceVariant.withValues(alpha: 0.5),
                         ),
                       ),
                     ),
@@ -122,7 +127,7 @@ class _NearbyArtisansScreenState extends State<NearbyArtisansScreen> {
                               onPressed: () => setState(() => _showMap = true),
                               style: ButtonStyle(
                                 backgroundColor: _showMap
-                                    ? MaterialStateProperty.all<Color>(theme.colorScheme.primary.withOpacity(0.2))
+                                    ? MaterialStateProperty.all<Color>(theme.colorScheme.primary.withValues(alpha: 0.2))
                                     : MaterialStateProperty.all<Color>(Colors.transparent),
                                 shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                                   RoundedRectangleBorder(
@@ -139,7 +144,7 @@ class _NearbyArtisansScreenState extends State<NearbyArtisansScreen> {
                               onPressed: () => setState(() => _showMap = false),
                               style: ButtonStyle(
                                 backgroundColor: !_showMap
-                                    ? MaterialStateProperty.all<Color>(theme.colorScheme.primary.withOpacity(0.2))
+                                    ? MaterialStateProperty.all<Color>(theme.colorScheme.primary.withValues(alpha: 0.2))
                                     : MaterialStateProperty.all<Color>(Colors.transparent),
                                 shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                                   RoundedRectangleBorder(
@@ -172,23 +177,33 @@ class _NearbyArtisansScreenState extends State<NearbyArtisansScreen> {
     );
   }
 
-  Widget _buildArtisanCard(dynamic artisan, ThemeData theme) {
+  Widget _buildArtisanCard(Artisan artisan, ThemeData theme) {
+    double distance = 0.0;
+    if (_currentPosition != null && artisan.latitude != null && artisan.longitude != null) {
+      distance = Geolocator.distanceBetween(
+        _currentPosition!.latitude,
+        _currentPosition!.longitude,
+        artisan.latitude!,
+        artisan.longitude!,
+      ) / 1000;
+    }
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: theme.colorScheme.primary.withOpacity(0.2),
+          backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.2),
           child: Icon(
             Icons.store,
             color: theme.colorScheme.primary,
           ),
         ),
-        title: Text(artisan['name'] ?? artisan['email'] ?? 'Artisan'),
+        title: Text(artisan.name ?? artisan.email),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              artisan['specialty'] ?? 'Spécialité non spécifiée',
+              artisan.specialty ?? 'Spécialité non spécifiée',
               style: TextStyle(color: theme.colorScheme.secondary),
             ),
             const SizedBox(height: 4),
@@ -197,7 +212,7 @@ class _NearbyArtisansScreenState extends State<NearbyArtisansScreen> {
                 const Icon(Icons.location_on, size: 14),
                 const SizedBox(width: 4),
                 Text(
-                  '${(artisan['distance'] ?? 0).toStringAsFixed(2)} km',
+                  '${distance.toStringAsFixed(2)} km',
                   style: const TextStyle(fontSize: 12),
                 ),
               ],
@@ -213,7 +228,7 @@ class _NearbyArtisansScreenState extends State<NearbyArtisansScreen> {
               size: 16,
             ),
             Text(
-              (artisan['rating'] ?? 'N/A').toString(),
+              (artisan.averageRating ?? 0.0).toString(),
               style: const TextStyle(fontSize: 14),
             ),
           ],
@@ -223,7 +238,7 @@ class _NearbyArtisansScreenState extends State<NearbyArtisansScreen> {
           Navigator.pushNamed(
             context,
             '/artisan_detail',
-            arguments: artisan['id'],
+            arguments: artisan.id,
           );
         },
       ),

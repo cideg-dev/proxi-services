@@ -3,6 +3,7 @@ import 'package:frontend/services/chat_service.dart';
 import 'package:frontend/services/token_manager.dart';
 import 'package:frontend/widgets/conversation_item.dart';
 import 'package:frontend/screens/chat_screen.dart';
+import 'package:frontend/models/conversation_model.dart';
 
 class ConversationsListScreen extends StatefulWidget {
   const ConversationsListScreen({super.key});
@@ -13,7 +14,7 @@ class ConversationsListScreen extends StatefulWidget {
 
 class _ConversationsListScreenState extends State<ConversationsListScreen> {
   final ChatService _chatService = ChatService();
-  List<dynamic> _conversations = [];
+  List<Conversation> _conversations = [];
   bool _isLoading = true;
   String _errorMessage = '';
   bool _isAuthenticated = false;
@@ -156,9 +157,9 @@ class _ConversationsListScreenState extends State<ConversationsListScreen> {
                                 context,
                                 '/chat',
                                 arguments: {
-                                  'conversationId': conversation['id'],
-                                  'partnerId': conversation['partner']['id'],
-                                  'partnerName': conversation['partner']['name'] ?? conversation['partner']['email'],
+                                  'conversationId': conversation.id,
+                                  'partnerId': conversation.otherParticipant?.id ?? 0,
+                                  'partnerName': conversation.otherParticipant?.name ?? conversation.otherParticipant?.email ?? 'Utilisateur',
                                 },
                               );
                             },
@@ -202,7 +203,7 @@ class _ConversationsListScreenState extends State<ConversationsListScreen> {
     );
   }
 
-  void _showConversationOptions(Map<String, dynamic> conversation) {
+  void _showConversationOptions(Conversation conversation) {
     showModalBottomSheet(
       context: context,
       builder: (context) => SafeArea(
@@ -213,7 +214,7 @@ class _ConversationsListScreenState extends State<ConversationsListScreen> {
               title: const Text('Supprimer la conversation'),
               onTap: () {
                 Navigator.of(context).pop();
-                _showDeleteConfirmation(conversation['id']);
+                _showDeleteConfirmation(conversation.id);
               },
             ),
             ListTile(
@@ -221,7 +222,9 @@ class _ConversationsListScreenState extends State<ConversationsListScreen> {
               title: const Text('Bloquer ce contact'),
               onTap: () {
                 Navigator.of(context).pop();
-                _showBlockConfirmation(conversation['partner']['id']);
+                if (conversation.otherParticipant != null) {
+                  _showBlockConfirmation(conversation.otherParticipant!.id);
+                }
               },
             ),
           ],

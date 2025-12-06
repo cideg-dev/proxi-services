@@ -107,6 +107,77 @@ serve(async (req) => {
       return new Response(JSON.stringify(conversation), { status: 201, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
+    // GET /:id/messages - Get messages for a conversation
+    if (req.method === "GET" && pathParts.length === 2 && pathParts[1] === "messages") {
+      const conversationId = pathParts[0];
+      const url = new URL(req.url);
+      const limit = parseInt(url.searchParams.get("limit") || "20");
+      const beforeId = url.searchParams.get("beforeId");
+
+      let query = supabase
+        .from("messages")
+        .select("*")
+        .eq("conversation_id", conversationId)
+        .order("sent_at", { ascending: false })
+        .limit(limit);
+
+      if (beforeId) {
+        query = query.lt("id", beforeId);
+      }
+
+      const { data, error } = await query;
+
+      if (error) throw error;
+
+      return new Response(JSON.stringify(data), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    // POST /:id/messages - Send a message
+    if (req.method === "POST" && pathParts.length === 2 && pathParts[1] === "messages") {
+      const conversationId = pathParts[0];
+      const body = await req.json();
+      const { content } = body;
+
+      const { data, error } = await supabase
+        .from("messages")
+        .insert({
+          conversation_id: conversationId,
+          sender_id: user.id,
+          content: content,
+          sent_at: new Date().toISOString()
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Update conversation updated_at
+      await supabase
+        .from("conversations")
+        .update({ updated_at: new Date().toISOString() })
+        .eq("id", conversationId);
+
+      return new Response(JSON.stringify(data), { status: 201, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    // PUT /:id/mark-as-read - Mark messages as read
+    if (req.method === "PUT" && pathParts.length === 2 && pathParts[1] === "mark-as-read") {
+      const conversationId = pathParts[0];
+
+      // Update read_at for messages where receiver is current user and read_at is null
+      // This assumes we have a way to know who the receiver is or we mark all messages not sent by us as read
+      const { error } = await supabase
+        .from("messages")
+        .update({ read_at: new Date().toISOString() })
+        .eq("conversation_id", conversationId)
+        .neq("sender_id", user.id)
+        .is("read_at", null);
+
+      if (error) throw error;
+
+      return new Response(JSON.stringify({ success: true }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
     return new Response(JSON.stringify({ error: "Not Found" }), { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
   } catch (error) {

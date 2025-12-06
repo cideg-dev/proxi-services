@@ -4,6 +4,7 @@ import 'package:frontend/services/artisan_service.dart';
 import 'package:frontend/screens/artisan_detail_screen.dart';
 import 'package:lottie/lottie.dart';
 import 'package:frontend/widgets/empty_state.dart';
+import 'package:frontend/models/artisan_model.dart';
 
 class ProfessionalsListScreen extends StatefulWidget {
   const ProfessionalsListScreen({super.key});
@@ -14,7 +15,7 @@ class ProfessionalsListScreen extends StatefulWidget {
 
 class _ProfessionalsListScreenState extends State<ProfessionalsListScreen> {
   final ArtisanService _artisanService = ArtisanService();
-  late Future<List<dynamic>> _professionalsFuture;
+  late Future<List<Artisan>> _professionalsFuture;
 
   @override
   void initState() {
@@ -28,7 +29,7 @@ class _ProfessionalsListScreenState extends State<ProfessionalsListScreen> {
       appBar: AppBar(
         title: const Text('Professionnels'),
       ),
-      body: FutureBuilder<List<dynamic>>(
+      body: FutureBuilder<List<Artisan>>(
         future: _professionalsFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -47,7 +48,7 @@ class _ProfessionalsListScreenState extends State<ProfessionalsListScreen> {
             itemCount: professionals.length,
             itemBuilder: (context, index) {
               final professional = professionals[index];
-              final bool isArtisan = professional['role'] == 'artisan';
+              final bool isArtisan = professional.role == 'artisan';
 
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -57,28 +58,28 @@ class _ProfessionalsListScreenState extends State<ProfessionalsListScreen> {
                     filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
                     child: Container(
                       decoration: BoxDecoration(
-                        color: Theme.of(context).cardColor.withOpacity(0.1),
+                        color: Theme.of(context).cardColor.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(16.0),
                         border: Border.all(
-                          color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+                          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
                         ),
                       ),
                       child: ListTile(
                         leading: Hero(
-                          tag: 'artisan-avatar-${professional['id']}',
+                          tag: 'artisan-avatar-${professional.id}',
                           child: CircleAvatar(
-                            backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+                            backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
                             foregroundColor: Theme.of(context).colorScheme.primary,
                             child: Icon(isArtisan ? Icons.construction : Icons.store),
                           ),
                         ),
-                        title: Text(professional['name'] ?? 'Nom non disponible'),
-                        subtitle: Text(professional['specialty'] ?? 'Information non disponible'),
+                        title: Text(professional.name ?? professional.email),
+                        subtitle: Text(professional.specialty ?? 'Information non disponible'),
                         onTap: () {
                           Navigator.pushNamed(
                             context,
                             '/artisan_detail',
-                            arguments: professional['id'],
+                            arguments: professional.id,
                           );
                         },
                       ),

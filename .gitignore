@@ -52,3 +52,4 @@ gha-creds-*.json
 .aider*
 github_pages_deploy/
 dist/
+frontend/lib/models/demand_model.dart

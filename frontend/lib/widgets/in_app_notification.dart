@@ -26,7 +26,7 @@ class InAppNotification extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: notification.color.withOpacity(0.9),
+                  color: notification.color.withValues(alpha: 0.9),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(

@@ -48,7 +48,7 @@ class LineChartWidget extends StatelessWidget {
         ),
         borderData: FlBorderData(
           show: true,
-          border: Border.all(color: Colors.grey.withOpacity(0.2)),
+          border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
         ),
         minX: 0,
         maxX: data.isEmpty ? 0 : data.last.x,
@@ -66,7 +66,7 @@ class LineChartWidget extends StatelessWidget {
             ),
             belowBarData: BarAreaData(
               show: true,
-              color: chartColor.withOpacity(0.1),
+              color: chartColor.withValues(alpha: 0.1),
             ),
           ),
         ],

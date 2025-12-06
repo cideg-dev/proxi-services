@@ -26,10 +26,10 @@ class _EnhancedDashboardScreenState extends State<EnhancedDashboardScreen> {
 
   Future<void> _loadUserProfile() async {
     try {
-      final profile = await _authService.getProfile();
+      final user = await _authService.getProfile();
       if (mounted) {
         setState(() {
-          _userName = profile['user']['nom_complet'] ?? 'Utilisateur';
+          _userName = user.name ?? user.email ?? 'Utilisateur';
         });
       }
     } catch (e) {

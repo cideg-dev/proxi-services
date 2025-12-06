@@ -1,6 +1,7 @@
 import 'package:geolocator/geolocator.dart';
 import 'package:frontend/services/api_service.dart';
 import 'package:frontend/services/artisan_service.dart';
+import 'package:frontend/models/artisan_model.dart';
 
 class LocationService {
   final ApiService _apiService = ApiService();
@@ -59,36 +60,40 @@ class LocationService {
   }
 
   /// Récupère les artisans les plus proches de l'utilisateur
-  Future<List<dynamic>> getNearbyArtisans({double? radius = 10.0}) async {
+  Future<List<Artisan>> getNearbyArtisans({double? radius = 10.0}) async {
     try {
       Position position = await getCurrentLocation();
+      
       final response = await _apiService.getPublic(
         '/api/artisans/nearby?lat=${position.latitude}&lng=${position.longitude}&radius=${radius ?? 10.0}'
       );
 
       if (response.statusCode == 200) {
-        final List<dynamic> artisans = await _artisanService.getArtisans();
-        final List<dynamic> nearbyArtisans = [];
+        final List<Artisan> artisans = await _artisanService.getArtisans();
+        final List<Artisan> nearbyArtisans = [];
 
         // Calculer la distance pour chaque artisan et filtrer selon le rayon
         for (var artisan in artisans) {
-          if (artisan['latitude'] != null && artisan['longitude'] != null) {
+          if (artisan.latitude != null && artisan.longitude != null) {
             double distance = calculateDistance(
               position.latitude,
               position.longitude,
-              artisan['latitude'],
-              artisan['longitude'],
+              artisan.latitude!,
+              artisan.longitude!,
             );
 
             if (distance <= (radius ?? 10.0)) {
-              artisan['distance'] = distance;
               nearbyArtisans.add(artisan);
             }
           }
         }
 
-        // Trier par distance
-        nearbyArtisans.sort((a, b) => a['distance'].compareTo(b['distance']));
+        // Trier par distance (re-calculating since we didn't store it)
+        nearbyArtisans.sort((a, b) {
+          double distA = calculateDistance(position.latitude, position.longitude, a.latitude!, a.longitude!);
+          double distB = calculateDistance(position.latitude, position.longitude, b.latitude!, b.longitude!);
+          return distA.compareTo(distB);
+        });
 
         return nearbyArtisans;
       } else {

@@ -156,7 +156,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
             end: Alignment.bottomRight,
             colors: [
               theme.colorScheme.surface,
-              theme.colorScheme.surface.withOpacity(0.8),
+              theme.colorScheme.surface.withValues(alpha: 0.8),
             ],
           ),
         ),
@@ -413,12 +413,12 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                   }
                 });
               },
-              backgroundColor: theme.colorScheme.surface.withOpacity(0.5),
+              backgroundColor: theme.colorScheme.surface.withValues(alpha: 0.5),
               selectedColor: theme.colorScheme.primary,
               labelStyle: TextStyle(color: isSelected ? Colors.black : theme.colorScheme.onSurface),
               shape: StadiumBorder(
                 side: BorderSide(
-                  color: isSelected ? theme.colorScheme.primary : theme.colorScheme.secondary.withOpacity(0.5),
+                  color: isSelected ? theme.colorScheme.primary : theme.colorScheme.secondary.withValues(alpha: 0.5),
                 ),
               ),
             );

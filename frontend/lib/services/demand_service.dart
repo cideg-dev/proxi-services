@@ -1,14 +1,16 @@
 import 'dart:convert';
 import 'package:frontend/services/api_service.dart';
+import 'package:frontend/models/demand_model.dart';
 
 class DemandService {
   final ApiService _apiService = ApiService();
 
   // Fetch all demands for the currently logged-in client
-  Future<List<dynamic>> getClientDemands() async {
+  Future<List<Demand>> getClientDemands() async {
     final response = await _apiService.get('/demands/client');
     if (response.statusCode == 200) {
-      return jsonDecode(response.body);
+      final List<dynamic> data = jsonDecode(response.body);
+      return data.map((json) => Demand.fromJson(json)).toList();
     } else {
       throw Exception('Failed to load client demands');
     }
@@ -25,19 +27,21 @@ class DemandService {
   }
 
   // Get details for a specific demand
-  Future<Map<String, dynamic>> getDemandById(int demandId) async {
+  Future<Demand> getDemandById(int demandId) async {
     final response = await _apiService.get('/demands/$demandId');
-    if (response.statusCode != 200) {
+    if (response.statusCode == 200) {
+      return Demand.fromJson(jsonDecode(response.body));
+    } else {
       throw Exception('Failed to load demand details');
     }
-    return jsonDecode(response.body);
   }
 
   // Fetch all demands for the currently logged-in professional (artisan or commercant)
-  Future<List<dynamic>> getProfessionalDemands() async {
+  Future<List<Demand>> getProfessionalDemands() async {
     final response = await _apiService.get('/demands/professional');
     if (response.statusCode == 200) {
-      return jsonDecode(response.body);
+      final List<dynamic> data = jsonDecode(response.body);
+      return data.map((json) => Demand.fromJson(json)).toList();
     } else {
       throw Exception('Failed to load professional demands');
     }

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/demand_service.dart';
+import '../models/demand_model.dart';
+import 'package:intl/intl.dart';
 
 class DemandDetailScreen extends StatefulWidget {
   final int demandId;
@@ -11,7 +13,7 @@ class DemandDetailScreen extends StatefulWidget {
 
 class _DemandDetailScreenState extends State<DemandDetailScreen> {
   final DemandService _demandService = DemandService();
-  late Future<Map<String, dynamic>> _demandFuture;
+  late Future<Demand> _demandFuture;
 
   @override
   void initState() {
@@ -25,7 +27,7 @@ class _DemandDetailScreenState extends State<DemandDetailScreen> {
       appBar: AppBar(
         title: Text('Détails de la Demande #${widget.demandId}'),
       ),
-      body: FutureBuilder<Map<String, dynamic>>(
+      body: FutureBuilder<Demand>(
         future: _demandFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -44,16 +46,17 @@ class _DemandDetailScreenState extends State<DemandDetailScreen> {
             padding: const EdgeInsets.all(16.0),
             child: ListView(
               children: <Widget>[
-                _buildDetailRow('Statut', demand['status'] ?? 'N/A'),
-                _buildDetailRow('Artisan', demand['artisan_name'] ?? 'N/A'),
-                _buildDetailRow('Client', demand['client_name'] ?? 'N/A'),
+                _buildDetailRow('Statut', demand.status),
+                _buildDetailRow('Artisan', demand.professionalName ?? 'N/A'),
+                _buildDetailRow('Client', demand.clientName ?? 'N/A'),
                 const Divider(height: 30),
                 Text('Description', style: Theme.of(context).textTheme.titleLarge),
                 const SizedBox(height: 8),
-                Text(demand['service_description'] ?? 'Aucune description fournie.'),
+                Text(demand.serviceDescription),
                 const Divider(height: 30),
-                 _buildDetailRow('Créée le', demand['created_at'] ?? 'N/A'),
-                 _buildDetailRow('Mise à jour le', demand['updated_at'] ?? 'N/A'),
+                 _buildDetailRow('Créée le', DateFormat('dd/MM/yyyy HH:mm').format(demand.createdAt)),
+                 if (demand.scheduledDate != null)
+                   _buildDetailRow('Prévue le', DateFormat('dd/MM/yyyy HH:mm').format(demand.scheduledDate!)),
               ],
             ),
           );

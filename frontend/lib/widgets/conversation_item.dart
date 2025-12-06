@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:frontend/models/conversation_model.dart';
 
 class ConversationItem extends StatelessWidget {
-  final Map<String, dynamic> conversation;
+  final Conversation conversation;
   final VoidCallback onTap;
   final VoidCallback? onLongPress;
 
@@ -16,26 +17,24 @@ class ConversationItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final partner = conversation['partner'] ?? {};
-    final lastMessage = conversation['lastMessage'] ?? {};
-    final partnerName = partner['name'] ?? partner['email'] ?? 'Utilisateur';
-    final messageContent = lastMessage['content'] ?? lastMessage['message'] ?? '';
-    final timestamp = lastMessage['timestamp'] != null 
-        ? DateTime.parse(lastMessage['timestamp']) 
-        : DateTime.now();
+    final partner = conversation.otherParticipant;
+    final lastMessage = conversation.lastMessage;
+    final partnerName = partner?.name ?? partner?.email ?? 'Utilisateur';
+    final messageContent = lastMessage?.content ?? '';
+    final timestamp = conversation.updatedAt;
     final formattedTime = DateFormat('HH:mm').format(timestamp);
-    final unreadCount = conversation['unreadCount'] ?? 0;
+    final unreadCount = conversation.unreadCount;
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
       child: ListTile(
         contentPadding: const EdgeInsets.all(12.0),
         leading: CircleAvatar(
-          backgroundColor: theme.colorScheme.primary.withOpacity(0.2),
-          child: Icon(
-            Icons.person,
-            color: theme.colorScheme.primary,
-          ),
+          backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.2),
+          backgroundImage: partner?.avatarUrl != null ? NetworkImage(partner!.avatarUrl!) : null,
+          child: partner?.avatarUrl == null 
+              ? Icon(Icons.person, color: theme.colorScheme.primary) 
+              : null,
         ),
         title: Row(
           children: [
@@ -44,15 +43,7 @@ class ConversationItem extends StatelessWidget {
               style: theme.textTheme.titleMedium,
             ),
             const SizedBox(width: 8),
-            if (conversation['isOnline'] == true)
-              Container(
-                width: 8,
-                height: 8,
-                decoration: BoxDecoration(
-                  color: Colors.green,
-                  shape: BoxShape.circle,
-                ),
-              ),
+            // Online status check would need to be added to Conversation model or fetched separately
           ],
         ),
         subtitle: Column(

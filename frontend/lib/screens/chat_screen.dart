@@ -3,6 +3,7 @@ import 'package:frontend/services/chat_service.dart';
 import 'package:frontend/services/token_manager.dart';
 import 'package:frontend/widgets/message_bubble.dart';
 import 'package:intl/intl.dart';
+import 'package:frontend/models/message_model.dart';
 
 class ChatScreen extends StatefulWidget {
   final int conversationId;
@@ -26,7 +27,7 @@ class _ChatScreenState extends State<ChatScreen> {
   final ScrollController _scrollController = ScrollController();
   final TokenManager _tokenManager = TokenManager();
   
-  List<dynamic> _messages = [];
+  List<Message> _messages = [];
   bool _isLoading = true;
   bool _isLoadingMore = false;
   String _errorMessage = '';
@@ -71,7 +72,8 @@ class _ChatScreenState extends State<ChatScreen> {
     _chatService.onMessageReceived((messageData) {
       if (mounted) {
         setState(() {
-          _messages.insert(0, messageData);
+          // Assuming messageData is a Map, convert to Message
+          _messages.insert(0, Message.fromJson(messageData));
         });
         _scrollToBottom();
       }
@@ -111,7 +113,7 @@ class _ChatScreenState extends State<ChatScreen> {
       // Calculer l'ID du message le plus ancien pour la pagination
       int? beforeId;
       if (_messages.isNotEmpty) {
-        beforeId = _messages.last['id'];
+        beforeId = _messages.last.id;
       }
       
       final moreMessages = await _chatService.getMessagesFromConversation(
@@ -145,14 +147,18 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Future<void> _sendMessage() async {
-    final message = _messageController.text.trim();
-    if (message.isEmpty) return;
+    final messageContent = _messageController.text.trim();
+    if (messageContent.isEmpty) return;
 
     _messageController.clear();
 
     try {
       // Envoyer le message via le service
-      await _chatService.sendMessageToConversation(widget.conversationId, message);
+      final newMessage = await _chatService.sendMessageToConversation(widget.conversationId, messageContent);
+      setState(() {
+        _messages.insert(0, newMessage);
+      });
+      _scrollToBottom();
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Erreur lors de l\'envoi du message: $e')),
@@ -228,16 +234,13 @@ class _ChatScreenState extends State<ChatScreen> {
                                 }
 
                                 final message = _messages[index];
-                                final isMe = message['senderId'] == _currentUserId;
-                                final timestamp = message['timestamp'] != null
-                                    ? DateTime.parse(message['timestamp'])
-                                    : DateTime.now();
-
+                                final isMe = message.senderId == _currentUserId;
+                                
                                 return MessageBubble(
-                                  message: message['content'],
+                                  message: message.content,
                                   isMe: isMe,
-                                  timestamp: timestamp,
-                                  isRead: message['isRead'] ?? false,
+                                  timestamp: message.sentAt,
+                                  isRead: message.readAt != null,
                                 );
                               },
                             ),

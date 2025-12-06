@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/services/auth_service.dart';
+import 'package:frontend/models/user_model.dart';
 
 class MyProfileScreen extends StatefulWidget {
   const MyProfileScreen({super.key});
@@ -12,7 +13,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
   final _formKey = GlobalKey<FormState>();
   final AuthService _authService = AuthService();
 
-  late Future<Map<String, dynamic>> _profileFuture;
+  late Future<User> _profileFuture;
   String? _userRole;
 
   // Controllers for form fields
@@ -29,19 +30,33 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
   void initState() {
     super.initState();
     _profileFuture = _authService.getProfile();
-    _profileFuture.then((data) {
-      _userRole = data['profile']?['role'] ?? data['user']?['role'];
-      _initializeFields(data['profile']);
+    _profileFuture.then((user) {
+      _userRole = user.role;
+      _initializeFields(user);
     });
   }
 
-  void _initializeFields(Map<String, dynamic>? profile) {
-    if (profile == null) return;
+  void _initializeFields(User user) {
+    final profile = user.toJson();
     profile.forEach((key, value) {
       if (value != null) {
         _controllers[key] = TextEditingController(text: value.toString());
       }
     });
+    
+    // Handle mapped fields that might have different keys in JSON vs Model
+    if (!_controllers.containsKey('nom_complet') && user.name != null) {
+      _controllers['nom_complet'] = TextEditingController(text: user.name);
+    }
+    if (!_controllers.containsKey('telephone') && user.phoneNumber != null) {
+      _controllers['telephone'] = TextEditingController(text: user.phoneNumber);
+    }
+    if (!_controllers.containsKey('location') && user.city != null) {
+      _controllers['location'] = TextEditingController(text: user.city);
+    }
+    if (!_controllers.containsKey('adresse') && user.address != null) {
+      _controllers['adresse'] = TextEditingController(text: user.address);
+    }
 
     setState(() {
       _assuranceProfessionnelle = profile['assurance_professionnelle'] ?? false;
@@ -71,6 +86,9 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
       profileData['assurance_professionnelle'] = _assuranceProfessionnelle;
       profileData['langues_parlees'] = _selectedLangues;
       profileData['sexe'] = _sexe;
+      
+      // Map back to model fields if necessary, but updateProfile takes a Map
+      // so we can send what we have. API should handle it.
 
       try {
         await _authService.updateProfile(profileData);
@@ -99,7 +117,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
           )
         ],
       ),
-      body: FutureBuilder<Map<String, dynamic>>(
+      body: FutureBuilder<User>(
         future: _profileFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -111,8 +129,8 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
 
           // Initialize controllers if they haven't been
           if (_controllers.isEmpty && snapshot.hasData) {
-            _initializeFields(snapshot.data!['profile']);
-            _userRole = snapshot.data!['user']?['role'] ?? snapshot.data!['profile']?['role'];
+            _initializeFields(snapshot.data!);
+            _userRole = snapshot.data!.role;
           }
 
           return Form(
@@ -135,7 +153,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
     List<Widget> fields = [];
 
     // --- Champs Communs ---
-    fields.add(_buildTextField(_userRole == 'client' ? 'nom_complet' : 'nom_complet', 'Nom complet'));
+    fields.add(_buildTextField('nom_complet', 'Nom complet'));
     fields.add(_buildTextField('telephone', 'Téléphone'));
     fields.add(_buildTextField('location', 'Coordonnées GPS (lat,lon)'));
 

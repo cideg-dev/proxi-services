@@ -33,7 +33,7 @@ class _AnimatedPortfolioItemState extends State<AnimatedPortfolioItem> {
             boxShadow: _isHovered
                 ? [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.4),
+                      color: Colors.black.withValues(alpha: 0.4),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -59,7 +59,7 @@ class _AnimatedPortfolioItemState extends State<AnimatedPortfolioItem> {
                         end: Alignment.bottomCenter,
                         colors: [
                           Colors.transparent,
-                          Colors.black.withOpacity(0.7),
+                          Colors.black.withValues(alpha: 0.7),
                         ],
                       ),
                     ),

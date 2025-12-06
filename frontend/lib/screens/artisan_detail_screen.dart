@@ -381,7 +381,7 @@ class _ArtisanDetailScreenState extends State<ArtisanDetailScreen> {
                           Container(
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
-                                colors: [Colors.transparent, Colors.black.withOpacity(0.8)],
+                                colors: [Colors.transparent, Colors.black.withValues(alpha: 0.8)],
                                 begin: Alignment.topCenter,
                                 end: Alignment.bottomCenter,
                               ),

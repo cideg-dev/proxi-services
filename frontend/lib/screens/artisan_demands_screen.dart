@@ -8,6 +8,7 @@ import '../services/demand_service.dart';
 import '../widgets/glass_card.dart';
 import 'package:lottie/lottie.dart';
 import '../widgets/empty_state.dart';
+import '../models/demand_model.dart';
 
 class ArtisanDemandsScreen extends StatefulWidget {
   const ArtisanDemandsScreen({Key? key}) : super(key: key);
@@ -19,7 +20,7 @@ class ArtisanDemandsScreen extends StatefulWidget {
 class _ArtisanDemandsScreenState extends State<ArtisanDemandsScreen> {
   final DemandService _demandService = DemandService();
   final TokenManager _tokenManager = TokenManager(); // Instance of TokenManager
-  List<dynamic> _demands = [];
+  List<Demand> _demands = [];
   String? _error;
   bool _isLoading = true;
   String? _userRole; // State variable for user role
@@ -89,24 +90,18 @@ class _ArtisanDemandsScreenState extends State<ArtisanDemandsScreen> {
     _demandUpdateSubscription = socketService.demandUpdates.listen((demandData) {
       if (!mounted) return;
 
-      final int index = _demands.indexWhere((d) => d['id'] == demandData['id']);
-      final notificationProvider = context.read<NotificationUIProvider>();
+      // Reload demands to get fresh data
+      _loadDemands();
 
-      setState(() {
-        if (index != -1) {
-          _demands[index]['status'] = demandData['status'];
-        } else {
-          _demands.insert(0, demandData);
-          notificationProvider.showNotification(
-            NotificationData(
-              title: 'Nouvelle demande reçue',
-              message: 'Vous avez une nouvelle demande de ${demandData['clientNom'] ?? 'un client'}.',
-              icon: Icons.add_alert,
-              color: Theme.of(context).primaryColor,
-            ),
-          );
-        }
-      });
+      final notificationProvider = context.read<NotificationUIProvider>();
+      notificationProvider.showNotification(
+        NotificationData(
+          title: 'Nouvelle demande reçue',
+          message: 'Vous avez une nouvelle demande de ${demandData['clientNom'] ?? 'un client'}.',
+          icon: Icons.add_alert,
+          color: Theme.of(context).primaryColor,
+        ),
+      );
     });
   }
 
@@ -116,12 +111,7 @@ class _ArtisanDemandsScreenState extends State<ArtisanDemandsScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Demande mise à jour.'), backgroundColor: Colors.green),
       );
-      final int index = _demands.indexWhere((d) => d['id'] == demandId);
-      if (index != -1) {
-        setState(() {
-          _demands[index]['status'] = status;
-        });
-      }
+      _loadDemands(); // Refresh list
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Erreur: $e'), backgroundColor: Colors.red),
@@ -187,21 +177,21 @@ class _ArtisanDemandsScreenState extends State<ArtisanDemandsScreen> {
         itemCount: _demands.length,
         itemBuilder: (context, index) {
           final demand = _demands[index];
-          final isPending = demand['status'] == 'pending';
+          final isPending = demand.status == 'pending';
 
           return Padding(
             padding: const EdgeInsets.all(8.0), // Changed from only(bottom: 8.0) to all(8.0) for consistency
             child: GlassCard(
               child: ListTile(
-                title: Text('Demande de ${demand['clientNom'] ?? 'Client inconnu'}'),
+                title: Text('Demande de ${demand.clientName ?? 'Client inconnu'}'),
                 subtitle: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(demand['service_description'] ?? 'Pas de description.'),
+                    Text(demand.serviceDescription),
                     const SizedBox(height: 8),
                     Chip(
-                      label: Text(demand['status'] ?? 'inconnu'),
-                      backgroundColor: Colors.black.withOpacity(0.3),
+                      label: Text(demand.status),
+                      backgroundColor: Colors.black.withValues(alpha: 0.3),
                       side: BorderSide.none,
                     ),
                   ],
@@ -213,12 +203,12 @@ class _ArtisanDemandsScreenState extends State<ArtisanDemandsScreen> {
                           IconButton(
                             icon: const Icon(Icons.check_circle, color: Colors.greenAccent),
                             tooltip: 'Accepter',
-                            onPressed: () => _updateDemandStatus(demand['id'], 'accepted'),
+                            onPressed: () => _updateDemandStatus(demand.id, 'accepted'),
                           ),
                           IconButton(
                             icon: const Icon(Icons.cancel, color: Colors.redAccent),
                             tooltip: 'Refuser',
-                            onPressed: () => _updateDemandStatus(demand['id'], 'declined'),
+                            onPressed: () => _updateDemandStatus(demand.id, 'declined'),
                           ),
                         ],
                       )

@@ -66,7 +66,7 @@ class _PublicHomeScreenState extends State<PublicHomeScreen> {
             end: Alignment.bottomRight,
             colors: [
               theme.colorScheme.surface,
-              theme.colorScheme.surface.withOpacity(0.8),
+              theme.colorScheme.surface.withValues(alpha: 0.8),
             ],
           ),
         ),
@@ -155,7 +155,7 @@ class _PublicHomeScreenState extends State<PublicHomeScreen> {
                       borderRadius: BorderRadius.circular(12.0),
                     ),
                     filled: true,
-                    fillColor: theme.colorScheme.surfaceVariant.withOpacity(0.5),
+                    fillColor: theme.colorScheme.surfaceVariant.withValues(alpha: 0.5),
                   ),
                   onSubmitted: (value) {
                     if (value.isNotEmpty) {

@@ -94,7 +94,7 @@ class _MerchantsScreenState extends State<MerchantsScreen> {
                             borderRadius: BorderRadius.circular(12.0),
                           ),
                           filled: true,
-                          fillColor: theme.colorScheme.surfaceVariant.withOpacity(0.5),
+                          fillColor: theme.colorScheme.surfaceVariant.withValues(alpha: 0.5),
                         ),
                         onChanged: (value) {
                           setState(() {
@@ -113,7 +113,7 @@ class _MerchantsScreenState extends State<MerchantsScreen> {
                             borderRadius: BorderRadius.circular(12.0),
                           ),
                           filled: true,
-                          fillColor: theme.colorScheme.surfaceVariant.withOpacity(0.5),
+                          fillColor: theme.colorScheme.surfaceVariant.withValues(alpha: 0.5),
                         ),
                         value: _selectedCategory,
                         items: [

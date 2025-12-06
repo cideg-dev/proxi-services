@@ -4,7 +4,6 @@ import 'package:frontend/providers/notification_ui_provider.dart';
 import 'package:frontend/screens/advanced_search_screen.dart';
 import 'package:frontend/screens/appointment_booking_screen.dart';
 import 'package:frontend/screens/chat_screen.dart';
-// import 'package:frontend/screens/client_home_screen.dart'; // Removed unused import
 import 'package:frontend/screens/conversations_list_screen.dart';
 import 'package:frontend/screens/integration_test_screen.dart';
 import 'package:frontend/screens/login_screen.dart';
@@ -26,7 +25,6 @@ import 'package:frontend/services/loyalty_service.dart';
 import 'package:frontend/services/moderation_service.dart';
 import 'package:frontend/services/offline_mode_service.dart';
 import 'package:frontend/services/performance_service.dart';
-import 'package:frontend/services/profile_service.dart';
 import 'package:frontend/services/predictive_analysis_service.dart';
 import 'package:frontend/services/recommendation_service.dart';
 import 'package:frontend/services/referral_service.dart';
@@ -35,7 +33,7 @@ import 'package:frontend/services/security_service.dart';
 import 'package:frontend/services/social_sharing_service.dart';
 import 'package:frontend/services/socket_service.dart';
 import 'package:frontend/services/theme_provider.dart';
-import 'package:frontend/services/localization_service.dart';
+import 'package:frontend/services/route_guard.dart';
 import 'package:frontend/screens/my_groups_screen.dart';
 import 'package:frontend/screens/create_group_screen.dart';
 import 'package:frontend/widgets/in_app_notification.dart';
@@ -52,7 +50,6 @@ import 'package:frontend/screens/register_choice_screen.dart';
 import 'package:frontend/screens/register_screen.dart';
 import 'package:frontend/screens/admin_panel_screen.dart';
 import 'package:frontend/screens/artisan_detail_screen.dart';
-import 'package:frontend/screens/chat_list_screen.dart';
 import 'package:frontend/screens/chat_screen.dart';
 import 'package:frontend/screens/demand_detail_screen.dart';
 import 'package:frontend/screens/create_demand_screen.dart';
@@ -62,7 +59,7 @@ import 'package:frontend/screens/settings_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  GoogleFonts.config.allowRuntimeFetching = false; // Prevent CanvasKit Typeface error
+  GoogleFonts.config.allowRuntimeFetching = false;
 
   runApp(
     MultiProvider(
@@ -85,6 +82,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   StreamSubscription? _notificationSubscription;
+  final RouteGuard _routeGuard = RouteGuard();
 
   @override
   void initState() {
@@ -111,6 +109,35 @@ class _MyAppState extends State<MyApp> {
     _notificationSubscription?.cancel();
     Provider.of<SocketService>(context, listen: false).disconnect();
     super.dispose();
+  }
+
+  // Widget pour afficher un message d'accès refusé
+  Widget _buildAccessDeniedScreen(String message) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Accès Refusé')),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.block, size: 80, color: Colors.red),
+              const SizedBox(height: 24),
+              Text(
+                message,
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 18),
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () => Navigator.of(NavigationService.navigatorKey.currentContext!).pushReplacementNamed('/login'),
+                child: const Text('Retour à la connexion'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -145,14 +172,14 @@ class _MyAppState extends State<MyApp> {
       cardColor: darkSurface,
       cardTheme: CardThemeData(
         elevation: 0,
-        color: darkSurface.withOpacity(0.5),
+        color: darkSurface.withValues(alpha: 0.5),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16.0),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: darkSurface.withOpacity(0.5),
+        fillColor: darkSurface.withValues(alpha: 0.5),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12.0),
           borderSide: BorderSide.none,
@@ -185,7 +212,6 @@ class _MyAppState extends State<MyApp> {
       ),
     );
 
-    // A more modern light theme to match
     final baseLightTheme = ThemeData.light(useMaterial3: true);
     final lightTheme = baseLightTheme.copyWith(
       primaryColor: primaryNeon,
@@ -235,7 +261,6 @@ class _MyAppState extends State<MyApp> {
             '/my_groups': (context) => const MyGroupsScreen(),
             '/create_group': (context) => const CreateGroupScreen(),
             '/advanced_search': (context) => const AdvancedSearchScreen(),
-            '/chat_list': (context) => const ChatListScreen(),
             '/client_demands': (context) => const ClientDemandsScreen(),
             '/conversations': (context) => const ConversationsListScreen(),
             '/professionals_list': (context) => const ProfessionalsListScreen(),
@@ -249,20 +274,29 @@ class _MyAppState extends State<MyApp> {
             '/artisan_services': (context) => const ArtisanServicesScreen(),
             '/artisan_demands': (context) => const ArtisanDemandsScreen(),
             '/admin_panel': (context) => const AdminPanelScreen(),
-            '/create_demand': (context) {
-              final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-              return CreateDemandScreen(
-                artisanId: args?['artisanId'] ?? 0,
-                artisanName: args?['artisanName'] ?? 'Artisan',
-                selectedService: args?['selectedService'],
-              );
-            },
             '/my_profile': (context) => const MyProfileScreen(),
             '/settings': (context) => const SettingsScreen(),
           },
-          onGenerateRoute: (settings) {
+          onGenerateRoute: (settings) async {
+            // Routes publiques (pas besoin d'authentification)
+            final publicRoutes = [
+              '/login',
+              '/register',
+              '/register/client',
+              '/register/artisan',
+              '/register/commercant',
+            ];
+
+            // Si c'est une route publique, autoriser directement
+            if (settings.name != null && publicRoutes.contains(settings.name)) {
+              return null; // Laisse le système utiliser les routes définies
+            }
+
+            // Routes avec arguments spéciaux
             if (settings.name != null) {
               final uri = Uri.parse(settings.name!);
+              
+              // Reset password - Route publique
               if (settings.name!.startsWith('/reset-password')) {
                 final token = uri.queryParameters['token'];
                 if (token != null) {
@@ -271,16 +305,63 @@ class _MyAppState extends State<MyApp> {
                   );
                 }
               }
-              if (settings.name!.startsWith('/artisan_detail')) {
-                 // Extract arguments if passed via arguments object or query params
-                 // Assuming arguments are passed via settings.arguments for internal navigation
-                 final args = settings.arguments;
-                 if (args is int) {
-                   return MaterialPageRoute(
-                     builder: (context) => ArtisanDetailScreen(artisanId: args),
-                   );
-                 }
+
+              // Routes protégées par authentification
+              final isAuth = await _routeGuard.isAuthenticated();
+              
+              if (!isAuth) {
+                // Rediriger vers login si non authentifié
+                return MaterialPageRoute(
+                  builder: (context) => const LoginScreen(),
+                );
               }
+
+              // Obtenir le rôle de l'utilisateur
+              final userRole = await _routeGuard.getUserRole();
+
+              // Routes avec contrôle d'accès basé sur les rôles
+              if (settings.name!.startsWith('/admin_panel')) {
+                if (userRole != 'admin') {
+                  return MaterialPageRoute(
+                    builder: (context) => _buildAccessDeniedScreen(
+                      'Seuls les administrateurs peuvent accéder à cette page.',
+                    ),
+                  );
+                }
+              }
+
+              if (settings.name!.startsWith('/artisan_portfolio') ||
+                  settings.name!.startsWith('/artisan_services') ||
+                  settings.name!.startsWith('/artisan_demands')) {
+                if (userRole != 'artisan' && userRole != 'commercant') {
+                  return MaterialPageRoute(
+                    builder: (context) => _buildAccessDeniedScreen(
+                      'Cette page est réservée aux artisans et commerçants.',
+                    ),
+                  );
+                }
+              }
+
+              if (settings.name!.startsWith('/client_demands')) {
+                if (userRole != 'client') {
+                  return MaterialPageRoute(
+                    builder: (context) => _buildAccessDeniedScreen(
+                      'Cette page est réservée aux clients.',
+                    ),
+                  );
+                }
+              }
+
+              // Routes avec arguments
+              if (settings.name!.startsWith('/artisan_detail')) {
+                final args = settings.arguments;
+                if (args is int) {
+                  return MaterialPageRoute(
+                    builder: (context) => ArtisanDetailScreen(artisanId: args),
+                  );
+                }
+              }
+
               if (settings.name!.startsWith('/chat')) {
                 final args = settings.arguments as Map<String, dynamic>;
                 return MaterialPageRoute(
@@ -291,15 +372,28 @@ class _MyAppState extends State<MyApp> {
                   ),
                 );
               }
+
               if (settings.name!.startsWith('/demand_detail')) {
-                 final args = settings.arguments;
-                 if (args is int) {
-                   return MaterialPageRoute(
-                     builder: (context) => DemandDetailScreen(demandId: args),
-                   );
-                 }
+                final args = settings.arguments;
+                if (args is int) {
+                  return MaterialPageRoute(
+                    builder: (context) => DemandDetailScreen(demandId: args),
+                  );
+                }
+              }
+
+              if (settings.name!.startsWith('/create_demand')) {
+                final args = settings.arguments as Map<String, dynamic>?;
+                return MaterialPageRoute(
+                  builder: (context) => CreateDemandScreen(
+                    artisanId: args?['artisanId'] ?? 0,
+                    artisanName: args?['artisanName'] ?? 'Artisan',
+                    selectedService: args?['selectedService'],
+                  ),
+                );
               }
             }
+            
             return null;
           },
           debugShowCheckedModeBanner: false,

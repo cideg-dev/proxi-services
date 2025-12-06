@@ -69,7 +69,7 @@ class _SearchFiltersState extends State<SearchFilters> {
           
           // Filtre par catégorie/spécialité
           DropdownButtonFormField<String>(
-            value: _category,
+            initialValue: _category,
             decoration: const InputDecoration(
               labelText: 'Catégorie',
               border: OutlineInputBorder(),
@@ -148,7 +148,7 @@ class _SearchFiltersState extends State<SearchFilters> {
           
           // Tri
           DropdownButtonFormField<String>(
-            value: _sortBy,
+            initialValue: _sortBy,
             decoration: const InputDecoration(
               labelText: 'Trier par',
               border: OutlineInputBorder(),
