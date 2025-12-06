@@ -113,6 +113,23 @@ class _GlobalProfessionalsListScreenState extends State<GlobalProfessionalsListS
                       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                       child: ListTile(
                         leading: CircleAvatar(
+                          backgroundImage: user['photo_url'] != null 
+                              ? NetworkImage(user['photo_url'])
+                              : null,
+                          child: user['photo_url'] == null
+                              ? Text(user['nom_complet']?[0] ?? '?')
+                              : null,
+                        ),
+                        title: Text(user['nom_complet'] ?? user['nom_entreprise'] ?? 'Utilisateur'),
+                        subtitle: Text('${user['role']} - ${user['email']}'),
+                        trailing: const Icon(Icons.arrow_forward_ios),
+                        onTap: () {
+                          // Navigate to user profile or details
+                        },
+                      ),
+                    );
+                  },
+                );
               },
             ),
           ),

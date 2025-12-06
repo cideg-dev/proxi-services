@@ -47,16 +47,15 @@ class _DemandDetailScreenState extends State<DemandDetailScreen> {
             child: ListView(
               children: <Widget>[
                 _buildDetailRow('Statut', demand.status),
-                _buildDetailRow('Artisan', demand.professionalName ?? 'N/A'),
-                _buildDetailRow('Client', demand.clientName ?? 'N/A'),
+                _buildDetailRow('Artisan ID', demand.artisanId.toString()),
+                _buildDetailRow('Client ID', demand.clientId.toString()),
                 const Divider(height: 30),
                 Text('Description', style: Theme.of(context).textTheme.titleLarge),
                 const SizedBox(height: 8),
-                Text(demand.serviceDescription),
+                Text(demand.serviceDescription ?? 'Description non disponible'),
                 const Divider(height: 30),
-                 _buildDetailRow('Créée le', DateFormat('dd/MM/yyyy HH:mm').format(demand.createdAt)),
-                 if (demand.scheduledDate != null)
-                   _buildDetailRow('Prévue le', DateFormat('dd/MM/yyyy HH:mm').format(demand.scheduledDate!)),
+                 if (demand.createdAt != null)
+                   _buildDetailRow('Créée le', DateFormat('dd/MM/yyyy HH:mm').format(demand.createdAt!)),
               ],
             ),
           );

@@ -277,7 +277,7 @@ class _MyAppState extends State<MyApp> {
             '/my_profile': (context) => const MyProfileScreen(),
             '/settings': (context) => const SettingsScreen(),
           },
-          onGenerateRoute: (settings) async {
+          onGenerateRoute: (settings) {
             // Routes publiques (pas besoin d'authentification)
             final publicRoutes = [
               '/login',
@@ -306,53 +306,70 @@ class _MyAppState extends State<MyApp> {
                 }
               }
 
-              // Routes protégées par authentification
-              final isAuth = await _routeGuard.isAuthenticated();
-              
-              if (!isAuth) {
-                // Rediriger vers login si non authentifié
+              // Pour les routes protégées, utiliser FutureBuilder
+              if (settings.name!.startsWith('/admin_panel') ||
+                  settings.name!.startsWith('/artisan_portfolio') ||
+                  settings.name!.startsWith('/artisan_services') ||
+                  settings.name!.startsWith('/artisan_demands') ||
+                  settings.name!.startsWith('/client_demands')) {
                 return MaterialPageRoute(
-                  builder: (context) => const LoginScreen(),
+                  builder: (context) => FutureBuilder<Map<String, dynamic>>(
+                    future: () async {
+                      final isAuth = await _routeGuard.isAuthenticated();
+                      final userRole = await _routeGuard.getUserRole();
+                      return {'isAuth': isAuth, 'userRole': userRole};
+                    }(),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        return const Scaffold(
+                          body: Center(child: CircularProgressIndicator()),
+                        );
+                      }
+                      
+                      final data = snapshot.data!;
+                      final isAuth = data['isAuth'] as bool;
+                      final userRole = data['userRole'] as String?;
+
+                      if (!isAuth) {
+                        return const LoginScreen();
+                      }
+
+                      // Vérification spécifique par routes
+                      if (settings.name!.startsWith('/admin_panel') && userRole != 'admin') {
+                        return _buildAccessDeniedScreen(
+                          'Seuls les administrateurs peuvent accéder à cette page.',
+                        );
+                      }
+
+                      if ((settings.name!.startsWith('/artisan_portfolio') ||
+                           settings.name!.startsWith('/artisan_services') ||
+                           settings.name!.startsWith('/artisan_demands')) &&
+                          userRole != 'artisan' && userRole != 'commercant') {
+                        return _buildAccessDeniedScreen(
+                          'Cette page est réservée aux artisans et commerçants.',
+                        );
+                      }
+
+                      if (settings.name!.startsWith('/client_demands') && userRole != 'client') {
+                        return _buildAccessDeniedScreen(
+                          'Cette page est réservée aux clients.',
+                        );
+                      }
+
+                      // Retourner à la page appropriée selon la route
+                      if (settings.name == '/admin_panel') return const AdminPanelScreen();
+                      if (settings.name == '/artisan_portfolio') return const ArtisanPortfolioScreen();
+                      if (settings.name == '/artisan_services') return const ArtisanServicesScreen();
+                      if (settings.name == '/artisan_demands') return const ArtisanDemandsScreen();
+                      if (settings.name == '/client_demands') return const ClientDemandsScreen();
+                      
+                      return const SizedBox(); // Fallback
+                    },
+                  ),
                 );
               }
 
-              // Obtenir le rôle de l'utilisateur
-              final userRole = await _routeGuard.getUserRole();
-
-              // Routes avec contrôle d'accès basé sur les rôles
-              if (settings.name!.startsWith('/admin_panel')) {
-                if (userRole != 'admin') {
-                  return MaterialPageRoute(
-                    builder: (context) => _buildAccessDeniedScreen(
-                      'Seuls les administrateurs peuvent accéder à cette page.',
-                    ),
-                  );
-                }
-              }
-
-              if (settings.name!.startsWith('/artisan_portfolio') ||
-                  settings.name!.startsWith('/artisan_services') ||
-                  settings.name!.startsWith('/artisan_demands')) {
-                if (userRole != 'artisan' && userRole != 'commercant') {
-                  return MaterialPageRoute(
-                    builder: (context) => _buildAccessDeniedScreen(
-                      'Cette page est réservée aux artisans et commerçants.',
-                    ),
-                  );
-                }
-              }
-
-              if (settings.name!.startsWith('/client_demands')) {
-                if (userRole != 'client') {
-                  return MaterialPageRoute(
-                    builder: (context) => _buildAccessDeniedScreen(
-                      'Cette page est réservée aux clients.',
-                    ),
-                  );
-                }
-              }
-
-              // Routes avec arguments
+              // Routes avec arguments (pas besoin de vérification de rôle spécifique)
               if (settings.name!.startsWith('/artisan_detail')) {
                 final args = settings.arguments;
                 if (args is int) {

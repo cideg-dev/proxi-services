@@ -10,6 +10,7 @@ import 'package:lottie/lottie.dart';
 import 'package:frontend/widgets/empty_state.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:frontend/screens/portfolio_item_detail_screen.dart';
+import 'package:frontend/models/artisan_model.dart';
 
 class ArtisanDetailScreen extends StatefulWidget {
   final int artisanId;
@@ -24,7 +25,7 @@ class _ArtisanDetailScreenState extends State<ArtisanDetailScreen> {
   final ArtisanService _artisanService = ArtisanService();
   final QAService _qaService = QAService();
   final TokenManager _tokenManager = TokenManager();
-  late Future<Map<String, dynamic>> _dataFuture;
+  late Future<Artisan> _dataFuture;
   List<dynamic> _professionalReviews = [];
   List<dynamic> _professionalPortfolio = [];
   List<dynamic> _professionalServices = [];
@@ -44,9 +45,9 @@ class _ArtisanDetailScreenState extends State<ArtisanDetailScreen> {
     _loadUserData();
   }
 
-  Future<Map<String, dynamic>> _fetchProfessionalDetails() async {
+  Future<Artisan> _fetchProfessionalDetails() async {
     final professionalData = await _artisanService.getArtisanById(widget.artisanId);
-    _checkFavoriteStatus(professionalData['id']); // Check favorite status after loading details
+    _checkFavoriteStatus(professionalData.id); // Check favorite status after loading details
     return professionalData;
   }
 
@@ -104,7 +105,7 @@ class _ArtisanDetailScreenState extends State<ArtisanDetailScreen> {
     try {
       final favorites = await _artisanService.getFavoriteArtisans();
       setState(() {
-        _isFavorited = favorites.any((fav) => fav['favorite_artisan_id'] == professionalId);
+        _isFavorited = favorites.any((fav) => fav.id == professionalId);
       });
     } catch (e) {
       print('Error checking favorite status: $e');
@@ -138,10 +139,10 @@ class _ArtisanDetailScreenState extends State<ArtisanDetailScreen> {
     }
   }
 
-  void _shareProfessionalProfile(Map<String, dynamic> professional) {
-    final String specialty = professional['specialite'] ?? professional['type_commerce'] ?? 'compétence inconnue';
+  void _shareProfessionalProfile(Artisan professional) {
+    final String specialty = professional.specialty ?? 'compétence inconnue';
     final String shareText =
-        'Découvrez ${professional['nom_complet'] ?? professional['nom_entreprise']}, un expert en $specialty sur Proxi-Services !';
+        'Découvrez ${professional.name}, un expert en $specialty sur Proxi-Services !';
     // Implement actual sharing logic (e.g., using share_plus package)
     print(shareText);
   }
@@ -163,7 +164,7 @@ class _ArtisanDetailScreenState extends State<ArtisanDetailScreen> {
           // Add other actions if needed
         ],
       ),
-      body: FutureBuilder<Map<String, dynamic>>(
+      body: FutureBuilder<Artisan>(
         future: _dataFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -177,7 +178,7 @@ class _ArtisanDetailScreenState extends State<ArtisanDetailScreen> {
           }
 
           final professional = snapshot.data!;
-          final bool isArtisan = professional['role'] == 'artisan';
+          final bool isArtisan = professional.role == 'artisan';
 
           return SingleChildScrollView(
             child: Column(
@@ -204,9 +205,7 @@ class _ArtisanDetailScreenState extends State<ArtisanDetailScreen> {
       onPressed: () {
         // We need professional data to pre-fill the description
         _dataFuture.then((professional) {
-          if (professional.isNotEmpty) {
-            _showGeneratePortfolioDialog(professional);
-          }
+          _showGeneratePortfolioDialog(professional);
         });
       },
       label: const Text('Générer Portfolio'),
@@ -215,16 +214,16 @@ class _ArtisanDetailScreenState extends State<ArtisanDetailScreen> {
     );
   }
 
-  Widget _buildGeneralInfoSection(Map<String, dynamic> professional, bool isArtisan) {
-    final String name = professional['nom_complet'] ?? professional['nom_entreprise'] ?? 'Nom non disponible';
-    final String specialty = professional['specialite'] ?? professional['type_commerce'] ?? 'Information non disponible';
-    final String description = professional['description'] ?? 'Description non disponible.';
-    final String location = professional['location'] ?? 'Non spécifiée';
-    final String telephone = professional['telephone'] ?? 'Non spécifié';
-    final String yearsExperience = professional['annees_experience']?.toString() ?? 'N/A';
-    final String siret = professional['siret'] ?? 'N/A';
-    final String website = professional['site_web'] ?? 'N/A';
-    final String photoUrl = professional['photo_url'] ?? '';
+  Widget _buildGeneralInfoSection(Artisan professional, bool isArtisan) {
+    final String name = professional.name ?? 'Nom non disponible';
+    final String specialty = professional.specialty ?? 'Information non disponible';
+    final String description = professional.description ?? 'Description non disponible.';
+    final String location = professional.city ?? 'Non spécifiée';
+    final String telephone = professional.phoneNumber ?? 'Non spécifié';
+    final String yearsExperience = professional.yearsExperience?.toString() ?? 'N/A';
+    final String siret = professional.siret ?? 'N/A';
+    final String website = professional.website ?? 'N/A';
+    final String photoUrl = professional.avatarUrl ?? '';
 
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -234,7 +233,7 @@ class _ArtisanDetailScreenState extends State<ArtisanDetailScreen> {
           Row(
             children: [
               Hero(
-                tag: 'artisan-avatar-${professional['id']}',
+                tag: 'artisan-avatar-${professional.id}',
                 child: CircleAvatar(
                   radius: 40,
                   backgroundImage: photoUrl.isNotEmpty
@@ -272,8 +271,8 @@ class _ArtisanDetailScreenState extends State<ArtisanDetailScreen> {
           _buildInfoRow(Icons.location_on, 'Localisation: $location'),
           _buildInfoRow(Icons.phone, 'Téléphone: $telephone'),
           if (isArtisan) _buildInfoRow(Icons.work, 'Années d\'experience: $yearsExperience'),
-          if (!isArtisan && professional['horaires_ouverture'] != null)
-            _buildInfoRow(Icons.access_time, 'Horaires: ${professional['horaires_ouverture']}'),
+          if (!isArtisan && professional.openingHours != null)
+            _buildInfoRow(Icons.access_time, 'Horaires: ${professional.openingHours}'),
           _buildInfoRow(Icons.credit_card, 'SIRET: $siret'),
           if (website != 'N/A') _buildInfoRow(Icons.link, 'Site Web: $website', onTap: () => _launchURL(website)),
         ],
@@ -305,7 +304,7 @@ class _ArtisanDetailScreenState extends State<ArtisanDetailScreen> {
     );
   }
 
-  Widget _buildVideoSection(Map<String, dynamic> professional) {
+  Widget _buildVideoSection(Artisan professional) {
     // Placeholder for video section
     return const SizedBox.shrink();
   }
@@ -462,13 +461,13 @@ class _ArtisanDetailScreenState extends State<ArtisanDetailScreen> {
     );
   }
 
-  Widget _buildContactButton(Map<String, dynamic> professional) {
+  Widget _buildContactButton(Artisan professional) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: ElevatedButton(
         onPressed: () {
           // TODO: Implement chat functionality
-          print('Contacter ${professional['nom_complet'] ?? professional['nom_entreprise']}');
+          print('Contacter ${professional.name}');
         },
         child: const Text('Contacter le professionnel'),
       ),
@@ -502,9 +501,9 @@ class _ArtisanDetailScreenState extends State<ArtisanDetailScreen> {
 
   // --- AI Portfolio Generation Logic ---
 
-  void _showGeneratePortfolioDialog(Map<String, dynamic> professional) {
+  void _showGeneratePortfolioDialog(Artisan professional) {
     final descriptionController = TextEditingController(
-      text: professional['description'] ?? '',
+      text: professional.description ?? '',
     );
 
     showDialog(

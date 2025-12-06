@@ -183,11 +183,11 @@ class _ArtisanDemandsScreenState extends State<ArtisanDemandsScreen> {
             padding: const EdgeInsets.all(8.0), // Changed from only(bottom: 8.0) to all(8.0) for consistency
             child: GlassCard(
               child: ListTile(
-                title: Text('Demande de ${demand.clientName ?? 'Client inconnu'}'),
+                title: Text('Demande #${demand.id} - Client ID: ${demand.clientId}'),
                 subtitle: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(demand.serviceDescription),
+                    Text(demand.serviceDescription ?? 'Description non disponible'),
                     const SizedBox(height: 8),
                     Chip(
                       label: Text(demand.status),

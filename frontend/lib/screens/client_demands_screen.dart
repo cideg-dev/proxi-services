@@ -192,19 +192,16 @@ class _ClientDemandsScreenState extends State<ClientDemandsScreen> {
                     arguments: demand.id,
                   ).then((_) => _loadDemands()); // Refresh when coming back
                 },
-                title: Text(demand.professionalName ?? 'Professionnel inconnu'),
+                title: Text('Demande #${demand.id} - Artisan ID: ${demand.artisanId}'),
                 subtitle: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Demande #${demand.id}'),
-                    const SizedBox(height: 4),
-                    Text(demand.serviceDescription),
+                    Text(demand.serviceDescription ?? 'Description non disponible'),
                     const SizedBox(height: 8),
                     Chip(
                       label: Text(demand.status),
                       backgroundColor: Colors.black.withValues(alpha: 0.3),
-                      side: BorderSide.none,
-                    ),
+                      side: BorderSide.none),
                   ],
                 ),
                 trailing: isPending
