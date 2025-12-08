@@ -13,12 +13,13 @@ class AnalyticsService {
       throw Exception('Utilisateur non authentifié');
     }
 
-    final response = await _apiService.get('/api/analytics/main-stats/$userId');
-    
-    if (response.statusCode == 200) {
+    final response = await ApiService.get('/api/analytics/main-stats/$userId');
+
+    if (ApiService.isSuccessful(response.statusCode)) {
       return jsonDecode(response.body);
     } else {
-      throw Exception('Échec du chargement des statistiques: ${response.body}');
+      final errorMessage = ApiService.extractErrorMessage(response);
+      throw Exception('Échec du chargement des statistiques: $errorMessage');
     }
   }
 

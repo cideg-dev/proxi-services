@@ -112,10 +112,10 @@ class NavigationService {
   static Future<T?> pushNamed<T extends Object?>(
     String routeName, {
     Object? arguments,
-  }) {
+  }) async {
     final state = navigatorKey.currentState;
     if (state != null) {
-      return state.pushNamed<T>(routeName, arguments: arguments);
+      return await state.pushNamed<T>(routeName, arguments: arguments);
     }
     return null;
   }
@@ -123,10 +123,10 @@ class NavigationService {
   static Future<T?> pushReplacementNamed<T extends Object?>(
     String routeName, {
     Object? arguments,
-  }) {
+  }) async {
     final state = navigatorKey.currentState;
     if (state != null) {
-      return state.pushReplacementNamed<T>(routeName, arguments: arguments);
+      return await state.pushReplacementNamed<T>(routeName, arguments: arguments);
     }
     return null;
   }
@@ -135,10 +135,10 @@ class NavigationService {
     String routeName, {
     Object? arguments,
     required RoutePredicate predicate,
-  }) {
+  }) async {
     final state = navigatorKey.currentState;
     if (state != null) {
-      return state.pushNamedAndRemoveUntil<T>(routeName, predicate, arguments: arguments);
+      return await state.pushNamedAndRemoveUntil<T>(routeName, predicate, arguments: arguments);
     }
     return null;
   }
