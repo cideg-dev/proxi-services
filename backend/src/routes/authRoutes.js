@@ -5,6 +5,7 @@ const TokenBlacklistService = require('../services/tokenBlacklistService');
 const EncryptionService = require('../services/encryptionService');
 const { pool } = require('../../db.config');
 const { body, validationResult } = require('express-validator');
+const authController = require('../controllers/authController');
 
 const router = Router();
 
@@ -358,6 +359,9 @@ router.post('/logout-others', require('../middleware/authMiddleware').authentica
     });
   }
 });
+
+// Nouvelle route pour rafraîchir le token
+router.post('/refresh', authController.refreshToken);
 
 module.exports = () => {
   return router;

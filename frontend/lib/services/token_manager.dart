@@ -5,6 +5,7 @@ import 'package:jwt_decode/jwt_decode.dart';
 class TokenManager {
   final _storage = const FlutterSecureStorage();
   static const _tokenKey = 'auth_token';
+  static const _refreshTokenKey = 'refresh_token'; // Key for refresh token
   static const _roleKey = 'user_role'; // New key for user role
   static const _emailKey = 'user_email'; // New key for user email
 
@@ -20,6 +21,15 @@ class TokenManager {
 
   Future<String?> getToken() async {
     return await _storage.read(key: _tokenKey);
+  }
+
+  // New method to handle refresh token
+  Future<void> setRefreshToken(String refreshToken) async {
+    await _storage.write(key: _refreshTokenKey, value: refreshToken);
+  }
+
+  Future<String?> getRefreshToken() async {
+    return await _storage.read(key: _refreshTokenKey);
   }
 
   // New method to persist user identity details

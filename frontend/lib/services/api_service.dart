@@ -12,21 +12,7 @@ class ApiService {
   static Future<http.Response> get(String endpoint, {Map<String, String>? headers}) async {
     try {
       final url = _buildUrl(endpoint);
-      final token = await _tokenManager.getToken();
-      
-      final requestHeaders = <String, String>{
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'User-Agent': 'Proxi-Services Flutter App',
-        if (token != null) 'Authorization': 'Bearer $token',
-        ...?headers,
-      };
-
-      final response = await http.get(
-        url,
-        headers: requestHeaders,
-      ).timeout(const Duration(seconds: _defaultTimeout));
-
+      final response = await _makeRequest('GET', url, headers: headers);
       _logApiCall('GET', endpoint, response.statusCode);
       return response;
     } catch (e) {
@@ -39,22 +25,7 @@ class ApiService {
   static Future<http.Response> post(String endpoint, dynamic data, {Map<String, String>? headers}) async {
     try {
       final url = _buildUrl(endpoint);
-      final token = await _tokenManager.getToken();
-      
-      final requestHeaders = <String, String>{
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'User-Agent': 'Proxi-Services Flutter App',
-        if (token != null) 'Authorization': 'Bearer $token',
-        ...?headers,
-      };
-
-      final response = await http.post(
-        url,
-        headers: requestHeaders,
-        body: jsonEncode(data),
-      ).timeout(const Duration(seconds: _defaultTimeout));
-
+      final response = await _makeRequest('POST', url, body: jsonEncode(data), headers: headers);
       _logApiCall('POST', endpoint, response.statusCode);
       return response;
     } catch (e) {
@@ -67,22 +38,7 @@ class ApiService {
   static Future<http.Response> put(String endpoint, dynamic data, {Map<String, String>? headers}) async {
     try {
       final url = _buildUrl(endpoint);
-      final token = await _tokenManager.getToken();
-      
-      final requestHeaders = <String, String>{
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'User-Agent': 'Proxi-Services Flutter App',
-        if (token != null) 'Authorization': 'Bearer $token',
-        ...?headers,
-      };
-
-      final response = await http.put(
-        url,
-        headers: requestHeaders,
-        body: jsonEncode(data),
-      ).timeout(const Duration(seconds: _defaultTimeout));
-
+      final response = await _makeRequest('PUT', url, body: jsonEncode(data), headers: headers);
       _logApiCall('PUT', endpoint, response.statusCode);
       return response;
     } catch (e) {
@@ -95,26 +51,171 @@ class ApiService {
   static Future<http.Response> delete(String endpoint, {Map<String, String>? headers}) async {
     try {
       final url = _buildUrl(endpoint);
-      final token = await _tokenManager.getToken();
-      
-      final requestHeaders = <String, String>{
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'User-Agent': 'Proxi-Services Flutter App',
-        if (token != null) 'Authorization': 'Bearer $token',
-        ...?headers,
-      };
-
-      final response = await http.delete(
-        url,
-        headers: requestHeaders,
-      ).timeout(const Duration(seconds: _defaultTimeout));
-
+      final response = await _makeRequest('DELETE', url, headers: headers);
       _logApiCall('DELETE', endpoint, response.statusCode);
       return response;
     } catch (e) {
       _logError('DELETE', endpoint, e);
       rethrow;
+    }
+  }
+
+  // Méthode privée pour effectuer la requête avec gestion du token
+  static Future<http.Response> _makeRequest(
+    String method,
+    Uri url, {
+    String? body,
+    Map<String, String>? headers,
+  }) async {
+    // Obtenir le token et les headers
+    final token = await _tokenManager.getToken();
+    final requestHeaders = <String, String>{
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'User-Agent': 'Proxi-Services Flutter App',
+      if (token != null) 'Authorization': 'Bearer $token',
+      ...?headers,
+    };
+
+    // Faire la requête initiale
+    http.Response response = await http.Request(method, url)
+      .send(
+        headers: requestHeaders,
+        body: body,
+      )
+      .timeout(const Duration(seconds: _defaultTimeout))
+      .then((streamedResponse) => http.Response.fromStream(streamedResponse));
+
+    // Vérifier si la requête a échoué à cause d'un token expiré (401 Unauthorized)
+    if (response.statusCode == 401) {
+      final responseBody = safeJsonDecode(response.body);
+      final errorMessage = responseBody['message'] ?? responseBody['error'] ?? '';
+
+      // Si c'est une erreur de token expiré, essayer de le rafraîchir
+      if (errorMessage.contains('expired') || errorMessage.contains('invalid') || errorMessage.contains('unable to parse') || response.statusCode == 401) {
+        bool tokenRefreshed = await _refreshToken();
+        if (tokenRefreshed) {
+          // Réessayer la requête avec le nouveau token
+          final newToken = await _tokenManager.getToken();
+          final newRequestHeaders = <String, String>{
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'User-Agent': 'Proxi-Services Flutter App',
+            if (newToken != null) 'Authorization': 'Bearer $newToken',
+            ...?headers,
+          };
+
+          response = await http.Request(method, url)
+            .send(
+              headers: newRequestHeaders,
+              body: body,
+            )
+            .timeout(const Duration(seconds: _defaultTimeout))
+            .then((streamedResponse) => http.Response.fromStream(streamedResponse));
+        }
+      }
+    }
+
+    return response;
+  }
+
+  // Méthode pour rafraîchir le token
+  static Future<bool> _refreshToken() async {
+    try {
+      // Récupérer le refresh token
+      final refreshToken = await _tokenManager.getRefreshToken();
+      if (refreshToken == null) {
+        // Si pas de refresh token, la session est complètement expirée
+        return false;
+      }
+
+      // Déterminer si on utilise le backend local ou Supabase
+      if (ApiConstants.useLocalBackend) {
+        // Backend local - utiliser l'endpoint standard
+        return await _refreshTokenWithLocalBackend(refreshToken);
+      } else {
+        // Supabase Functions - utiliser une fonction similaire
+        return await _refreshTokenWithSupabase(refreshToken);
+      }
+    } catch (e) {
+      _logError('_refreshToken', '/auth/refresh', e);
+      return false;
+    }
+  }
+
+  // Méthode pour rafraîchir le token avec le backend local
+  static Future<bool> _refreshTokenWithLocalBackend(String refreshToken) async {
+    try {
+      final refreshTokenUrl = Uri.parse(ApiConstants.baseUrl + '/api/auth/refresh');
+      final response = await http.post(
+        refreshTokenUrl,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $refreshToken',
+        },
+      ).timeout(const Duration(seconds: _defaultTimeout));
+
+      if (isSuccessful(response.statusCode)) {
+        final data = safeJsonDecode(response.body);
+        final newAccessToken = data['token'];
+        final newRefreshToken = data['refreshToken'];
+
+        if (newAccessToken != null) {
+          await _tokenManager.setToken(newAccessToken);
+          if (newRefreshToken != null) {
+            await _tokenManager.setRefreshToken(newRefreshToken);
+          }
+          return true;
+        }
+      }
+      
+      // Si le rafraîchissement a échoué, déconnecter l'utilisateur
+      await _tokenManager.clearToken();
+      return false;
+    } catch (e) {
+      _logError('_refreshTokenWithLocalBackend', '/api/auth/refresh', e);
+      return false;
+    }
+  }
+
+  // Méthode pour rafraîchir le token avec Supabase Functions
+  static Future<bool> _refreshTokenWithSupabase(String refreshToken) async {
+    try {
+      // Pour Supabase, nous pourrions avoir une fonction spécifique ou 
+      // utiliser le service d'authentification Supabase directement
+      // Pour l'instant, nous utiliserons une approche similaire
+      final refreshTokenUrl = Uri.parse('${ApiConstants.supabaseBaseUrl}/refresh-token');
+      
+      final response = await http.post(
+        refreshTokenUrl,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $refreshToken',
+        },
+      ).timeout(const Duration(seconds: _defaultTimeout));
+
+      if (isSuccessful(response.statusCode)) {
+        final data = safeJsonDecode(response.body);
+        final newAccessToken = data['token'];
+        final newRefreshToken = data['refreshToken'];
+
+        if (newAccessToken != null) {
+          await _tokenManager.setToken(newAccessToken);
+          if (newRefreshToken != null) {
+            await _tokenManager.setRefreshToken(newRefreshToken);
+          }
+          return true;
+        }
+      }
+      
+      // Si le rafraîchissement a échoué, déconnecter l'utilisateur
+      await _tokenManager.clearToken();
+      return false;
+    } catch (e) {
+      _logError('_refreshTokenWithSupabase', '/refresh-token', e);
+      return false;
     }
   }
 
@@ -125,7 +226,8 @@ class ApiService {
       return Uri.parse(endpoint);
     }
     
-    // Sinon, construire l'URL à partir de la base
+    // Pour les appels à des endpoints spécifiques à l'authentification
+    // déterminer la bonne base URL
     String baseUrl = ApiConstants.baseUrl;
     
     // S'assurer que l'endpoint commence par / si ce n'est pas déjà le cas

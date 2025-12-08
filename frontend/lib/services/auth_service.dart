@@ -16,6 +16,8 @@ class AuthService {
     if (ApiService.isSuccessful(response.statusCode)) {
       final data = ApiService.safeJsonDecode(response.body);
       String? token;
+      String? refreshToken;
+
       if (data.containsKey('token')) {
         token = data['token'];
       } else if (data.containsKey('access_token')) {
@@ -24,8 +26,19 @@ class AuthService {
         token = data['session']['access_token'];
       }
 
+      if (data.containsKey('refreshToken')) {
+        refreshToken = data['refreshToken'];
+      } else if (data.containsKey('refresh_token')) {
+        refreshToken = data['refresh_token'];
+      } else if (data.containsKey('session') && data['session'] is Map) {
+        refreshToken = data['session']['refresh_token'];
+      }
+
       if (token != null) {
         await _tokenManager.setToken(token);
+        if (refreshToken != null) {
+          await _tokenManager.setRefreshToken(refreshToken);
+        }
 
         Map<String, dynamic>? user;
         if (data.containsKey('user')) {
@@ -71,6 +84,8 @@ class AuthService {
     if (ApiService.isSuccessful(response.statusCode)) {
       final data = ApiService.safeJsonDecode(response.body);
       String? token;
+      String? refreshToken;
+
       if (data.containsKey('token')) {
         token = data['token'];
       } else if (data.containsKey('access_token')) {
@@ -79,8 +94,19 @@ class AuthService {
         token = data['session']['access_token'];
       }
 
+      if (data.containsKey('refreshToken')) {
+        refreshToken = data['refreshToken'];
+      } else if (data.containsKey('refresh_token')) {
+        refreshToken = data['refresh_token'];
+      } else if (data.containsKey('session') && data['session'] is Map) {
+        refreshToken = data['session']['refresh_token'];
+      }
+
       if (token != null) {
         await _tokenManager.setToken(token);
+        if (refreshToken != null) {
+          await _tokenManager.setRefreshToken(refreshToken);
+        }
 
          Map<String, dynamic>? user;
         if (data.containsKey('user')) {
