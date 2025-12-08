@@ -3,7 +3,6 @@ import 'package:frontend/services/api_service.dart';
 import 'package:frontend/services/token_manager.dart';
 
 class AnalyticsService {
-  final ApiService _apiService = ApiService();
   final TokenManager _tokenManager = TokenManager();
 
   // Obtenir les statistiques principales
@@ -34,14 +33,15 @@ class AnalyticsService {
       throw Exception('Utilisateur non authentifié');
     }
 
-    final response = await _apiService.get(
+    final response = await ApiService.get(
       '/api/analytics/revenue/$userId?startDate=${startDate.toIso8601String()}&endDate=${endDate.toIso8601String()}&period=$period'
     );
-    
-    if (response.statusCode == 200) {
+
+    if (ApiService.isSuccessful(response.statusCode)) {
       return jsonDecode(response.body);
     } else {
-      throw Exception('Échec du chargement des données de revenus: ${response.body}');
+      final errorMessage = ApiService.extractErrorMessage(response);
+      throw Exception('Échec du chargement des données de revenus: $errorMessage');
     }
   }
 
@@ -56,14 +56,15 @@ class AnalyticsService {
       throw Exception('Utilisateur non authentifié');
     }
 
-    final response = await _apiService.get(
+    final response = await ApiService.get(
       '/api/analytics/appointments/$userId?startDate=${startDate.toIso8601String()}&endDate=${endDate.toIso8601String()}&period=$period'
     );
-    
-    if (response.statusCode == 200) {
+
+    if (ApiService.isSuccessful(response.statusCode)) {
       return jsonDecode(response.body);
     } else {
-      throw Exception('Échec du chargement des données de rendez-vous: ${response.body}');
+      final errorMessage = ApiService.extractErrorMessage(response);
+      throw Exception('Échec du chargement des données de rendez-vous: $errorMessage');
     }
   }
 
@@ -78,14 +79,15 @@ class AnalyticsService {
       throw Exception('Utilisateur non authentifié');
     }
 
-    final response = await _apiService.get(
+    final response = await ApiService.get(
       '/api/analytics/reviews/$userId?startDate=${startDate.toIso8601String()}&endDate=${endDate.toIso8601String()}&period=$period'
     );
-    
-    if (response.statusCode == 200) {
+
+    if (ApiService.isSuccessful(response.statusCode)) {
       return jsonDecode(response.body);
     } else {
-      throw Exception('Échec du chargement des données d\'évaluations: ${response.body}');
+      final errorMessage = ApiService.extractErrorMessage(response);
+      throw Exception('Échec du chargement des données d\'évaluations: $errorMessage');
     }
   }
 
@@ -101,23 +103,24 @@ class AnalyticsService {
       throw Exception('Utilisateur non authentifié');
     }
 
-    final response = await _apiService.post('/api/analytics/comparison/$userId',
-      body: {
-        'currentPeriod': {
-          'start': currentPeriodStart.toIso8601String(),
-          'end': currentPeriodEnd.toIso8601String(),
-        },
-        'previousPeriod': {
-          'start': previousPeriodStart.toIso8601String(),
-          'end': previousPeriodEnd.toIso8601String(),
-        },
-      }
-    );
-    
-    if (response.statusCode == 200) {
+    final body = {
+      'currentPeriod': {
+        'start': currentPeriodStart.toIso8601String(),
+        'end': currentPeriodEnd.toIso8601String(),
+      },
+      'previousPeriod': {
+        'start': previousPeriodStart.toIso8601String(),
+        'end': previousPeriodEnd.toIso8601String(),
+      },
+    };
+
+    final response = await ApiService.post('/api/analytics/comparison/$userId', body);
+
+    if (ApiService.isSuccessful(response.statusCode)) {
       return jsonDecode(response.body);
     } else {
-      throw Exception('Échec du chargement des statistiques comparatives: ${response.body}');
+      final errorMessage = ApiService.extractErrorMessage(response);
+      throw Exception('Échec du chargement des statistiques comparatives: $errorMessage');
     }
   }
 
@@ -131,14 +134,15 @@ class AnalyticsService {
       throw Exception('Utilisateur non authentifié');
     }
 
-    final response = await _apiService.get(
+    final response = await ApiService.get(
       '/api/analytics/top-services/$userId?startDate=${startDate.toIso8601String()}&endDate=${endDate.toIso8601String()}'
     );
-    
-    if (response.statusCode == 200) {
+
+    if (ApiService.isSuccessful(response.statusCode)) {
       return jsonDecode(response.body);
     } else {
-      throw Exception('Échec du chargement des tendances de services: ${response.body}');
+      final errorMessage = ApiService.extractErrorMessage(response);
+      throw Exception('Échec du chargement des tendances de services: $errorMessage');
     }
   }
 
@@ -152,14 +156,15 @@ class AnalyticsService {
       throw Exception('Utilisateur non authentifié');
     }
 
-    final response = await _apiService.get(
+    final response = await ApiService.get(
       '/api/analytics/location/$userId?startDate=${startDate.toIso8601String()}&endDate=${endDate.toIso8601String()}'
     );
-    
-    if (response.statusCode == 200) {
+
+    if (ApiService.isSuccessful(response.statusCode)) {
       return jsonDecode(response.body);
     } else {
-      throw Exception('Échec du chargement des données géographiques: ${response.body}');
+      final errorMessage = ApiService.extractErrorMessage(response);
+      throw Exception('Échec du chargement des données géographiques: $errorMessage');
     }
   }
 
@@ -170,12 +175,13 @@ class AnalyticsService {
       throw Exception('Utilisateur non authentifié');
     }
 
-    final response = await _apiService.get('/api/analytics/client-preferences/$userId');
-    
-    if (response.statusCode == 200) {
+    final response = await ApiService.get('/api/analytics/client-preferences/$userId');
+
+    if (ApiService.isSuccessful(response.statusCode)) {
       return jsonDecode(response.body);
     } else {
-      throw Exception('Échec du chargement des préférences clients: ${response.body}');
+      final errorMessage = ApiService.extractErrorMessage(response);
+      throw Exception('Échec du chargement des préférences clients: $errorMessage');
     }
   }
 
@@ -198,12 +204,13 @@ class AnalyticsService {
       if (additionalParams != null) ...additionalParams,
     };
 
-    final response = await _apiService.post('/api/analytics/custom-report/$userId', body: body);
-    
-    if (response.statusCode == 200) {
+    final response = await ApiService.post('/api/analytics/custom-report/$userId', body);
+
+    if (ApiService.isSuccessful(response.statusCode)) {
       return jsonDecode(response.body);
     } else {
-      throw Exception('Échec du chargement du rapport personnalisé: ${response.body}');
+      final errorMessage = ApiService.extractErrorMessage(response);
+      throw Exception('Échec du chargement du rapport personnalisé: $errorMessage');
     }
   }
 }
