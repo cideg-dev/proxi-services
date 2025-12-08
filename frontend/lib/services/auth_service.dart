@@ -149,6 +149,14 @@ class AuthService {
       Map<String, dynamic> userMap;
       if (data.containsKey('user')) {
         userMap = data['user'];
+      } else if (data.containsKey('data')) {
+        // Gérer les réponses enveloppées
+        final responseData = data['data'];
+        if (responseData is Map<String, dynamic>) {
+          userMap = responseData;
+        } else {
+          userMap = data;
+        }
       } else {
         userMap = data;
       }

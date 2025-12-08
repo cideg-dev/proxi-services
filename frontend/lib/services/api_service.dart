@@ -349,11 +349,35 @@ class ApiService {
   // Méthode pour extraire le corps JSON de manière sécurisée
   static Map<String, dynamic> safeJsonDecode(String responseBody) {
     try {
-      return jsonDecode(responseBody) as Map<String, dynamic>;
+      // Vérifier si la réponse est vide
+      if (responseBody.isEmpty) {
+        return {
+          'error': 'Empty response',
+        };
+      }
+
+      final decoded = jsonDecode(responseBody);
+
+      // Vérifier si le résultat est déjà un Map<String, dynamic>
+      if (decoded is Map<String, dynamic>) {
+        return decoded;
+      }
+      // Si c'est une liste, envelopper dans un objet avec une clé de données
+      else if (decoded is List) {
+        return {
+          'data': decoded,
+        };
+      }
+      // Si c'est une valeur primitive, la convertir en objet
+      else {
+        return {
+          'result': decoded,
+        };
+      }
     } catch (e) {
-      // Si le décodage échoue, retourner un objet vide avec un message d'erreur
+      // Si le décodage échoue, retourner un objet avec un message d'erreur
       return {
-        'error': 'Invalid JSON response',
+        'error': 'Invalid JSON response: ${e.toString()}',
         'raw_response': responseBody,
       };
     }
