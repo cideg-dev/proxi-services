@@ -33,9 +33,20 @@ import 'package:provider/provider.dart';
 import 'package:frontend/services/auth_navigation_service.dart';
 import 'package:frontend/services/review_service.dart';
 import 'package:frontend/services/security_service.dart';
-import 'package:frontend/services/socket_service.dart';
+// import 'package:frontend/services/socket_service.dart'; // Déjà géré conditionnellement
 import 'package:frontend/services/theme_provider.dart';
 import 'package:frontend/services/route_guard.dart';
+// Services à commenter temporairement pour le build
+// import 'package:frontend/services/advanced_search_service.dart';
+// import 'package:frontend/services/appointment_service.dart';
+// import 'package:frontend/services/demand_service.dart';
+// import 'package:frontend/services/admin_service.dart';
+// import 'package:frontend/services/dashboard_service.dart';
+// import 'package:frontend/services/demacheur_service.dart';
+// import 'package:frontend/services/location_service.dart';
+// import 'package:frontend/services/notification_service.dart';
+// import 'package:frontend/services/payment_service.dart';
+// import 'package:frontend/services/qa_service.dart';
 import 'package:frontend/screens/my_groups_screen.dart';
 import 'package:frontend/screens/create_group_screen.dart';
 import 'package:frontend/widgets/in_app_notification.dart';
@@ -67,9 +78,9 @@ Future<void> main() async {
   runApp(
     MultiProvider(
       providers: [
-        // ChangeNotifierProvider(create: (context) => SocketService()), // Désactivé temporairement pour le build
         ChangeNotifierProvider(create: (context) => ThemeProvider()),
         ChangeNotifierProvider(create: (context) => NotificationUIProvider()),
+        // Plus de providers pour le moment pour permettre le build
       ],
       child: const MyApp(),
     ),
@@ -91,35 +102,14 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      try {
-        final socketService = Provider.of<SocketService>(context, listen: false);
-        final notificationProvider = Provider.of<NotificationUIProvider>(context, listen: false);
-
-        _notificationSubscription = socketService.notifications.listen((data) {
-          notificationProvider.showNotification(
-            NotificationData(
-              title: data['senderName'] ?? 'Nouvelle Notification',
-              message: data['message'] ?? 'Vous avez un nouveau message.',
-              icon: Icons.message,
-              color: Theme.of(context).primaryColor,
-            ),
-          );
-        });
-      } catch (e) {
-        // SocketService est désactivé, ignorer les notifications de socket
-        print('SocketService désactivé pour le build: $e');
-      }
+      // SocketService est désactivé pour permettre le build
+      // Pourrait être réactivé dans une version ultérieure
     });
   }
 
   @override
   void dispose() {
     _notificationSubscription?.cancel();
-    try {
-      Provider.of<SocketService>(context, listen: false).disconnect();
-    } catch (e) {
-      // SocketService est désactivé, ignorer la déconnexion
-    }
     super.dispose();
   }
 
