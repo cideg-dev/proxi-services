@@ -67,7 +67,7 @@ Future<void> main() async {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => SocketService()),
+        // ChangeNotifierProvider(create: (context) => SocketService()), // Désactivé temporairement pour le build
         ChangeNotifierProvider(create: (context) => ThemeProvider()),
         ChangeNotifierProvider(create: (context) => NotificationUIProvider()),
       ],
@@ -91,26 +91,35 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final socketService = Provider.of<SocketService>(context, listen: false);
-      final notificationProvider = Provider.of<NotificationUIProvider>(context, listen: false);
+      try {
+        final socketService = Provider.of<SocketService>(context, listen: false);
+        final notificationProvider = Provider.of<NotificationUIProvider>(context, listen: false);
 
-      _notificationSubscription = socketService.notifications.listen((data) {
-        notificationProvider.showNotification(
-          NotificationData(
-            title: data['senderName'] ?? 'Nouvelle Notification',
-            message: data['message'] ?? 'Vous avez un nouveau message.',
-            icon: Icons.message,
-            color: Theme.of(context).primaryColor,
-          ),
-        );
-      });
+        _notificationSubscription = socketService.notifications.listen((data) {
+          notificationProvider.showNotification(
+            NotificationData(
+              title: data['senderName'] ?? 'Nouvelle Notification',
+              message: data['message'] ?? 'Vous avez un nouveau message.',
+              icon: Icons.message,
+              color: Theme.of(context).primaryColor,
+            ),
+          );
+        });
+      } catch (e) {
+        // SocketService est désactivé, ignorer les notifications de socket
+        print('SocketService désactivé pour le build: $e');
+      }
     });
   }
 
   @override
   void dispose() {
     _notificationSubscription?.cancel();
-    Provider.of<SocketService>(context, listen: false).disconnect();
+    try {
+      Provider.of<SocketService>(context, listen: false).disconnect();
+    } catch (e) {
+      // SocketService est désactivé, ignorer la déconnexion
+    }
     super.dispose();
   }
 
