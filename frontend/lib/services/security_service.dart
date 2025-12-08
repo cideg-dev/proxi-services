@@ -8,7 +8,6 @@ class SecurityService {
   factory SecurityService() => _instance;
   SecurityService._internal();
 
-  final ApiService _apiService = ApiService();
   final TokenManager _tokenManager = TokenManager();
 
   // Hasher un mot de passe
@@ -89,12 +88,12 @@ class SecurityService {
   Future<bool> hasPermission(String permission) async {
     final token = await _tokenManager.getToken();
     if (token == null) return false;
-    
+
     // Ici, vous pouvez vérifier les permissions dans le token
     // ou faire un appel API pour vérifier les permissions
     try {
-      final response = await _apiService.get('/api/users/permissions');
-      if (response.statusCode == 200) {
+      final response = await ApiService.get('/api/users/permissions');
+      if (ApiService.isSuccessful(response.statusCode)) {
         final permissions = jsonDecode(response.body)['permissions'] as List<dynamic>;
         return permissions.contains(permission);
       }
@@ -130,8 +129,8 @@ class SecurityService {
     String? ipAddress,
   }) async {
     try {
-      await _apiService.post('/api/security/log', 
-        body: {
+      await ApiService.post('/api/security/log',
+        {
           'eventType': eventType,
           'userId': userId,
           'details': details ?? '',
@@ -147,8 +146,8 @@ class SecurityService {
   // Vérifier si une adresse IP est dans la liste noire
   Future<bool> isIpBlacklisted(String ipAddress) async {
     try {
-      final response = await _apiService.get('/api/security/blacklist/$ipAddress');
-      if (response.statusCode == 200) {
+      final response = await ApiService.get('/api/security/blacklist/$ipAddress');
+      if (ApiService.isSuccessful(response.statusCode)) {
         final data = jsonDecode(response.body);
         return data['isBlacklisted'] ?? false;
       }
