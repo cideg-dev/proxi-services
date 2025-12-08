@@ -290,24 +290,11 @@ class ApiService {
   // Méthode pour rafraîchir le token avec Supabase Functions
   static Future<bool> _refreshTokenWithSupabase(String refreshToken) async {
     try {
-      // Pour Supabase, nous avons besoin d'une gestion spécifique
-      // En attendant que la fonction de refresh soit implémentée côté Supabase
-      // nous pourrions devoir rediriger vers la page de connexion
-      return false; // Pour le moment, pas de support pour refresh via Supabase
-    } catch (e) {
-      _logError('_refreshTokenWithSupabase', '/refresh-token', e);
-      return false;
-    }
-  }
-
-  // Méthode pour rafraîchir le token avec Supabase Functions
-  static Future<bool> _refreshTokenWithSupabase(String refreshToken) async {
-    try {
-      // Pour Supabase, nous pourrions avoir une fonction spécifique ou 
+      // Pour Supabase, nous pourrions avoir une fonction spécifique ou
       // utiliser le service d'authentification Supabase directement
       // Pour l'instant, nous utiliserons une approche similaire
       final refreshTokenUrl = Uri.parse('${ApiConstants.supabaseBaseUrl}/refresh-token');
-      
+
       final response = await http.post(
         refreshTokenUrl,
         headers: {
@@ -330,7 +317,7 @@ class ApiService {
           return true;
         }
       }
-      
+
       // Si le rafraîchissement a échoué, déconnecter l'utilisateur
       await _tokenManager.clearToken();
       return false;
