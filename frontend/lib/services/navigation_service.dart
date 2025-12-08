@@ -126,7 +126,12 @@ class NavigationService {
   }) async {
     final state = navigatorKey.currentState;
     if (state != null) {
-      return await state.pushReplacementNamed<T>(routeName, arguments: arguments);
+      try {
+        final result = await state.pushReplacementNamed<T>(routeName, arguments: arguments);
+        return result;
+      } catch (e) {
+        return null;
+      }
     }
     return null;
   }
@@ -138,7 +143,11 @@ class NavigationService {
   }) async {
     final state = navigatorKey.currentState;
     if (state != null) {
-      return await state.pushNamedAndRemoveUntil<T>(routeName, predicate, arguments: arguments);
+      try {
+        return await state.pushNamedAndRemoveUntil<T>(routeName, predicate, arguments: arguments);
+      } catch (e) {
+        return null;
+      }
     }
     return null;
   }
@@ -160,15 +169,24 @@ class NavigationService {
   }) async {
     // Si c'est une route publique, naviguer directement
     if (publicRoutes.contains(routeName)) {
-      return await pushNamed(routeName, arguments: arguments) ?? false;
+      try {
+        await pushNamed<dynamic>(routeName, arguments: arguments);
+        return true;
+      } catch (e) {
+        return false;
+      }
     }
 
     // Vérifier l'authentification
     final token = await TokenManager().getToken();
     if (token == null || token.isEmpty) {
       // Rediriger vers la page de login si non authentifié
-      await pushReplacementNamed('/login');
-      return false;
+      try {
+        await pushReplacementNamed<dynamic>('/login');
+        return false;
+      } catch (e) {
+        return false;
+      }
     }
 
     // Récupérer le rôle de l'utilisateur
@@ -194,7 +212,12 @@ class NavigationService {
     }
 
     // Toutes les vérifications passées, naviguer vers la route
-    return await pushNamed(routeName, arguments: arguments) ?? false;
+    try {
+      await pushNamed<dynamic>(routeName, arguments: arguments);
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   // Méthode pour afficher un message d'accès refusé

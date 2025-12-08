@@ -277,12 +277,25 @@ class ApiService {
           return true;
         }
       }
-      
+
       // Si le rafraîchissement a échoué, déconnecter l'utilisateur
       await _tokenManager.clearToken();
       return false;
     } catch (e) {
       _logError('_refreshTokenWithLocalBackend', '/api/auth/refresh', e);
+      return false;
+    }
+  }
+
+  // Méthode pour rafraîchir le token avec Supabase Functions
+  static Future<bool> _refreshTokenWithSupabase(String refreshToken) async {
+    try {
+      // Pour Supabase, nous avons besoin d'une gestion spécifique
+      // En attendant que la fonction de refresh soit implémentée côté Supabase
+      // nous pourrions devoir rediriger vers la page de connexion
+      return false; // Pour le moment, pas de support pour refresh via Supabase
+    } catch (e) {
+      _logError('_refreshTokenWithSupabase', '/refresh-token', e);
       return false;
     }
   }
@@ -333,16 +346,16 @@ class ApiService {
     if (endpoint.startsWith('http')) {
       return Uri.parse(endpoint);
     }
-    
+
     // Pour les appels à des endpoints spécifiques à l'authentification
     // déterminer la bonne base URL
     String baseUrl = ApiConstants.baseUrl;
-    
+
     // S'assurer que l'endpoint commence par / si ce n'est pas déjà le cas
     if (!endpoint.startsWith('/')) {
       endpoint = '/$endpoint';
     }
-    
+
     return Uri.parse('$baseUrl$endpoint');
   }
 
