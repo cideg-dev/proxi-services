@@ -113,14 +113,22 @@ class NavigationService {
     String routeName, {
     Object? arguments,
   }) {
-    return navigatorKey.currentState?.pushNamed<T>(routeName, arguments: arguments);
+    final state = navigatorKey.currentState;
+    if (state != null) {
+      return state.pushNamed<T>(routeName, arguments: arguments);
+    }
+    return null;
   }
 
   static Future<T?> pushReplacementNamed<T extends Object?>(
     String routeName, {
     Object? arguments,
   }) {
-    return navigatorKey.currentState?.pushReplacementNamed<T>(routeName, arguments: arguments);
+    final state = navigatorKey.currentState;
+    if (state != null) {
+      return state.pushReplacementNamed<T>(routeName, arguments: arguments);
+    }
+    return null;
   }
 
   static Future<T?> pushNamedAndRemoveUntil<T extends Object?>(
@@ -128,11 +136,20 @@ class NavigationService {
     Object? arguments,
     required RoutePredicate predicate,
   }) {
-    return navigatorKey.currentState?.pushNamedAndRemoveUntil<T>(routeName, predicate, arguments: arguments);
+    final state = navigatorKey.currentState;
+    if (state != null) {
+      return state.pushNamedAndRemoveUntil<T>(routeName, predicate, arguments: arguments);
+    }
+    return null;
   }
 
   static bool pop<T extends Object?>([T? result]) {
-    return navigatorKey.currentState?.pop(result) ?? false;
+    final state = navigatorKey.currentState;
+    if (state != null) {
+      state.pop(result);
+      return true;
+    }
+    return false;
   }
 
   // Méthode pour naviguer vers une route avec vérification d'accès

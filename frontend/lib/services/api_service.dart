@@ -77,14 +77,25 @@ class ApiService {
       ...?headers,
     };
 
-    // Faire la requête initiale
-    http.Response response = await http.Request(method, url)
-      .send(
-        headers: requestHeaders,
-        body: body,
-      )
-      .timeout(const Duration(seconds: _defaultTimeout))
-      .then((streamedResponse) => http.Response.fromStream(streamedResponse));
+    http.Response response;
+
+    // Faire la requête initiale selon la méthode
+    switch(method) {
+      case 'GET':
+        response = await http.get(url, headers: requestHeaders).timeout(const Duration(seconds: _defaultTimeout));
+        break;
+      case 'POST':
+        response = await http.post(url, headers: requestHeaders, body: body).timeout(const Duration(seconds: _defaultTimeout));
+        break;
+      case 'PUT':
+        response = await http.put(url, headers: requestHeaders, body: body).timeout(const Duration(seconds: _defaultTimeout));
+        break;
+      case 'DELETE':
+        response = await http.delete(url, headers: requestHeaders).timeout(const Duration(seconds: _defaultTimeout));
+        break;
+      default:
+        throw Exception('Méthode HTTP non supportée: $method');
+    }
 
     // Vérifier si la requête a échoué à cause d'un token expiré (401 Unauthorized)
     if (response.statusCode == 401) {
@@ -92,7 +103,7 @@ class ApiService {
       final errorMessage = responseBody['message'] ?? responseBody['error'] ?? '';
 
       // Si c'est une erreur de token expiré, essayer de le rafraîchir
-      if (errorMessage.contains('expired') || errorMessage.contains('invalid') || errorMessage.contains('unable to parse') || response.statusCode == 401) {
+      if (errorMessage.contains('expired') || errorMessage.contains('invalid') || errorMessage.contains('unable to parse')) {
         bool tokenRefreshed = await _refreshToken();
         if (tokenRefreshed) {
           // Réessayer la requête avec le nouveau token
@@ -105,13 +116,22 @@ class ApiService {
             ...?headers,
           };
 
-          response = await http.Request(method, url)
-            .send(
-              headers: newRequestHeaders,
-              body: body,
-            )
-            .timeout(const Duration(seconds: _defaultTimeout))
-            .then((streamedResponse) => http.Response.fromStream(streamedResponse));
+          switch(method) {
+            case 'GET':
+              response = await http.get(url, headers: newRequestHeaders).timeout(const Duration(seconds: _defaultTimeout));
+              break;
+            case 'POST':
+              response = await http.post(url, headers: newRequestHeaders, body: body).timeout(const Duration(seconds: _defaultTimeout));
+              break;
+            case 'PUT':
+              response = await http.put(url, headers: newRequestHeaders, body: body).timeout(const Duration(seconds: _defaultTimeout));
+              break;
+            case 'DELETE':
+              response = await http.delete(url, headers: newRequestHeaders).timeout(const Duration(seconds: _defaultTimeout));
+              break;
+            default:
+              throw Exception('Méthode HTTP non supportée: $method');
+          }
         }
       }
     }
@@ -140,6 +160,94 @@ class ApiService {
     } catch (e) {
       _logError('_refreshToken', '/auth/refresh', e);
       return false;
+    }
+  }
+
+  // Méthode GET sans authentification
+  static Future<http.Response> getPublic(String endpoint, {Map<String, String>? headers}) async {
+    try {
+      final url = _buildUrl(endpoint);
+      final requestHeaders = <String, String>{
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'User-Agent': 'Proxi-Services Flutter App',
+        ...?headers,
+      };
+
+      final response = await http.get(url, headers: requestHeaders)
+          .timeout(const Duration(seconds: _defaultTimeout));
+
+      _logApiCall('GET_PUBLIC', endpoint, response.statusCode);
+      return response;
+    } catch (e) {
+      _logError('GET_PUBLIC', endpoint, e);
+      rethrow;
+    }
+  }
+
+  // Méthode POST sans authentification
+  static Future<http.Response> postPublic(String endpoint, dynamic data, {Map<String, String>? headers}) async {
+    try {
+      final url = _buildUrl(endpoint);
+      final requestHeaders = <String, String>{
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'User-Agent': 'Proxi-Services Flutter App',
+        ...?headers,
+      };
+
+      final response = await http.post(url, headers: requestHeaders, body: jsonEncode(data))
+          .timeout(const Duration(seconds: _defaultTimeout));
+
+      _logApiCall('POST_PUBLIC', endpoint, response.statusCode);
+      return response;
+    } catch (e) {
+      _logError('POST_PUBLIC', endpoint, e);
+      rethrow;
+    }
+  }
+
+  // Méthode PUT sans authentification
+  static Future<http.Response> putPublic(String endpoint, dynamic data, {Map<String, String>? headers}) async {
+    try {
+      final url = _buildUrl(endpoint);
+      final requestHeaders = <String, String>{
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'User-Agent': 'Proxi-Services Flutter App',
+        ...?headers,
+      };
+
+      final response = await http.put(url, headers: requestHeaders, body: jsonEncode(data))
+          .timeout(const Duration(seconds: _defaultTimeout));
+
+      _logApiCall('PUT_PUBLIC', endpoint, response.statusCode);
+      return response;
+    } catch (e) {
+      _logError('PUT_PUBLIC', endpoint, e);
+      rethrow;
+    }
+  }
+
+  // Méthode DELETE sans authentification
+  static Future<http.Response> deletePublic(String endpoint, {Map<String, String>? headers}) async {
+    try {
+      final url = _buildUrl(endpoint);
+      final requestHeaders = <String, String>{
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'User-Agent': 'Proxi-Services Flutter App',
+        ...?headers,
+      };
+
+      final response = await http.delete(url, headers: requestHeaders)
+          .timeout(const Duration(seconds: _defaultTimeout));
+
+      _logApiCall('DELETE_PUBLIC', endpoint, response.statusCode);
+      return response;
+    } catch (e) {
+      _logError('DELETE_PUBLIC', endpoint, e);
+      rethrow;
     }
   }
 
