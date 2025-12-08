@@ -7,6 +7,12 @@ const compression = require('compression');
 const http = require('http');
 const path = require('path'); // Ajout pour la gestion des chemins
 
+// Importation du service de validation des variables d'environnement
+const EnvValidationService = require('./src/services/envValidationService');
+
+// Valider les variables d'environnement avant de continuer
+EnvValidationService.validateAndExitIfCritical();
+
 // Importation des middlewares de sécurité
 const {
   limiter,

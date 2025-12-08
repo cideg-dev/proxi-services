@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.0.0";
+import { extractTokenFromHeaders, isValidJWTFormat } from '../_shared/tokenUtils.ts';
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
 const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
@@ -23,11 +24,14 @@ serve(async (req) => {
   }
 
   try {
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
-      throw new Error("Missing Authorization header");
+    const token = extractTokenFromHeaders(req.headers);
+    if (!token || !isValidJWTFormat(token)) {
+      return new Response(JSON.stringify({ error: "Invalid or missing authorization token" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" }
+      });
     }
-    const token = authHeader.replace("Bearer ", "");
+
     const user = await getUserFromToken(token);
     if (!user) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });

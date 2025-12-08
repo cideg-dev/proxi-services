@@ -1,28 +1,23 @@
 import { serve } from 'https://deno.land/std@0.114.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { SignJWT } from 'https://deno.land/x/djwt@v3.0.1/mod.ts'
+import { createOptionsResponse, getCorsHeaders } from '../_shared/cors.ts'
 
 serve(async (req) => {
   // Gérer les requêtes OPTIONS pour CORS
   if (req.method === 'OPTIONS') {
-    return new Response(null, {
-      status: 204,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      }
-    });
+    return createOptionsResponse(req);
   }
 
   if (req.method !== 'POST') {
+    const origin = req.headers.get("Origin");
+    const corsHeaders = getCorsHeaders(origin);
+
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
       status: 405,
-      headers: { 
+      headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        ...corsHeaders,
       }
     })
   }

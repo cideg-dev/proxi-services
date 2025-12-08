@@ -1,21 +1,20 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:frontend/services/supabase_functions_service.dart';
+import 'package:frontend/services/api_service.dart';
 import 'package:frontend/services/token_manager.dart';
 import 'package:frontend/models/user_model.dart';
 
 class AuthService {
-  final SupabaseFunctionsService _functionsService = SupabaseFunctionsService();
   final TokenManager _tokenManager = TokenManager();
 
   Future<Map<String, dynamic>> login(String email, String password) async {
-    final response = await _functionsService.signin(
-      email: email,
-      password: password,
-    );
+    final response = await ApiService.post('/auth/login', {
+      'email': email,
+      'password': password,
+    });
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
+    if (ApiService.isSuccessful(response.statusCode)) {
+      final data = ApiService.safeJsonDecode(response.body);
       String? token;
       if (data.containsKey('token')) {
         token = data['token'];
@@ -27,7 +26,7 @@ class AuthService {
 
       if (token != null) {
         await _tokenManager.setToken(token);
-        
+
         Map<String, dynamic>? user;
         if (data.containsKey('user')) {
           user = data['user'];
@@ -52,13 +51,8 @@ class AuthService {
       }
       return data;
     } else {
-      try {
-        final errorBody = jsonDecode(response.body);
-        final errorMessage = errorBody['message'] ?? errorBody['error'] ?? 'Failed to login';
-        throw Exception(errorMessage);
-      } catch (e) {
-        throw Exception('Failed to login: ${response.body}');
-      }
+      final errorMessage = ApiService.extractErrorMessage(response);
+      throw Exception(errorMessage);
     }
   }
 
@@ -67,15 +61,15 @@ class AuthService {
       profileData['referralCode'] = referralCode;
     }
 
-    final response = await _functionsService.signup(
-      email: email,
-      password: password,
-      role: role,
-      profileData: profileData,
-    );
+    final response = await ApiService.post('/auth/register', {
+      'email': email,
+      'password': password,
+      'role': role,
+      'profileData': profileData,
+    });
 
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      final data = jsonDecode(response.body);
+    if (ApiService.isSuccessful(response.statusCode)) {
+      final data = ApiService.safeJsonDecode(response.body);
       String? token;
       if (data.containsKey('token')) {
         token = data['token'];
@@ -87,7 +81,7 @@ class AuthService {
 
       if (token != null) {
         await _tokenManager.setToken(token);
-        
+
          Map<String, dynamic>? user;
         if (data.containsKey('user')) {
           user = data['user'];
@@ -112,18 +106,8 @@ class AuthService {
       }
       return data;
     } else {
-      try {
-        final errorBody = jsonDecode(response.body);
-        if (response.statusCode == 400 && errorBody.containsKey('errors')) {
-          final errors = (errorBody['errors'] as List).map((e) => e['msg'] as String).join('\n');
-          throw Exception(errors);
-        } else {
-          final errorMessage = errorBody['message'] ?? errorBody['error'] ?? 'Failed to register';
-          throw Exception(errorMessage);
-        }
-      } catch (e) {
-        throw Exception('Failed to register: ${response.body}');
-      }
+      final errorMessage = ApiService.extractErrorMessage(response);
+      throw Exception(errorMessage);
     }
   }
 
@@ -132,89 +116,63 @@ class AuthService {
   }
 
   Future<User> getProfile() async {
-    final response = await _functionsService.getUserProfile();
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      
+    final response = await ApiService.get('/profile');
+    if (ApiService.isSuccessful(response.statusCode)) {
+      final data = ApiService.safeJsonDecode(response.body);
+
       Map<String, dynamic> userMap;
       if (data.containsKey('user')) {
         userMap = data['user'];
       } else {
         userMap = data;
       }
-      
+
       if (userMap['role'] == null) {
         userMap['role'] = await _tokenManager.getUserRole();
       }
       if (userMap['email'] == null) {
         userMap['email'] = await _tokenManager.getUserEmail();
       }
-      
+
       return User.fromJson(userMap);
     } else {
-      try {
-        final errorBody = jsonDecode(response.body);
-        final errorMessage = errorBody['message'] ?? errorBody['error'] ?? 'Failed to load profile';
-        throw Exception(errorMessage);
-      } catch (e) {
-        throw Exception('Failed to load profile: ${response.body}');
-      }
+      final errorMessage = ApiService.extractErrorMessage(response);
+      throw Exception(errorMessage);
     }
   }
 
   Future<User> updateProfile(Map<String, dynamic> profileData) async {
-    final response = await _functionsService.updateUserProfile(profileData);
-    if (response.statusCode == 200) {
-      return User.fromJson(jsonDecode(response.body));
+    final response = await ApiService.put('/profile', profileData);
+    if (ApiService.isSuccessful(response.statusCode)) {
+      final data = ApiService.safeJsonDecode(response.body);
+      return User.fromJson(data);
     } else {
-      try {
-        final errorBody = jsonDecode(response.body);
-        final errorMessage = errorBody['message'] ?? errorBody['error'] ?? 'Failed to update profile';
-        throw Exception(errorMessage);
-      } catch (e) {
-        throw Exception('Failed to update profile: ${response.body}');
-      }
+      final errorMessage = ApiService.extractErrorMessage(response);
+      throw Exception(errorMessage);
     }
   }
 
   Future<void> changePassword(String currentPassword, String newPassword) async {
-    final response = await _functionsService.proxyToFunction(
-      'auth', 
-      '/change-password', 
-      'POST',
-      body: {
-        'currentPassword': currentPassword,
-        'newPassword': newPassword,
-      }
-    );
-    
-    if (response.statusCode != 200) {
-      try {
-        final body = jsonDecode(response.body);
-        throw Exception(body['message'] ?? body['error'] ?? 'Échec de la mise à jour du mot de passe');
-      } catch (e) {
-        throw Exception('Échec de la mise à jour du mot de passe: ${response.body}');
-      }
+    final response = await ApiService.post('/auth/change-password', {
+      'currentPassword': currentPassword,
+      'newPassword': newPassword,
+    });
+
+    if (!ApiService.isSuccessful(response.statusCode)) {
+      final errorMessage = ApiService.extractErrorMessage(response);
+      throw Exception(errorMessage);
     }
   }
 
   Future<User> getProfileById(int userId) async {
-    final response = await _functionsService.proxyToFunction(
-      'profile', 
-      '/$userId', 
-      'GET'
-    );
-    
-    if (response.statusCode == 200) {
-      return User.fromJson(jsonDecode(response.body));
+    final response = await ApiService.get('/users/$userId');
+
+    if (ApiService.isSuccessful(response.statusCode)) {
+      final data = ApiService.safeJsonDecode(response.body);
+      return User.fromJson(data);
     } else {
-      try {
-        final errorBody = jsonDecode(response.body);
-        final errorMessage = errorBody['message'] ?? errorBody['error'] ?? 'Failed to load profile';
-        throw Exception(errorMessage);
-      } catch (e) {
-        throw Exception('Failed to load profile: ${response.body}');
-      }
+      final errorMessage = ApiService.extractErrorMessage(response);
+      throw Exception(errorMessage);
     }
   }
 }

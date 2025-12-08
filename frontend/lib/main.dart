@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/navigation_service.dart';
+import 'package:frontend/services/navigation_service.dart'; // Mise à jour pour utiliser le nouveau service
 import 'package:frontend/providers/notification_ui_provider.dart';
 import 'package:frontend/screens/advanced_search_screen.dart';
 import 'package:frontend/screens/appointment_booking_screen.dart';
@@ -38,6 +38,7 @@ import 'package:frontend/screens/my_groups_screen.dart';
 import 'package:frontend/screens/create_group_screen.dart';
 import 'package:frontend/widgets/in_app_notification.dart';
 import 'package:frontend/widgets/navigation/bottom_navigation_widget.dart';
+import 'package:frontend/routes/app_routes.dart'; // Importer les routes centralisées
 import 'dart:async';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:frontend/screens/artisan_demands_screen.dart';
@@ -256,163 +257,8 @@ class _MyAppState extends State<MyApp> {
               ],
             ),
           ),
-          routes: {
-            '/login': (context) => const LoginScreen(),
-            '/my_groups': (context) => const MyGroupsScreen(),
-            '/create_group': (context) => const CreateGroupScreen(),
-            '/advanced_search': (context) => const AdvancedSearchScreen(),
-            '/client_demands': (context) => const ClientDemandsScreen(),
-            '/conversations': (context) => const ConversationsListScreen(),
-            '/professionals_list': (context) => const ProfessionalsListScreen(),
-            '/nearby_artisans': (context) => const NearbyArtisansScreen(),
-            '/profile_boost': (context) => const ProfileBoostScreen(),
-            '/register': (context) => const RegisterChoiceScreen(),
-            '/register/client': (context) => const RegisterScreen(role: 'client'),
-            '/register/artisan': (context) => const RegisterScreen(role: 'artisan'),
-            '/register/commercant': (context) => const RegisterScreen(role: 'commercant'),
-            '/artisan_portfolio': (context) => const ArtisanPortfolioScreen(),
-            '/artisan_services': (context) => const ArtisanServicesScreen(),
-            '/artisan_demands': (context) => const ArtisanDemandsScreen(),
-            '/admin_panel': (context) => const AdminPanelScreen(),
-            '/my_profile': (context) => const MyProfileScreen(),
-            '/settings': (context) => const SettingsScreen(),
-          },
-          onGenerateRoute: (settings) {
-            // Routes publiques (pas besoin d'authentification)
-            final publicRoutes = [
-              '/login',
-              '/register',
-              '/register/client',
-              '/register/artisan',
-              '/register/commercant',
-            ];
-
-            // Si c'est une route publique, autoriser directement
-            if (settings.name != null && publicRoutes.contains(settings.name)) {
-              return null; // Laisse le système utiliser les routes définies
-            }
-
-            // Routes avec arguments spéciaux
-            if (settings.name != null) {
-              final uri = Uri.parse(settings.name!);
-              
-              // Reset password - Route publique
-              if (settings.name!.startsWith('/reset-password')) {
-                final token = uri.queryParameters['token'];
-                if (token != null) {
-                  return MaterialPageRoute(
-                    builder: (context) => ResetPasswordScreen(token: token),
-                  );
-                }
-              }
-
-              // Pour les routes protégées, utiliser FutureBuilder
-              if (settings.name!.startsWith('/admin_panel') ||
-                  settings.name!.startsWith('/artisan_portfolio') ||
-                  settings.name!.startsWith('/artisan_services') ||
-                  settings.name!.startsWith('/artisan_demands') ||
-                  settings.name!.startsWith('/client_demands')) {
-                return MaterialPageRoute(
-                  builder: (context) => FutureBuilder<Map<String, dynamic>>(
-                    future: () async {
-                      final isAuth = await _routeGuard.isAuthenticated();
-                      final userRole = await _routeGuard.getUserRole();
-                      return {'isAuth': isAuth, 'userRole': userRole};
-                    }(),
-                    builder: (context, snapshot) {
-                      if (!snapshot.hasData) {
-                        return const Scaffold(
-                          body: Center(child: CircularProgressIndicator()),
-                        );
-                      }
-                      
-                      final data = snapshot.data!;
-                      final isAuth = data['isAuth'] as bool;
-                      final userRole = data['userRole'] as String?;
-
-                      if (!isAuth) {
-                        return const LoginScreen();
-                      }
-
-                      // Vérification spécifique par routes
-                      if (settings.name!.startsWith('/admin_panel') && userRole != 'admin') {
-                        return _buildAccessDeniedScreen(
-                          'Seuls les administrateurs peuvent accéder à cette page.',
-                        );
-                      }
-
-                      if ((settings.name!.startsWith('/artisan_portfolio') ||
-                           settings.name!.startsWith('/artisan_services') ||
-                           settings.name!.startsWith('/artisan_demands')) &&
-                          userRole != 'artisan' && userRole != 'commercant') {
-                        return _buildAccessDeniedScreen(
-                          'Cette page est réservée aux artisans et commerçants.',
-                        );
-                      }
-
-                      if (settings.name!.startsWith('/client_demands') && userRole != 'client') {
-                        return _buildAccessDeniedScreen(
-                          'Cette page est réservée aux clients.',
-                        );
-                      }
-
-                      // Retourner à la page appropriée selon la route
-                      if (settings.name == '/admin_panel') return const AdminPanelScreen();
-                      if (settings.name == '/artisan_portfolio') return const ArtisanPortfolioScreen();
-                      if (settings.name == '/artisan_services') return const ArtisanServicesScreen();
-                      if (settings.name == '/artisan_demands') return const ArtisanDemandsScreen();
-                      if (settings.name == '/client_demands') return const ClientDemandsScreen();
-                      
-                      return const SizedBox(); // Fallback
-                    },
-                  ),
-                );
-              }
-
-              // Routes avec arguments (pas besoin de vérification de rôle spécifique)
-              if (settings.name!.startsWith('/artisan_detail')) {
-                final args = settings.arguments;
-                if (args is int) {
-                  return MaterialPageRoute(
-                    builder: (context) => ArtisanDetailScreen(artisanId: args),
-                  );
-                }
-              }
-
-              if (settings.name!.startsWith('/chat')) {
-                final args = settings.arguments as Map<String, dynamic>;
-                return MaterialPageRoute(
-                  builder: (context) => ChatScreen(
-                    conversationId: args['conversationId'],
-                    partnerId: args['partnerId'],
-                    partnerName: args['partnerName'],
-                  ),
-                );
-              }
-
-              if (settings.name!.startsWith('/demand_detail')) {
-                final args = settings.arguments;
-                if (args is int) {
-                  return MaterialPageRoute(
-                    builder: (context) => DemandDetailScreen(demandId: args),
-                  );
-                }
-              }
-
-              if (settings.name!.startsWith('/create_demand')) {
-                final args = settings.arguments as Map<String, dynamic>?;
-                return MaterialPageRoute(
-                  builder: (context) => CreateDemandScreen(
-                    artisanId: args?['artisanId'] ?? 0,
-                    artisanName: args?['artisanName'] ?? 'Artisan',
-                    selectedService: args?['selectedService'],
-                  ),
-                );
-              }
-            }
-            
-            return null;
-          },
+          routes: AppRoutes.routes, // Utiliser les routes centralisées
+          onGenerateRoute: AppRoutes.onGenerateRoute, // Utiliser le gestionnaire de routes centralisé
           debugShowCheckedModeBanner: false,
         );
       },

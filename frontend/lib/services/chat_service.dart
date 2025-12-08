@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:frontend/services/supabase_functions_service.dart';
+import 'package:frontend/services/api_service.dart';
 import 'package:frontend/services/socket_service.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
@@ -10,7 +10,6 @@ import 'package:frontend/models/conversation_model.dart';
 class ChatService {
   SocketService? _socketService;
   final TokenManager _tokenManager = TokenManager();
-  final SupabaseFunctionsService _functionsService = SupabaseFunctionsService();
 
   // Singleton pattern
   static final ChatService _instance = ChatService._internal();
@@ -56,171 +55,130 @@ class ChatService {
     final userId = await _tokenManager.getUserId();
     if (userId == null) throw Exception('User ID not found.');
 
-    final Map<String, String> queryParams = {
-      'limit': limit.toString(),
-    };
-    if (beforeId != null) {
-      queryParams['beforeId'] = beforeId.toString();
-    }
-    
-    final uri = Uri.parse('/messages/$userId/$receiverId').replace(queryParameters: queryParams);
-    final response = await _functionsService.proxyToFunction('messages', uri.toString(), 'GET');
+    String endpoint = '/messages/$userId/$receiverId';
+    if (beforeId != null || limit != 20) {
+      final queryParams = <String, String>{};
+      if (beforeId != null) queryParams['beforeId'] = beforeId.toString();
+      if (limit != 20) queryParams['limit'] = limit.toString();
 
-    if (response.statusCode == 200) {
+      endpoint += '?${queryParams.entries.map((e) => '${e.key}=${e.value}').join('&')}';
+    }
+
+    final response = await ApiService.get(endpoint);
+
+    if (ApiService.isSuccessful(response.statusCode)) {
       final decoded = jsonDecode(response.body) as List<dynamic>;
       return decoded.map<Message>((e) => Message.fromJson(e as Map<String, dynamic>)).toList();
     } else {
-      throw Exception('Failed to load messages');
+      final errorMessage = ApiService.extractErrorMessage(response);
+      throw Exception(errorMessage);
     }
   }
 
   // NEW: Mark a message as read
   Future<void> markMessageAsRead(int messageId) async {
-    final response = await _functionsService.proxyToFunction('messages', '/$messageId/read', 'PUT');
+    final response = await ApiService.put('/messages/$messageId/read', {});
 
-    if (response.statusCode != 200) {
-      final errorBody = jsonDecode(response.body);
-      final errorMessage = errorBody['message'] ?? 'Failed to mark message as read';
+    if (!ApiService.isSuccessful(response.statusCode)) {
+      final errorMessage = ApiService.extractErrorMessage(response);
       throw Exception(errorMessage);
     }
   }
 
   // NEW: Fetch all conversations for the logged-in user
   Future<List<Conversation>> getConversations() async {
-    try {
-      // Use proxy to 'conversations' function, root path
-      final response = await _functionsService.proxyToFunction('conversations', '', 'GET');
+    final response = await ApiService.get('/conversations');
 
-      if (response.statusCode == 200) {
-        final decoded = jsonDecode(response.body) as List<dynamic>;
-        return decoded.map<Conversation>((e) => Conversation.fromJson(e as Map<String, dynamic>)).toList();
-      } else if (response.statusCode == 401) {
-        throw Exception('Unauthorized: Invalid token');
-      } else {
-        final errorBody = jsonDecode(response.body);
-        final errorMessage = errorBody['message'] ?? 'Failed to load conversations';
-        throw Exception(errorMessage);
-      }
-    } catch (e) {
-      print('Error getting conversations: $e');
-      rethrow;
+    if (ApiService.isSuccessful(response.statusCode)) {
+      final decoded = jsonDecode(response.body) as List<dynamic>;
+      return decoded.map<Conversation>((e) => Conversation.fromJson(e as Map<String, dynamic>)).toList();
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized: Invalid token');
+    } else {
+      final errorMessage = ApiService.extractErrorMessage(response);
+      throw Exception(errorMessage);
     }
   }
 
   // NEW: Start a new conversation
   Future<Conversation> startConversation(int receiverId) async {
-    try {
-      final response = await _functionsService.proxyToFunction(
-        'conversations', 
-        '', 
-        'POST',
-        body: {'receiverId': receiverId}
-      );
+    final response = await ApiService.post('/conversations', {
+      'receiverId': receiverId
+    });
 
-      if (response.statusCode == 201) {
-        return Conversation.fromJson(jsonDecode(response.body));
-      } else {
-        final errorBody = jsonDecode(response.body);
-        final errorMessage = errorBody['message'] ?? 'Failed to start conversation';
-        throw Exception(errorMessage);
-      }
-    } catch (e) {
-      print('Error starting conversation: $e');
-      rethrow;
+    if (ApiService.isSuccessful(response.statusCode)) {
+      return Conversation.fromJson(jsonDecode(response.body));
+    } else {
+      final errorMessage = ApiService.extractErrorMessage(response);
+      throw Exception(errorMessage);
     }
   }
 
   // NEW: Send a message to a specific conversation
   Future<Message> sendMessageToConversation(int conversationId, String message) async {
-    try {
-      final response = await _functionsService.proxyToFunction(
-        'conversations', 
-        '/$conversationId/messages', 
-        'POST',
-        body: {'content': message}
-      );
+    final response = await ApiService.post('/conversations/$conversationId/messages', {
+      'content': message
+    });
 
-      if (response.statusCode == 201) {
-        return Message.fromJson(jsonDecode(response.body));
-      } else {
-        final errorBody = jsonDecode(response.body);
-        final errorMessage = errorBody['message'] ?? 'Failed to send message';
-        throw Exception(errorMessage);
-      }
-    } catch (e) {
-      print('Error sending message to conversation: $e');
-      rethrow;
+    if (ApiService.isSuccessful(response.statusCode)) {
+      return Message.fromJson(jsonDecode(response.body));
+    } else {
+      final errorMessage = ApiService.extractErrorMessage(response);
+      throw Exception(errorMessage);
     }
   }
 
   // NEW: Get messages from a specific conversation
   Future<List<Message>> getMessagesFromConversation(int conversationId, {int? beforeId, int limit = 20}) async {
-    final Map<String, String> queryParams = {
-      'limit': limit.toString(),
-    };
-    if (beforeId != null) {
-      queryParams['beforeId'] = beforeId.toString();
+    String endpoint = '/conversations/$conversationId/messages';
+    if (beforeId != null || limit != 20) {
+      final queryParams = <String, String>{};
+      if (beforeId != null) queryParams['beforeId'] = beforeId.toString();
+      if (limit != 20) queryParams['limit'] = limit.toString();
+
+      endpoint += '?${queryParams.entries.map((e) => '${e.key}=${e.value}').join('&')}';
     }
 
-    // Construct URI with query params
-    String path = '/$conversationId/messages';
-    String queryString = queryParams.entries.map((e) => '${e.key}=${e.value}').join('&');
-    if (queryString.isNotEmpty) {
-      path += '?$queryString';
-    }
+    final response = await ApiService.get(endpoint);
 
-    final response = await _functionsService.proxyToFunction('conversations', path, 'GET');
-
-    if (response.statusCode == 200) {
+    if (ApiService.isSuccessful(response.statusCode)) {
       final decoded = jsonDecode(response.body) as List<dynamic>;
       return decoded.map<Message>((e) => Message.fromJson(e as Map<String, dynamic>)).toList();
     } else {
-      throw Exception('Failed to load messages: ${response.body}');
+      final errorMessage = ApiService.extractErrorMessage(response);
+      throw Exception(errorMessage);
     }
   }
 
   // NEW: Mark all messages in a conversation as read
   Future<void> markConversationAsRead(int conversationId) async {
-    final response = await _functionsService.proxyToFunction(
-      'conversations', 
-      '/$conversationId/mark-as-read', 
-      'PUT'
-    );
+    final response = await ApiService.put('/conversations/$conversationId/mark-as-read', {});
 
-    if (response.statusCode != 200) {
-      final errorBody = jsonDecode(response.body);
-      final errorMessage = errorBody['message'] ?? 'Failed to mark conversation as read';
+    if (!ApiService.isSuccessful(response.statusCode)) {
+      final errorMessage = ApiService.extractErrorMessage(response);
       throw Exception(errorMessage);
     }
   }
 
   // NEW: Block a user
   Future<void> blockUser(int userId) async {
-    final response = await _functionsService.proxyToFunction(
-      'users', 
-      '/$userId/block', 
-      'POST'
-    );
+    final response = await ApiService.post('/users/$userId/block', {});
 
-    if (response.statusCode != 200) {
-      final errorBody = jsonDecode(response.body);
-      final errorMessage = errorBody['message'] ?? 'Failed to block user';
+    if (!ApiService.isSuccessful(response.statusCode)) {
+      final errorMessage = ApiService.extractErrorMessage(response);
       throw Exception(errorMessage);
     }
   }
 
   // NEW: Get user status (online/offline)
   Future<Map<String, dynamic>> getUserStatus(int userId) async {
-    final response = await _functionsService.proxyToFunction(
-      'users', 
-      '/$userId/status', 
-      'GET'
-    );
+    final response = await ApiService.get('/users/$userId/status');
 
-    if (response.statusCode == 200) {
+    if (ApiService.isSuccessful(response.statusCode)) {
       return jsonDecode(response.body);
     } else {
-      throw Exception('Failed to get user status: ${response.body}');
+      final errorMessage = ApiService.extractErrorMessage(response);
+      throw Exception(errorMessage);
     }
   }
 }

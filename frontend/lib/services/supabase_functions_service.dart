@@ -1,13 +1,13 @@
-// frontend/lib/services/supabase_functions_service.dart (mis à jour avec gestion CORS)
+// frontend/lib/services/api_service_supabase.dart (service API pour Supabase)
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:frontend/services/api_constants.dart';
 import 'package:frontend/services/token_manager.dart';
 
-class SupabaseFunctionsService {
+class SupabaseApiService {
   final TokenManager _tokenManager = TokenManager();
 
-  // Méthode pour l'inscription
+  // Méthode pour l'inscription via Supabase Functions
   Future<http.Response> signup({
     required String email,
     required String password,
@@ -15,7 +15,7 @@ class SupabaseFunctionsService {
     Map<String, dynamic>? profileData,
   }) async {
     final url = Uri.parse(ApiConstants.signupUrl);
-    
+
     final body = jsonEncode({
       'email': email,
       'password': password,
@@ -39,13 +39,13 @@ class SupabaseFunctionsService {
     return response;
   }
 
-  // Méthode pour la connexion
+  // Méthode pour la connexion via Supabase Functions
   Future<http.Response> signin({
     required String email,
     required String password,
   }) async {
     final url = Uri.parse(ApiConstants.signinUrl);
-    
+
     final body = jsonEncode({
       'email': email,
       'password': password,
@@ -64,10 +64,10 @@ class SupabaseFunctionsService {
     return response;
   }
 
-  // Méthode pour récupérer les artisans
+  // Méthode pour récupérer les artisans via Supabase Functions
   Future<http.Response> getArtisans() async {
     final url = Uri.parse(ApiConstants.artisansUrl);
-    
+
     final response = await http.get(
       url,
       headers: {
@@ -80,7 +80,7 @@ class SupabaseFunctionsService {
     return response;
   }
 
-  // Méthode pour les professionnels mis en avant
+  // Méthode pour les professionnels mis en avant via Supabase Functions
   Future<http.Response> getFeaturedProfessionals() async {
     final url = Uri.parse('${ApiConstants.baseUrl}/professionals');
 
@@ -96,16 +96,16 @@ class SupabaseFunctionsService {
     return response;
   }
 
-  // Méthode pour ajouter un avis
+  // Méthode pour ajouter un avis via Supabase Functions
   Future<http.Response> addReview({
     required int artisanId,
     required int rating,
     required String comment,
   }) async {
     final token = await _tokenManager.getToken();
-    
+
     final url = Uri.parse(ApiConstants.reviewsUrl);
-    
+
     final body = jsonEncode({
       'artisanId': artisanId,
       'rating': rating,
@@ -126,10 +126,10 @@ class SupabaseFunctionsService {
     return response;
   }
 
-  // Méthode pour récupérer les avis d'un artisan
+  // Méthode pour récupérer les avis d'un artisan via Supabase Functions
   Future<http.Response> getArtisanReviews(int artisanId) async {
     final url = Uri.parse('${ApiConstants.reviewsUrl}?artisan_id=$artisanId');
-    
+
     final response = await http.get(
       url,
       headers: {
@@ -142,7 +142,7 @@ class SupabaseFunctionsService {
     return response;
   }
 
-  // Méthode pour récupérer le profil utilisateur
+  // Méthode pour récupérer le profil utilisateur via Supabase Functions
   Future<http.Response> getUserProfile() async {
     final token = await _tokenManager.getToken();
     final url = Uri.parse('${ApiConstants.baseUrl}/profile'); // ou un endpoint spécifique
@@ -160,7 +160,7 @@ class SupabaseFunctionsService {
     return response;
   }
 
-  // Méthode pour mettre à jour le profil utilisateur
+  // Méthode pour mettre à jour le profil utilisateur via Supabase Functions
   Future<http.Response> updateUserProfile(Map<String, dynamic> profileData) async {
     final token = await _tokenManager.getToken();
     final url = Uri.parse('${ApiConstants.baseUrl}/profile'); // ou un endpoint spécifique
@@ -182,23 +182,23 @@ class SupabaseFunctionsService {
   // Méthode générique pour proxy vers une fonction Supabase
   Future<http.Response> proxyToFunction(String functionName, String path, String method, {Map<String, dynamic>? body}) async {
     final token = await _tokenManager.getToken();
-    // Construit l'URL de la fonction. 
+    // Construit l'URL de la fonction.
     // Si path est "/conversations/123", et functionName est "conversations",
     // on veut probablement appeler ".../functions/v1/conversations/123"
     // Mais attention, si path est "/conversations", on veut ".../functions/v1/conversations"
-    
-    // Nettoyer le path pour qu'il soit relatif à la fonction si besoin, 
+
+    // Nettoyer le path pour qu'il soit relatif à la fonction si besoin,
     // ou simplement utiliser le nom de la fonction comme base.
     // Supposons que ApiConstants.baseUrl pointe vers ".../functions/v1"
-    
+
     // Si le path commence par le nom de la fonction, on l'utilise tel quel après le baseUrl
     // Sinon on l'ajoute.
-    
+
     String relativePath = path;
     if (relativePath.startsWith('/')) {
       relativePath = relativePath.substring(1);
     }
-    
+
     final url = Uri.parse('${ApiConstants.baseUrl}/$relativePath');
 
     final headers = {

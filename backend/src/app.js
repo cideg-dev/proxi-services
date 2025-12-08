@@ -20,6 +20,7 @@ const { monitorSensitiveAccess } = require('./utils/securityMonitoring');
 
 const sharp = require('sharp');
 const multer = require('multer');
+const { validateFile } = require('./utils/fileValidation');
 const { sendNotificationEmail } = require('./services/emailService');
 
 // Importation des middlewares de validation

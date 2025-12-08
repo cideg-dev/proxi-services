@@ -1,28 +1,22 @@
 import { serve } from 'https://deno.land/std@0.114.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { createOptionsResponse, getCorsHeaders } from '../_shared/cors.ts'
 
 serve(async (req) => {
   // Gérer les requêtes OPTIONS pour CORS
   if (req.method === 'OPTIONS') {
-    return new Response(null, {
-      status: 204,
-      headers: {
-        'Access-Control-Allow-Origin': 'https://cideg-dev.github.io',
-        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization, Accept, X-Requested-With, X-Client-Info',
-        'Access-Control-Allow-Credentials': 'true',
-      }
-    });
+    return createOptionsResponse(req);
   }
 
   if (req.method !== 'POST') {
+    const origin = req.headers.get("Origin");
+    const corsHeaders = getCorsHeaders(origin);
+
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
       status: 405,
       headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': 'https://cideg-dev.github.io',
-        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization, Accept, X-Requested-With, X-Client-Info',
+        ...corsHeaders,
         'Access-Control-Allow-Credentials': 'true',
       }
     })

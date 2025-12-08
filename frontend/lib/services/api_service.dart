@@ -1,114 +1,177 @@
-
+// frontend/lib/services/api_service.dart
 import 'dart:convert';
-import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:flutter/material.dart';
-import 'package:frontend/navigation_service.dart';
-import 'package:frontend/screens/login_screen.dart';
 import 'package:http/http.dart' as http;
-import 'package:frontend/services/token_manager.dart';
 import 'package:frontend/services/api_constants.dart';
+import 'package:frontend/services/token_manager.dart';
 
 class ApiService {
-  final TokenManager _tokenManager = TokenManager();
+  static final TokenManager _tokenManager = TokenManager();
+  static const int _defaultTimeout = 30; // 30 secondes
 
-  // Handles authenticated requests
-  Future<http.Response> _handleRequest(Future<http.Response> Function(Map<String, String> headers) request) async {
-    final token = await _tokenManager.getToken();
-    final headers = {
-      'Content-Type': 'application/json; charset=UTF-8',
-      'Authorization': 'Bearer $token',
-    };
+  // Méthode GET
+  static Future<http.Response> get(String endpoint, {Map<String, String>? headers}) async {
+    try {
+      final url = _buildUrl(endpoint);
+      final token = await _tokenManager.getToken();
+      
+      final requestHeaders = <String, String>{
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'User-Agent': 'Proxi-Services Flutter App',
+        if (token != null) 'Authorization': 'Bearer $token',
+        ...?headers,
+      };
 
-    final response = await request(headers);
+      final response = await http.get(
+        url,
+        headers: requestHeaders,
+      ).timeout(const Duration(seconds: _defaultTimeout));
 
-    if (response.statusCode == 401 || response.statusCode == 403) {
-      _handleAuthError();
-      throw Exception('Authentication Error');
-    }
-    return response;
-  }
-
-  // Handles unauthenticated requests
-  Future<http.Response> _handleUnauthenticatedRequest(Future<http.Response> Function() request) async {
-    final response = await request();
-    // No auth error handling needed for public endpoints
-    return response;
-  }
-
-  void _handleAuthError() async {
-    await _tokenManager.clearToken();
-    if (NavigationService.navigatorKey.currentState != null) {
-      NavigationService.navigatorKey.currentState!.pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => const LoginScreen()),
-        (Route<dynamic> route) => false,
-      );
+      _logApiCall('GET', endpoint, response.statusCode);
+      return response;
+    } catch (e) {
+      _logError('GET', endpoint, e);
+      rethrow;
     }
   }
 
-  // Authenticated methods
-  Future<http.Response> get(String endpoint) {
-    return _handleRequest((headers) => http.get(
-      Uri.parse('${ApiConstants.baseUrl}$endpoint'),
-      headers: headers,
-    ));
-  }
+  // Méthode POST
+  static Future<http.Response> post(String endpoint, dynamic data, {Map<String, String>? headers}) async {
+    try {
+      final url = _buildUrl(endpoint);
+      final token = await _tokenManager.getToken();
+      
+      final requestHeaders = <String, String>{
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'User-Agent': 'Proxi-Services Flutter App',
+        if (token != null) 'Authorization': 'Bearer $token',
+        ...?headers,
+      };
 
-  Future<http.Response> post(String endpoint, {Object? body}) {
-    return _handleRequest((headers) => http.post(
-      Uri.parse('${ApiConstants.baseUrl}$endpoint'),
-      headers: headers,
-      body: jsonEncode(body),
-    ));
-  }
+      final response = await http.post(
+        url,
+        headers: requestHeaders,
+        body: jsonEncode(data),
+      ).timeout(const Duration(seconds: _defaultTimeout));
 
-  Future<http.Response> put(String endpoint, {Object? body}) {
-    return _handleRequest((headers) => http.put(
-      Uri.parse('${ApiConstants.baseUrl}$endpoint'),
-      headers: headers,
-      body: jsonEncode(body),
-    ));
-  }
-
-  Future<http.Response> delete(String endpoint) {
-    return _handleRequest((headers) => http.delete(
-      Uri.parse('${ApiConstants.baseUrl}$endpoint'),
-      headers: headers,
-    ));
-  }
-
-  // New method for authenticated multipart requests, now platform-agnostic
-  Future<http.StreamedResponse> multipartRequest(String method, String endpoint, {Map<String, String>? fields, List<http.MultipartFile>? files}) async {
-    final token = await _tokenManager.getToken();
-    final headers = {
-      'Authorization': 'Bearer $token',
-    };
-
-    var request = http.MultipartRequest(method, Uri.parse('${ApiConstants.baseUrl}$endpoint'));
-    request.headers.addAll(headers);
-
-    if (fields != null) {
-      request.fields.addAll(fields);
+      _logApiCall('POST', endpoint, response.statusCode);
+      return response;
+    } catch (e) {
+      _logError('POST', endpoint, e);
+      rethrow;
     }
-    if (files != null) {
-      request.files.addAll(files);
+  }
+
+  // Méthode PUT
+  static Future<http.Response> put(String endpoint, dynamic data, {Map<String, String>? headers}) async {
+    try {
+      final url = _buildUrl(endpoint);
+      final token = await _tokenManager.getToken();
+      
+      final requestHeaders = <String, String>{
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'User-Agent': 'Proxi-Services Flutter App',
+        if (token != null) 'Authorization': 'Bearer $token',
+        ...?headers,
+      };
+
+      final response = await http.put(
+        url,
+        headers: requestHeaders,
+        body: jsonEncode(data),
+      ).timeout(const Duration(seconds: _defaultTimeout));
+
+      _logApiCall('PUT', endpoint, response.statusCode);
+      return response;
+    } catch (e) {
+      _logError('PUT', endpoint, e);
+      rethrow;
     }
-
-    return request.send();
   }
 
+  // Méthode DELETE
+  static Future<http.Response> delete(String endpoint, {Map<String, String>? headers}) async {
+    try {
+      final url = _buildUrl(endpoint);
+      final token = await _tokenManager.getToken();
+      
+      final requestHeaders = <String, String>{
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'User-Agent': 'Proxi-Services Flutter App',
+        if (token != null) 'Authorization': 'Bearer $token',
+        ...?headers,
+      };
 
-  // Unauthenticated methods
-  Future<http.Response> getPublic(String endpoint) {
-    return _handleUnauthenticatedRequest(() => http.get(
-      Uri.parse('${ApiConstants.baseUrl}$endpoint'),
-    ));
+      final response = await http.delete(
+        url,
+        headers: requestHeaders,
+      ).timeout(const Duration(seconds: _defaultTimeout));
+
+      _logApiCall('DELETE', endpoint, response.statusCode);
+      return response;
+    } catch (e) {
+      _logError('DELETE', endpoint, e);
+      rethrow;
+    }
   }
 
-  Future<http.Response> postPublic(String endpoint, {Object? body}) {
-    return _handleUnauthenticatedRequest(() => http.post(
-      Uri.parse('${ApiConstants.baseUrl}$endpoint'),
-      headers: {'Content-Type': 'application/json; charset=UTF-8'},
-      body: jsonEncode(body),
-    ));
+  // Méthode pour construire l'URL complète
+  static Uri _buildUrl(String endpoint) {
+    // Si l'endpoint commence par http, c'est déjà une URL complète
+    if (endpoint.startsWith('http')) {
+      return Uri.parse(endpoint);
+    }
+    
+    // Sinon, construire l'URL à partir de la base
+    String baseUrl = ApiConstants.baseUrl;
+    
+    // S'assurer que l'endpoint commence par / si ce n'est pas déjà le cas
+    if (!endpoint.startsWith('/')) {
+      endpoint = '/$endpoint';
+    }
+    
+    return Uri.parse('$baseUrl$endpoint');
+  }
+
+  // Méthode pour extraire le corps JSON de manière sécurisée
+  static Map<String, dynamic> safeJsonDecode(String responseBody) {
+    try {
+      return jsonDecode(responseBody) as Map<String, dynamic>;
+    } catch (e) {
+      // Si le décodage échoue, retourner un objet vide avec un message d'erreur
+      return {
+        'error': 'Invalid JSON response',
+        'raw_response': responseBody,
+      };
+    }
+  }
+
+  // Méthode pour vérifier si la réponse est une erreur
+  static bool isSuccessful(int statusCode) {
+    return statusCode >= 200 && statusCode < 300;
+  }
+
+  // Méthode pour extraire le message d'erreur d'une réponse
+  static String extractErrorMessage(http.Response response) {
+    try {
+      final body = safeJsonDecode(response.body);
+      return body['message'] ?? body['error'] ?? 'Erreur inconnue';
+    } catch (e) {
+      return 'Erreur de réseau ou de format de réponse';
+    }
+  }
+
+  // Méthode de journalisation des appels API
+  static void _logApiCall(String method, String endpoint, int statusCode) {
+    // En production, on pourrait envoyer ces logs à un service d'analyse
+    print('[API] $method $endpoint -> $statusCode');
+  }
+
+  // Méthode de journalisation des erreurs
+  static void _logError(String method, String endpoint, dynamic error) {
+    print('[API-ERROR] $method $endpoint -> $error');
   }
 }
