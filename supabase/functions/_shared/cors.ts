@@ -43,8 +43,8 @@ export function createOptionsResponse(req: Request): Response {
   const origin = req.headers.get("Origin");
   const corsHeaders = getCorsHeaders(origin);
   
-  return new Response(null, {
-    status: 204, // No Content
+  return new Response("", { // Empty string body
+    status: 200, // OK
     headers: corsHeaders
   });
 }

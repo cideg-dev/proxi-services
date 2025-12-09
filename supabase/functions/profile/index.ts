@@ -57,7 +57,8 @@ serve(async (req) => {
         .from("profiles")
         .select("*")
         .eq("id", user.id)
-        .single();
+        .limit(1)
+        .maybeSingle();
 
       if (profileError) throw profileError;
 
@@ -67,31 +68,55 @@ serve(async (req) => {
         .from("users")
         .select("role")
         .eq("id", user.id)
-        .single();
+        .limit(1)
+        .maybeSingle();
 
-      if (userError) throw userError;
+      if (userError) {
+        console.error("Error fetching user data:", userError);
+        throw userError;
+      }
 
-      if (userData.role === 'artisan') {
+      if (userData && userData.role === 'artisan') {
         const { data: artisan, error: artisanError } = await supabase
           .from("artisan_profiles")
           .select("*")
           .eq("user_id", user.id)
-          .single();
-        if (!artisanError) roleProfile = artisan;
-      } else if (userData.role === 'commercant') {
+          .limit(1)
+          .maybeSingle();
+        if (artisanError) {
+          console.error("Error fetching artisan profile:", artisanError);
+        } else if (artisan) {
+          roleProfile = artisan;
+        }
+      } else if (userData && userData.role === 'commercant') {
         const { data: merchant, error: merchantError } = await supabase
           .from("commercant_profiles")
           .select("*")
           .eq("user_id", user.id)
-          .single();
-        if (!merchantError) roleProfile = merchant;
+          .limit(1)
+          .maybeSingle();
+        if (merchantError) {
+          console.error("Error fetching commercant profile:", merchantError);
+        } else if (merchant) {
+          roleProfile = merchant;
+        }
+      }
+
+      // Check for profile existence and log if not found
+      if (!profile) {
+        console.warn(`No entry in 'profiles' table for user ID: ${user.id}`);
+      }
+      
+      // Check for user data existence and log if not found
+      if (!userData) {
+        console.warn(`No entry in 'users' table for user ID: ${user.id}`);
       }
 
       return new Response(JSON.stringify({
         user: {
           ...user,
           ...profile,
-          role: userData.role,
+          role: userData?.role, // Use optional chaining for safety
           ...roleProfile
         }
       }), {
