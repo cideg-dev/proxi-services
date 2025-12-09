@@ -1,15 +1,10 @@
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.0.0";
+import { createOptionsResponse, getCorsHeaders } from '../_shared/cors.ts'
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
 const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "https://cideg-dev.github.io",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-};
 
 async function getUserFromToken(token: string) {
   const { data: { user }, error } = await supabase.auth.getUser(token);
@@ -18,11 +13,15 @@ async function getUserFromToken(token: string) {
 }
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { status: 200, headers: corsHeaders });
+  // Gérer les requêtes OPTIONS pour CORS
+  if (req.method === 'OPTIONS') {
+    return createOptionsResponse(req);
   }
 
   try {
+    const origin = req.headers.get("Origin");
+    const corsHeaders = getCorsHeaders(origin);
+
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
       throw new Error("Missing Authorization header");
@@ -30,7 +29,14 @@ serve(async (req) => {
     const token = authHeader.replace("Bearer ", "");
     const user = await getUserFromToken(token);
     if (!user) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: {
+          ...corsHeaders,
+          "Content-Type": "application/json",
+          'Access-Control-Allow-Credentials': 'true',
+        }
+      });
     }
 
     const url = new URL(req.url);
@@ -75,7 +81,14 @@ serve(async (req) => {
         };
       });
 
-      return new Response(JSON.stringify(formattedConversations), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      return new Response(JSON.stringify(formattedConversations), {
+        status: 200,
+        headers: {
+          ...corsHeaders,
+          "Content-Type": "application/json",
+          'Access-Control-Allow-Credentials': 'true',
+        }
+      });
     }
 
     // POST / - Create conversation
@@ -104,7 +117,14 @@ serve(async (req) => {
 
       if (partError) throw partError;
 
-      return new Response(JSON.stringify(conversation), { status: 201, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      return new Response(JSON.stringify(conversation), {
+        status: 201,
+        headers: {
+          ...corsHeaders,
+          "Content-Type": "application/json",
+          'Access-Control-Allow-Credentials': 'true',
+        }
+      });
     }
 
     // GET /:id/messages - Get messages for a conversation
@@ -129,7 +149,14 @@ serve(async (req) => {
 
       if (error) throw error;
 
-      return new Response(JSON.stringify(data), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      return new Response(JSON.stringify(data), {
+        status: 200,
+        headers: {
+          ...corsHeaders,
+          "Content-Type": "application/json",
+          'Access-Control-Allow-Credentials': 'true',
+        }
+      });
     }
 
     // POST /:id/messages - Send a message
@@ -157,7 +184,14 @@ serve(async (req) => {
         .update({ updated_at: new Date().toISOString() })
         .eq("id", conversationId);
 
-      return new Response(JSON.stringify(data), { status: 201, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      return new Response(JSON.stringify(data), {
+        status: 201,
+        headers: {
+          ...corsHeaders,
+          "Content-Type": "application/json",
+          'Access-Control-Allow-Credentials': 'true',
+        }
+      });
     }
 
     // PUT /:id/mark-as-read - Mark messages as read
@@ -175,13 +209,37 @@ serve(async (req) => {
 
       if (error) throw error;
 
-      return new Response(JSON.stringify({ success: true }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      return new Response(JSON.stringify({ success: true }), {
+        status: 200,
+        headers: {
+          ...corsHeaders,
+          "Content-Type": "application/json",
+          'Access-Control-Allow-Credentials': 'true',
+        }
+      });
     }
 
-    return new Response(JSON.stringify({ error: "Not Found" }), { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    return new Response(JSON.stringify({ error: "Not Found" }), {
+      status: 404,
+      headers: {
+        ...corsHeaders,
+        "Content-Type": "application/json",
+        'Access-Control-Allow-Credentials': 'true',
+      }
+    });
 
   } catch (error) {
     console.error(error);
-    return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    const origin = req.headers.get("Origin");
+    const corsHeaders = getCorsHeaders(origin);
+
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: {
+        ...corsHeaders,
+        "Content-Type": "application/json",
+        'Access-Control-Allow-Credentials': 'true',
+      }
+    });
   }
 });

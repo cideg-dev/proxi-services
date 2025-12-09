@@ -31,14 +31,16 @@ serve(async (req) => {
   const { email, password, role, profileData } = body
 
   // Validation des données
+  const origin = req.headers.get("Origin");
+  const corsHeaders = getCorsHeaders(origin);
+
   if (!email || !password || !role) {
     return new Response(JSON.stringify({ error: 'Missing required fields' }), {
       status: 400,
-      headers: { 
+      headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        ...corsHeaders,
+        'Access-Control-Allow-Credentials': 'true',
       }
     })
   }
@@ -55,11 +57,10 @@ serve(async (req) => {
     if (authError) {
       return new Response(JSON.stringify({ error: authError.message }), {
         status: 400,
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+          ...corsHeaders,
+          'Access-Control-Allow-Credentials': 'true',
         }
       })
     }
@@ -89,11 +90,10 @@ serve(async (req) => {
       await supabase.auth.admin.deleteUser(authData.user.id)
       return new Response(JSON.stringify({ error: dbError.message }), {
         status: 500,
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+          ...corsHeaders,
+          'Access-Control-Allow-Credentials': 'true',
         }
       })
     }
@@ -112,11 +112,10 @@ serve(async (req) => {
       await supabase.auth.admin.deleteUser(authData.user.id)
       return new Response(JSON.stringify({ error: mappingError.message }), {
         status: 500,
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+          ...corsHeaders,
+          'Access-Control-Allow-Credentials': 'true',
         }
       })
     }
@@ -142,9 +141,8 @@ serve(async (req) => {
         status: 500,
         headers: {
           'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+          ...corsHeaders,
+          'Access-Control-Allow-Credentials': 'true',
         }
       })
     }
@@ -157,9 +155,8 @@ serve(async (req) => {
         status: 500,
         headers: {
           'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+          ...corsHeaders,
+          'Access-Control-Allow-Credentials': 'true',
         }
       })
     }
@@ -204,19 +201,20 @@ serve(async (req) => {
       status: 201,
       headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        ...corsHeaders,
+        'Access-Control-Allow-Credentials': 'true',
       }
     })
   } catch (error) {
+    const origin = req.headers.get("Origin");
+    const corsHeaders = getCorsHeaders(origin);
+
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        ...corsHeaders,
+        'Access-Control-Allow-Credentials': 'true',
       }
     })
   }

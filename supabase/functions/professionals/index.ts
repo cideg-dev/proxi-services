@@ -1,17 +1,11 @@
 import { serve } from 'https://deno.land/std@0.114.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { createOptionsResponse, getCorsHeaders } from '../_shared/cors.ts'
 
 serve(async (req) => {
   // Gérer les requêtes OPTIONS pour CORS
   if (req.method === 'OPTIONS') {
-    return new Response(null, {
-      status: 204,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-      }
-    });
+    return createOptionsResponse(req);
   }
 
   const supabase = createClient(
@@ -20,6 +14,9 @@ serve(async (req) => {
   )
 
   try {
+    const origin = req.headers.get("Origin");
+    const corsHeaders = getCorsHeaders(origin);
+
     // Cette requête récupère les artisans et commercants avec leurs profils
     // Utilisons d'abord une requête simple pour éviter les problèmes de jointure
     const { data: usersData, error: usersError } = await supabase
@@ -35,9 +32,8 @@ serve(async (req) => {
         status: 500,
         headers: {
           'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-          'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+          ...corsHeaders,
+          'Access-Control-Allow-Credentials': 'true',
         }
       })
     }
@@ -109,20 +105,21 @@ serve(async (req) => {
       status: 200,
       headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',  // Autoriser l'accès depuis n'importe quelle origine
-        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+        ...corsHeaders,
+        'Access-Control-Allow-Credentials': 'true',
       }
     })
   } catch (error) {
     console.error('Erreur serveur lors de la récupération des professionnels mis en avant:', error)
+    const origin = req.headers.get("Origin");
+    const corsHeaders = getCorsHeaders(origin);
+
     return new Response(JSON.stringify({ message: "Erreur serveur lors de la récupération des professionnels mis en avant" }), {
       status: 500,
       headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+        ...corsHeaders,
+        'Access-Control-Allow-Credentials': 'true',
       }
     })
   }
