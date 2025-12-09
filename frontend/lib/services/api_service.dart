@@ -8,6 +8,42 @@ class ApiService {
   static final TokenManager _tokenManager = TokenManager();
   static const int _defaultTimeout = 30; // 30 secondes
 
+  // Constructeur pour permettre l'instanciation dans les services
+  ApiService();
+
+  // Méthodes d'instance qui appellent les méthodes statiques
+  Future<http.Response> get(String endpoint, {Map<String, String>? headers}) async {
+    return await ApiService.get(endpoint, headers: headers);
+  }
+
+  Future<http.Response> post(String endpoint, dynamic data, {Map<String, String>? headers}) async {
+    return await ApiService.post(endpoint, data, headers: headers);
+  }
+
+  Future<http.Response> put(String endpoint, dynamic data, {Map<String, String>? headers}) async {
+    return await ApiService.put(endpoint, data, headers: headers);
+  }
+
+  Future<http.Response> delete(String endpoint, {Map<String, String>? headers}) async {
+    return await ApiService.delete(endpoint, headers: headers);
+  }
+
+  Future<http.Response> getPublic(String endpoint, {Map<String, String>? headers}) async {
+    return await ApiService.getPublic(endpoint, headers: headers);
+  }
+
+  Future<http.Response> postPublic(String endpoint, dynamic data, {Map<String, String>? headers}) async {
+    return await ApiService.postPublic(endpoint, data, headers: headers);
+  }
+
+  Future<http.Response> putPublic(String endpoint, dynamic data, {Map<String, String>? headers}) async {
+    return await ApiService.putPublic(endpoint, data, headers: headers);
+  }
+
+  Future<http.Response> deletePublic(String endpoint, {Map<String, String>? headers}) async {
+    return await ApiService.deletePublic(endpoint, headers: headers);
+  }
+
   // Méthode GET
   static Future<http.Response> get(String endpoint, {Map<String, String>? headers}) async {
     try {

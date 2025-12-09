@@ -115,7 +115,7 @@ class NavigationService {
   }) async {
     final state = navigatorKey.currentState;
     if (state != null) {
-      return await state.pushNamed<T>(routeName, arguments: arguments);
+      return await state.pushNamed(routeName, arguments: arguments) as T?;
     }
     return null;
   }
@@ -127,8 +127,8 @@ class NavigationService {
     final state = navigatorKey.currentState;
     if (state != null) {
       try {
-        final result = await state.pushReplacementNamed<T>(routeName, arguments: arguments);
-        return result;
+        final result = await state.pushReplacementNamed(routeName, arguments: arguments);
+        return result as T?;
       } catch (e) {
         return null;
       }
@@ -144,7 +144,7 @@ class NavigationService {
     final state = navigatorKey.currentState;
     if (state != null) {
       try {
-        return await state.pushNamedAndRemoveUntil<T>(routeName, predicate, arguments: arguments);
+        return await state.pushNamedAndRemoveUntil(routeName, predicate, arguments: arguments) as T?;
       } catch (e) {
         return null;
       }
