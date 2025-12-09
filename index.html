@@ -725,10 +725,13 @@
 
     appLinks.forEach(link => {
       if (link) {
-        link.addEventListener('click', function (e) {
-          e.preventDefault();
-          redirectToApp(link.getAttribute('href') || '#home');
-        });
+        // Vérifier si le lien est une ancre locale (commence par #) et laisser la navigation fluide le gérer
+        if (!link.getAttribute('href') || !link.getAttribute('href').startsWith('#')) {
+          link.addEventListener('click', function (e) {
+            e.preventDefault();
+            redirectToApp(link.getAttribute('href') || '#home');
+          });
+        }
       }
     });
 
