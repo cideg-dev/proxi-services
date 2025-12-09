@@ -5,14 +5,104 @@ import 'package:frontend/services/api_constants.dart';
 import 'package:frontend/services/token_manager.dart';
 
 class ApiService {
-  final TokenManager _tokenManager = TokenManager();
+  static final TokenManager _tokenManager = TokenManager();
   static const int _defaultTimeout = 30; // 30 secondes
 
   // Constructeur pour permettre l'instanciation dans les services
   ApiService();
 
-  // Méthode GET
-  Future<http.Response> get(String endpoint, {Map<String, String>? headers}) async {
+  // Méthodes statiques pour maintenir la compatibilité
+  static Future<http.Response> get(String endpoint, {Map<String, String>? headers}) async {
+    final instance = ApiService();
+    return await instance._get(endpoint, headers: headers);
+  }
+
+  static Future<http.Response> post(String endpoint, dynamic data, {Map<String, String>? headers}) async {
+    final instance = ApiService();
+    return await instance._post(endpoint, data, headers: headers);
+  }
+
+  static Future<http.Response> put(String endpoint, dynamic data, {Map<String, String>? headers}) async {
+    final instance = ApiService();
+    return await instance._put(endpoint, data, headers: headers);
+  }
+
+  static Future<http.Response> delete(String endpoint, {Map<String, String>? headers}) async {
+    final instance = ApiService();
+    return await instance._delete(endpoint, headers: headers);
+  }
+
+  static Future<http.Response> getPublic(String endpoint, {Map<String, String>? headers}) async {
+    final instance = ApiService();
+    return await instance._getPublic(endpoint, headers: headers);
+  }
+
+  static Future<http.Response> postPublic(String endpoint, dynamic data, {Map<String, String>? headers}) async {
+    final instance = ApiService();
+    return await instance._postPublic(endpoint, data, headers: headers);
+  }
+
+  static Future<http.Response> putPublic(String endpoint, dynamic data, {Map<String, String>? headers}) async {
+    final instance = ApiService();
+    return await instance._putPublic(endpoint, data, headers: headers);
+  }
+
+  static Future<http.Response> deletePublic(String endpoint, {Map<String, String>? headers}) async {
+    final instance = ApiService();
+    return await instance._deletePublic(endpoint, headers: headers);
+  }
+
+  static bool isSuccessful(int statusCode) {
+    return statusCode >= 200 && statusCode < 300;
+  }
+
+  static String extractErrorMessage(http.Response response) {
+    try {
+      final body = safeJsonDecode(response.body);
+      return body['message'] ?? body['error'] ?? 'Erreur inconnue';
+    } catch (e) {
+      return 'Erreur de réseau ou de format de réponse';
+    }
+  }
+
+  static Map<String, dynamic> safeJsonDecode(String responseBody) {
+    try {
+      // Vérifier si la réponse est vide
+      if (responseBody.isEmpty) {
+        return {
+          'error': 'Empty response',
+        };
+      }
+
+      final decoded = jsonDecode(responseBody);
+
+      // Vérifier si le résultat est déjà un Map<String, dynamic>
+      if (decoded is Map<String, dynamic>) {
+        return decoded;
+      }
+      // Si c'est une liste, envelopper dans un objet avec une clé de données
+      else if (decoded is List) {
+        return {
+          'data': decoded,
+        };
+      }
+      // Si c'est une valeur primitive, la convertir en objet
+      else {
+        return {
+          'result': decoded,
+        };
+      }
+    } catch (e) {
+      // Si le décodage échoue, retourner un objet avec un message d'erreur
+      return {
+        'error': 'Invalid JSON response: ${e.toString()}',
+        'raw_response': responseBody,
+      };
+    }
+  }
+
+  // Méthodes d'instance privées pour les services qui instancient ApiService
+  Future<http.Response> _get(String endpoint, {Map<String, String>? headers}) async {
     try {
       final url = _buildUrl(endpoint);
       final response = await _makeRequest('GET', url, headers: headers);
@@ -24,8 +114,7 @@ class ApiService {
     }
   }
 
-  // Méthode POST
-  Future<http.Response> post(String endpoint, dynamic data, {Map<String, String>? headers}) async {
+  Future<http.Response> _post(String endpoint, dynamic data, {Map<String, String>? headers}) async {
     try {
       final url = _buildUrl(endpoint);
       final response = await _makeRequest('POST', url, body: jsonEncode(data), headers: headers);
@@ -37,8 +126,7 @@ class ApiService {
     }
   }
 
-  // Méthode PUT
-  Future<http.Response> put(String endpoint, dynamic data, {Map<String, String>? headers}) async {
+  Future<http.Response> _put(String endpoint, dynamic data, {Map<String, String>? headers}) async {
     try {
       final url = _buildUrl(endpoint);
       final response = await _makeRequest('PUT', url, body: jsonEncode(data), headers: headers);
@@ -50,8 +138,7 @@ class ApiService {
     }
   }
 
-  // Méthode DELETE
-  Future<http.Response> delete(String endpoint, {Map<String, String>? headers}) async {
+  Future<http.Response> _delete(String endpoint, {Map<String, String>? headers}) async {
     try {
       final url = _buildUrl(endpoint);
       final response = await _makeRequest('DELETE', url, headers: headers);
@@ -61,6 +148,123 @@ class ApiService {
       _logError('DELETE', endpoint, e);
       rethrow;
     }
+  }
+
+  Future<http.Response> _getPublic(String endpoint, {Map<String, String>? headers}) async {
+    try {
+      final url = _buildUrl(endpoint);
+      final requestHeaders = <String, String>{
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'User-Agent': 'Proxi-Services Flutter App',
+        ...?headers,
+      };
+
+      final response = await http.get(url, headers: requestHeaders)
+          .timeout(const Duration(seconds: _defaultTimeout));
+
+      _logApiCall('GET_PUBLIC', endpoint, response.statusCode);
+      return response;
+    } catch (e) {
+      _logError('GET_PUBLIC', endpoint, e);
+      rethrow;
+    }
+  }
+
+  Future<http.Response> _postPublic(String endpoint, dynamic data, {Map<String, String>? headers}) async {
+    try {
+      final url = _buildUrl(endpoint);
+      final requestHeaders = <String, String>{
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'User-Agent': 'Proxi-Services Flutter App',
+        ...?headers,
+      };
+
+      final response = await http.post(url, headers: requestHeaders, body: jsonEncode(data))
+          .timeout(const Duration(seconds: _defaultTimeout));
+
+      _logApiCall('POST_PUBLIC', endpoint, response.statusCode);
+      return response;
+    } catch (e) {
+      _logError('POST_PUBLIC', endpoint, e);
+      rethrow;
+    }
+  }
+
+  Future<http.Response> _putPublic(String endpoint, dynamic data, {Map<String, String>? headers}) async {
+    try {
+      final url = _buildUrl(endpoint);
+      final requestHeaders = <String, String>{
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'User-Agent': 'Proxi-Services Flutter App',
+        ...?headers,
+      };
+
+      final response = await http.put(url, headers: requestHeaders, body: jsonEncode(data))
+          .timeout(const Duration(seconds: _defaultTimeout));
+
+      _logApiCall('PUT_PUBLIC', endpoint, response.statusCode);
+      return response;
+    } catch (e) {
+      _logError('PUT_PUBLIC', endpoint, e);
+      rethrow;
+    }
+  }
+
+  Future<http.Response> _deletePublic(String endpoint, {Map<String, String>? headers}) async {
+    try {
+      final url = _buildUrl(endpoint);
+      final requestHeaders = <String, String>{
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'User-Agent': 'Proxi-Services Flutter App',
+        ...?headers,
+      };
+
+      final response = await http.delete(url, headers: requestHeaders)
+          .timeout(const Duration(seconds: _defaultTimeout));
+
+      _logApiCall('DELETE_PUBLIC', endpoint, response.statusCode);
+      return response;
+    } catch (e) {
+      _logError('DELETE_PUBLIC', endpoint, e);
+      rethrow;
+    }
+  }
+
+  // Méthode d'instance pour les services qui l'instancient
+  Future<http.Response> get(String endpoint, {Map<String, String>? headers}) {
+    return _get(endpoint, headers: headers);
+  }
+
+  Future<http.Response> post(String endpoint, dynamic data, {Map<String, String>? headers}) {
+    return _post(endpoint, data, headers: headers);
+  }
+
+  Future<http.Response> put(String endpoint, dynamic data, {Map<String, String>? headers}) {
+    return _put(endpoint, data, headers: headers);
+  }
+
+  Future<http.Response> delete(String endpoint, {Map<String, String>? headers}) {
+    return _delete(endpoint, headers: headers);
+  }
+
+  Future<http.Response> getPublic(String endpoint, {Map<String, String>? headers}) {
+    return _getPublic(endpoint, headers: headers);
+  }
+
+  Future<http.Response> postPublic(String endpoint, dynamic data, {Map<String, String>? headers}) {
+    return _postPublic(endpoint, data, headers: headers);
+  }
+
+  Future<http.Response> putPublic(String endpoint, dynamic data, {Map<String, String>? headers}) {
+    return _putPublic(endpoint, data, headers: headers);
+  }
+
+  Future<http.Response> deletePublic(String endpoint, {Map<String, String>? headers}) {
+    return _deletePublic(endpoint, headers: headers);
   }
 
   // Méthode privée pour effectuer la requête avec gestion du token
@@ -166,94 +370,6 @@ class ApiService {
     }
   }
 
-  // Méthode GET sans authentification
-  Future<http.Response> getPublic(String endpoint, {Map<String, String>? headers}) async {
-    try {
-      final url = _buildUrl(endpoint);
-      final requestHeaders = <String, String>{
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'User-Agent': 'Proxi-Services Flutter App',
-        ...?headers,
-      };
-
-      final response = await http.get(url, headers: requestHeaders)
-          .timeout(const Duration(seconds: _defaultTimeout));
-
-      _logApiCall('GET_PUBLIC', endpoint, response.statusCode);
-      return response;
-    } catch (e) {
-      _logError('GET_PUBLIC', endpoint, e);
-      rethrow;
-    }
-  }
-
-  // Méthode POST sans authentification
-  Future<http.Response> postPublic(String endpoint, dynamic data, {Map<String, String>? headers}) async {
-    try {
-      final url = _buildUrl(endpoint);
-      final requestHeaders = <String, String>{
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'User-Agent': 'Proxi-Services Flutter App',
-        ...?headers,
-      };
-
-      final response = await http.post(url, headers: requestHeaders, body: jsonEncode(data))
-          .timeout(const Duration(seconds: _defaultTimeout));
-
-      _logApiCall('POST_PUBLIC', endpoint, response.statusCode);
-      return response;
-    } catch (e) {
-      _logError('POST_PUBLIC', endpoint, e);
-      rethrow;
-    }
-  }
-
-  // Méthode PUT sans authentification
-  Future<http.Response> putPublic(String endpoint, dynamic data, {Map<String, String>? headers}) async {
-    try {
-      final url = _buildUrl(endpoint);
-      final requestHeaders = <String, String>{
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'User-Agent': 'Proxi-Services Flutter App',
-        ...?headers,
-      };
-
-      final response = await http.put(url, headers: requestHeaders, body: jsonEncode(data))
-          .timeout(const Duration(seconds: _defaultTimeout));
-
-      _logApiCall('PUT_PUBLIC', endpoint, response.statusCode);
-      return response;
-    } catch (e) {
-      _logError('PUT_PUBLIC', endpoint, e);
-      rethrow;
-    }
-  }
-
-  // Méthode DELETE sans authentification
-  Future<http.Response> deletePublic(String endpoint, {Map<String, String>? headers}) async {
-    try {
-      final url = _buildUrl(endpoint);
-      final requestHeaders = <String, String>{
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'User-Agent': 'Proxi-Services Flutter App',
-        ...?headers,
-      };
-
-      final response = await http.delete(url, headers: requestHeaders)
-          .timeout(const Duration(seconds: _defaultTimeout));
-
-      _logApiCall('DELETE_PUBLIC', endpoint, response.statusCode);
-      return response;
-    } catch (e) {
-      _logError('DELETE_PUBLIC', endpoint, e);
-      rethrow;
-    }
-  }
-
   // Méthode pour rafraîchir le token avec le backend local
   Future<bool> _refreshTokenWithLocalBackend(String refreshToken) async {
     try {
@@ -347,58 +463,6 @@ class ApiService {
     }
 
     return Uri.parse('$baseUrl$endpoint');
-  }
-
-  // Méthode pour extraire le corps JSON de manière sécurisée
-  Map<String, dynamic> safeJsonDecode(String responseBody) {
-    try {
-      // Vérifier si la réponse est vide
-      if (responseBody.isEmpty) {
-        return {
-          'error': 'Empty response',
-        };
-      }
-
-      final decoded = jsonDecode(responseBody);
-
-      // Vérifier si le résultat est déjà un Map<String, dynamic>
-      if (decoded is Map<String, dynamic>) {
-        return decoded;
-      }
-      // Si c'est une liste, envelopper dans un objet avec une clé de données
-      else if (decoded is List) {
-        return {
-          'data': decoded,
-        };
-      }
-      // Si c'est une valeur primitive, la convertir en objet
-      else {
-        return {
-          'result': decoded,
-        };
-      }
-    } catch (e) {
-      // Si le décodage échoue, retourner un objet avec un message d'erreur
-      return {
-        'error': 'Invalid JSON response: ${e.toString()}',
-        'raw_response': responseBody,
-      };
-    }
-  }
-
-  // Méthode pour vérifier si la réponse est une erreur
-  bool isSuccessful(int statusCode) {
-    return statusCode >= 200 && statusCode < 300;
-  }
-
-  // Méthode pour extraire le message d'erreur d'une réponse
-  String extractErrorMessage(http.Response response) {
-    try {
-      final body = safeJsonDecode(response.body);
-      return body['message'] ?? body['error'] ?? 'Erreur inconnue';
-    } catch (e) {
-      return 'Erreur de réseau ou de format de réponse';
-    }
   }
 
   // Méthode de journalisation des appels API
