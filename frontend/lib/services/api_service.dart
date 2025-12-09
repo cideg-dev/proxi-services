@@ -5,47 +5,14 @@ import 'package:frontend/services/api_constants.dart';
 import 'package:frontend/services/token_manager.dart';
 
 class ApiService {
-  static final TokenManager _tokenManager = TokenManager();
+  final TokenManager _tokenManager = TokenManager();
   static const int _defaultTimeout = 30; // 30 secondes
 
   // Constructeur pour permettre l'instanciation dans les services
   ApiService();
 
-  // Méthodes d'instance qui appellent les méthodes statiques
-  Future<http.Response> get(String endpoint, {Map<String, String>? headers}) async {
-    return await ApiService.get(endpoint, headers: headers);
-  }
-
-  Future<http.Response> post(String endpoint, dynamic data, {Map<String, String>? headers}) async {
-    return await ApiService.post(endpoint, data, headers: headers);
-  }
-
-  Future<http.Response> put(String endpoint, dynamic data, {Map<String, String>? headers}) async {
-    return await ApiService.put(endpoint, data, headers: headers);
-  }
-
-  Future<http.Response> delete(String endpoint, {Map<String, String>? headers}) async {
-    return await ApiService.delete(endpoint, headers: headers);
-  }
-
-  Future<http.Response> getPublic(String endpoint, {Map<String, String>? headers}) async {
-    return await ApiService.getPublic(endpoint, headers: headers);
-  }
-
-  Future<http.Response> postPublic(String endpoint, dynamic data, {Map<String, String>? headers}) async {
-    return await ApiService.postPublic(endpoint, data, headers: headers);
-  }
-
-  Future<http.Response> putPublic(String endpoint, dynamic data, {Map<String, String>? headers}) async {
-    return await ApiService.putPublic(endpoint, data, headers: headers);
-  }
-
-  Future<http.Response> deletePublic(String endpoint, {Map<String, String>? headers}) async {
-    return await ApiService.deletePublic(endpoint, headers: headers);
-  }
-
   // Méthode GET
-  static Future<http.Response> get(String endpoint, {Map<String, String>? headers}) async {
+  Future<http.Response> get(String endpoint, {Map<String, String>? headers}) async {
     try {
       final url = _buildUrl(endpoint);
       final response = await _makeRequest('GET', url, headers: headers);
@@ -58,7 +25,7 @@ class ApiService {
   }
 
   // Méthode POST
-  static Future<http.Response> post(String endpoint, dynamic data, {Map<String, String>? headers}) async {
+  Future<http.Response> post(String endpoint, dynamic data, {Map<String, String>? headers}) async {
     try {
       final url = _buildUrl(endpoint);
       final response = await _makeRequest('POST', url, body: jsonEncode(data), headers: headers);
@@ -71,7 +38,7 @@ class ApiService {
   }
 
   // Méthode PUT
-  static Future<http.Response> put(String endpoint, dynamic data, {Map<String, String>? headers}) async {
+  Future<http.Response> put(String endpoint, dynamic data, {Map<String, String>? headers}) async {
     try {
       final url = _buildUrl(endpoint);
       final response = await _makeRequest('PUT', url, body: jsonEncode(data), headers: headers);
@@ -84,7 +51,7 @@ class ApiService {
   }
 
   // Méthode DELETE
-  static Future<http.Response> delete(String endpoint, {Map<String, String>? headers}) async {
+  Future<http.Response> delete(String endpoint, {Map<String, String>? headers}) async {
     try {
       final url = _buildUrl(endpoint);
       final response = await _makeRequest('DELETE', url, headers: headers);
@@ -97,7 +64,7 @@ class ApiService {
   }
 
   // Méthode privée pour effectuer la requête avec gestion du token
-  static Future<http.Response> _makeRequest(
+  Future<http.Response> _makeRequest(
     String method,
     Uri url, {
     String? body,
@@ -176,7 +143,7 @@ class ApiService {
   }
 
   // Méthode pour rafraîchir le token
-  static Future<bool> _refreshToken() async {
+  Future<bool> _refreshToken() async {
     try {
       // Récupérer le refresh token
       final refreshToken = await _tokenManager.getRefreshToken();
@@ -200,7 +167,7 @@ class ApiService {
   }
 
   // Méthode GET sans authentification
-  static Future<http.Response> getPublic(String endpoint, {Map<String, String>? headers}) async {
+  Future<http.Response> getPublic(String endpoint, {Map<String, String>? headers}) async {
     try {
       final url = _buildUrl(endpoint);
       final requestHeaders = <String, String>{
@@ -222,7 +189,7 @@ class ApiService {
   }
 
   // Méthode POST sans authentification
-  static Future<http.Response> postPublic(String endpoint, dynamic data, {Map<String, String>? headers}) async {
+  Future<http.Response> postPublic(String endpoint, dynamic data, {Map<String, String>? headers}) async {
     try {
       final url = _buildUrl(endpoint);
       final requestHeaders = <String, String>{
@@ -244,7 +211,7 @@ class ApiService {
   }
 
   // Méthode PUT sans authentification
-  static Future<http.Response> putPublic(String endpoint, dynamic data, {Map<String, String>? headers}) async {
+  Future<http.Response> putPublic(String endpoint, dynamic data, {Map<String, String>? headers}) async {
     try {
       final url = _buildUrl(endpoint);
       final requestHeaders = <String, String>{
@@ -266,7 +233,7 @@ class ApiService {
   }
 
   // Méthode DELETE sans authentification
-  static Future<http.Response> deletePublic(String endpoint, {Map<String, String>? headers}) async {
+  Future<http.Response> deletePublic(String endpoint, {Map<String, String>? headers}) async {
     try {
       final url = _buildUrl(endpoint);
       final requestHeaders = <String, String>{
@@ -288,7 +255,7 @@ class ApiService {
   }
 
   // Méthode pour rafraîchir le token avec le backend local
-  static Future<bool> _refreshTokenWithLocalBackend(String refreshToken) async {
+  Future<bool> _refreshTokenWithLocalBackend(String refreshToken) async {
     try {
       final refreshTokenUrl = Uri.parse(ApiConstants.baseUrl + '/api/auth/refresh');
       final response = await http.post(
@@ -324,7 +291,7 @@ class ApiService {
   }
 
   // Méthode pour rafraîchir le token avec Supabase Functions
-  static Future<bool> _refreshTokenWithSupabase(String refreshToken) async {
+  Future<bool> _refreshTokenWithSupabase(String refreshToken) async {
     try {
       // Pour Supabase, nous pourrions avoir une fonction spécifique ou
       // utiliser le service d'authentification Supabase directement
@@ -364,7 +331,7 @@ class ApiService {
   }
 
   // Méthode pour construire l'URL complète
-  static Uri _buildUrl(String endpoint) {
+  Uri _buildUrl(String endpoint) {
     // Si l'endpoint commence par http, c'est déjà une URL complète
     if (endpoint.startsWith('http')) {
       return Uri.parse(endpoint);
@@ -383,7 +350,7 @@ class ApiService {
   }
 
   // Méthode pour extraire le corps JSON de manière sécurisée
-  static Map<String, dynamic> safeJsonDecode(String responseBody) {
+  Map<String, dynamic> safeJsonDecode(String responseBody) {
     try {
       // Vérifier si la réponse est vide
       if (responseBody.isEmpty) {
@@ -420,12 +387,12 @@ class ApiService {
   }
 
   // Méthode pour vérifier si la réponse est une erreur
-  static bool isSuccessful(int statusCode) {
+  bool isSuccessful(int statusCode) {
     return statusCode >= 200 && statusCode < 300;
   }
 
   // Méthode pour extraire le message d'erreur d'une réponse
-  static String extractErrorMessage(http.Response response) {
+  String extractErrorMessage(http.Response response) {
     try {
       final body = safeJsonDecode(response.body);
       return body['message'] ?? body['error'] ?? 'Erreur inconnue';
@@ -435,13 +402,13 @@ class ApiService {
   }
 
   // Méthode de journalisation des appels API
-  static void _logApiCall(String method, String endpoint, int statusCode) {
+  void _logApiCall(String method, String endpoint, int statusCode) {
     // En production, on pourrait envoyer ces logs à un service d'analyse
     print('[API] $method $endpoint -> $statusCode');
   }
 
   // Méthode de journalisation des erreurs
-  static void _logError(String method, String endpoint, dynamic error) {
+  void _logError(String method, String endpoint, dynamic error) {
     print('[API-ERROR] $method $endpoint -> $error');
   }
 }
